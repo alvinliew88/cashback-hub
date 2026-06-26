@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>AL</title>
+  <style>
+    /* PURE OFFLINE CSS - Recreates the Finory Tailwind look perfectly */
+    body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 16px; overscroll-behavior-y: none; height: 100vh; overflow-y: auto; }
+    .max-w-md { max-width: 28rem; margin: 0 auto; padding-bottom: 2.5rem; }
+    
+    .header-title { font-size: 1.5rem; font-weight: bold; letter-spacing: -0.025em; margin-bottom: 1.5rem; }
+    .space-y-5 > * + * { margin-top: 1.25rem; }
+
+    /* Custom Gradients */
+    .grad-rhb1 { background: linear-gradient(to bottom right, #f97316, #b91c1c); }
+    .grad-rhb2 { background: linear-gradient(to bottom right, #dc2626, #7f1d1d); }
+    .grad-affin { background: linear-gradient(to bottom right, #3b82f6, #1e3a8a); }
+    .grad-ikhwan { background: linear-gradient(to bottom right, #94a3b8, #334155); }
+    .grad-maybank { background: linear-gradient(to bottom right, #fde047, #d97706); }
+
+    .card-outer { padding: 2px; border-radius: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
+    .card-inner { background-color: rgba(0, 0, 0, 0.9); padding: 1.25rem; border-radius: calc(1.5rem - 2px); }
+
+    .flex-between { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
+    
+    .card-title { font-size: 1.125rem; font-weight: bold; margin: 0; }
+    .card-reset { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; display: block; }
+    
+    .text-right { text-align: right; }
+    .text-emerald { color: #34d399; font-size: 1.5rem; font-weight: 900; margin: 0; line-height: 1; }
+    .text-sky { color: #0ea5e9; font-size: 0.65rem; font-weight: bold; margin-top: 0.5rem; display: block; }
+
+    .input-group { display: flex; gap: 0.5rem; }
+    .w-half { width: 50%; }
+    input, select { background-color: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; color: white; padding: 0.75rem; border-radius: 0.75rem; font-size: 1rem; font-weight: bold; outline: none; box-sizing: border-box; }
+    input:focus, select:focus { border-color: #64748b; }
+    select { font-size: 0.75rem; }
+
+    .history-list { margin-top: 1rem; }
+    .history-item { border-top: 1px solid #1e293b; padding-top: 0.75rem; margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #94a3b8; }
+    .history-date { color: #64748b; font-family: monospace; margin-right: 8px; font-size: 0.75rem; }
+    .history-amt { color: #fff; font-weight: bold; }
+    .del-btn { background: none; border: none; color: #ef4444; font-size: 1.25rem; font-weight: bold; cursor: pointer; padding: 0 0.5rem; }
+  </style>
+</head>
+<body>
+  <div class="max-w-md">
+    <h1 class="header-title">AL</h1>
+    <div id="card-container" class="space-y-5"></div>
+  </div>
+
+  <script>
+    const cardsData = [
+      { name: "RHB Shell 2498", colorClass: "grad-rhb1", resetDay: 13, cats: ["Petrol", "Grocery", "e-Wallet/Online", "Utilities", "Overseas", "Other"] },
+      { name: "RHB Shell 8652", colorClass: "grad-rhb2", resetDay: 23, cats: ["Petrol", "Grocery", "e-Wallet/Online", "Utilities", "Overseas", "Other"] },
+      { name: "Affin Duo Visa 3322", colorClass: "grad-affin", resetDay: 23, cap: 50, cats: ["E-Wallet (3%)", "General (1%)"] },
+      { name: "Ikhwan Platinum 6157", colorClass: "grad-ikhwan", resetDay: 1, cap: 50, cats: ["Weekend (8%)", "Weekday (0%)"] },
+      { name: "Maybank 2 Gold 8943", colorClass: "grad-maybank", resetDay: 1, cap: 50, cats: ["Weekend (5%)", "Weekday (0%)"] }
+    ];
+
+    function getCycleStart(day) {
+      const now = new Date();
+      let start = new Date(now.getFullYear(), now.getMonth(), day);
+      if (now.getDate() < day) start.setMonth(start.getMonth() - 1);
+      return start.toISOString();
+    }
+
+    function safeSave(data) {
+      try { localStorage.setItem('finoryData', JSON.stringify(data)); } 
+      catch (e) { console.log("Storage blocked, running in memory only."); }
+    }
+
+    let state;
+    try {
+      const saved = localStorage.getItem('finoryData');
+      if (saved) state = JSON.parse(saved);
+      if (!state || !state.cards) throw new Error();
+    } catch(e) {
+      state = { cards: cardsData.map(c => ({...c, totalSpend: 0, cashback: 0, categoryCashback: {}, history: [], lastCycleStart: getCycleStart(c.resetDay)})) };
+      safeSave(state);
+    }
+
+    function recalculateCard(card) {
+      card.totalSpend = 0;
+      card.cashback = 0;
+      card.categoryCashback = {};
+      
+      if (!card.history) card.history = [];
+      
+      // Pass 1: Calculate Global Total Spend to determine RHB Tier
+      card.history.forEach(tx => {
+        card.totalSpend += tx.amt;
+      });
+
+      if (card.name.includes("RHB")) {
+        // Pass 2: Aggregate spend by category
+        let catSpends = { "Petrol": 0, "Grocery": 0, "e-Wallet/Online": 0, "Utilities": 0, "Overseas": 0, "Other": 0 };
+        card.history.forEach(tx => {
+          if (catSpends[tx.cat] !== undefined) catSpends[tx.cat] += tx.amt;
+          else catSpends["Other"] += tx.amt;
+        });
+
+        // Determine RHB Tier Rates based on Monthly Total Spend
+        let rates = { "Petrol": 0, "Grocery": 0, "e-Wallet/Online": 0, "Utilities": 0, "Overseas": 0, "Other": 0 };
+        if (card.totalSpend >= 3000) {
+            rates = { "Petrol": 0.12, "Grocery": 0.05, "e-Wallet/Online": 0.05, "Utilities": 0.05, "Overseas": 0.05, "Other": 0.002 };
+        } else if (card.totalSpend >= 2000) {
+            rates = { "Petrol": 0.05, "Grocery": 0.02, "e-Wallet/Online": 0.02, "Utilities": 0.02, "Overseas": 0.02, "Other": 0.002 };
+        } else if (card.totalSpend >= 1000) {
+            rates = { "Petrol": 0.03, "Grocery": 0.01, "e-Wallet/Online": 0.01, "Utilities": 0.01, "Overseas": 0.01, "Other": 0.002 };
+        }
+
+        // Apply specific RHB limits
+        const rhbCaps = { "Petrol": 30, "Grocery": 10, "e-Wallet/Online": 10, "Utilities": 10, "Overseas": 50, "Other": Infinity };
+        const rhbMins = { "Petrol": 0, "Grocery": 250, "e-Wallet/Online": 500, "Utilities": 250, "Overseas": 500, "Other": 500 };
+
+        for (let cat in catSpends) {
+            let catSpend = catSpends[cat];
+            let earned = 0;
+            // Only award cashback if minimum category spend is met
+            if (catSpend >= rhbMins[cat]) {
+                let rawEarned = catSpend * rates[cat];
+                earned = Math.min(rawEarned, rhbCaps[cat]);
+            }
+            card.categoryCashback[cat] = earned;
+            card.cashback += earned;
+        }
+
+      } else {
+        // Non-RHB Calculation Logic
+        card.history.forEach(tx => {
+          let earned = 0;
+          if (card.name.includes("Ikhwan") && tx.cat.includes("Weekend")) earned = tx.amt * 0.08;
+          else if (card.name.includes("Maybank")) earned = tx.amt * 0.05;
+          else if (card.name.includes("Affin")) earned = tx.cat.includes("E-Wallet") ? tx.amt * 0.03 : tx.amt * 0.01;
+          
+          card.cashback = Math.min(card.cap, card.cashback + earned);
+        });
+      }
+    }
+
+    function checkAndReset() {
+      state.cards.forEach(c => {
+        const lastStart = new Date(c.lastCycleStart);
+        const currentStart = new Date(getCycleStart(c.resetDay));
+        if (lastStart.getTime() !== currentStart.getTime()) {
+          c.totalSpend = 0;
+          c.cashback = 0;
+          c.categoryCashback = {};
+          c.history = [];
+          c.lastCycleStart = currentStart.toISOString();
+        }
+      });
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
+    }
+
+    function formatHistoryDate(isoString) {
+      if (!isoString) return "--/--";
+      const d = new Date(isoString);
+      return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}`;
+    }
+
+    function render() {
+      checkAndReset();
+      const container = document.getElementById('card-container');
+      
+      container.innerHTML = state.cards.map((c, i) => {
+        const start = new Date(c.lastCycleStart);
+        const end = new Date(start);
+        end.setMonth(end.getMonth() + 1);
+        end.setDate(end.getDate() - 1);
+        
+        if (!c.history) c.history = [];
+
+        const gradientClass = cardsData[i].colorClass || "grad-ikhwan";
+
+        return `
+        <div class="card-outer ${gradientClass}">
+          <div class="card-inner">
+            <div class="flex-between">
+              <div>
+                  <h2 class="card-title">${c.name}</h2>
+                  <span class="card-reset">Reset: ${c.resetDay}th (${formatDate(start)} - ${formatDate(end)})</span>
+              </div>
+              <div class="text-right">
+                <p class="text-emerald">RM ${c.cashback.toFixed(2)}</p>
+                <span class="text-sky">Usage: RM ${c.totalSpend.toFixed(2)}</span>
+              </div>
+            </div>
+            
+            <div class="input-group">
+              <input class="w-half" type="number" id="amt-${i}" placeholder="0.00" onchange="autoAddTx(${i})">
+              <select class="w-half" id="cat-${i}">
+                ${c.cats ? c.cats.map(cat => `<option value="${cat}">${cat}</option>`).join('') : cardsData[i].cats.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
+              </select>
+            </div>
+
+            <div class="history-list">
+              ${c.history.map((tx, idx) => `
+                <div class="history-item">
+                  <span>
+                    <span class="history-date">${formatHistoryDate(tx.date)}</span>
+                    ${tx.cat}: <span class="history-amt">RM ${tx.amt.toFixed(2)}</span>
+                  </span>
+                  <button class="del-btn" onclick="deleteTx(${i}, ${idx})">×</button>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+        `;
+      }).join('');
+    }
+
+    window.autoAddTx = function(i) {
+      const amtInput = document.getElementById(`amt-${i}`);
+      const amt = parseFloat(amtInput.value);
+      const cat = document.getElementById(`cat-${i}`).value;
+      
+      if (!amt || amt <= 0) return;
+      
+      if (!state.cards[i].history) state.cards[i].history = [];
+      
+      const currentDate = new Date().toISOString();
+      state.cards[i].history.push({ amt: amt, cat: cat, date: currentDate });
+      
+      recalculateCard(state.cards[i]);
+      safeSave(state);
+      render();
+      
+      setTimeout(() => {
+        const nextInput = document.getElementById(`amt-${i}`);
+        if(nextInput) nextInput.focus();
+      }, 10);
+    };
+
+    window.deleteTx = function(cardIdx, txIdx) {
+      state.cards[cardIdx].history.splice(txIdx, 1);
+      recalculateCard(state.cards[cardIdx]);
+      safeSave(state);
+      render();
+    };
+
+    window.onload = function() {
+      // Data migration to ensure old local storage gets new category structure safely
+      state.cards.forEach((c, i) => {
+        if (c.name.includes("RHB") && c.cats && c.cats[2] !== "e-Wallet/Online") {
+            c.cats = cardsData[i].cats;
+        }
+      });
+      safeSave(state);
+      render();
+    };
+  </script>
+</body>
+</html>
