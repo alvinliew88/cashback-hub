@@ -1,261 +1,752 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>AL</title>
-  <style>
-    /* PURE OFFLINE CSS - Recreates the Finory Tailwind look perfectly */
-    body { background-color: #000; color: #fff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; margin: 0; padding: 16px; overscroll-behavior-y: none; height: 100vh; overflow-y: auto; }
-    .max-w-md { max-width: 28rem; margin: 0 auto; padding-bottom: 2.5rem; }
-    
-    .header-title { font-size: 1.5rem; font-weight: bold; letter-spacing: -0.025em; margin-bottom: 1.5rem; }
-    .space-y-5 > * + * { margin-top: 1.25rem; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>AL</title>
+<style>
+  :root {
+    --bg: #020617;
+    --surface: #0f172a;
+    --border: #1e293b;
+    --text: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #60a5fa;
+    --btn-bg: #1e293b;
+    --btn-active: #334155;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.5;
+    overscroll-behavior-y: auto;
+    padding: 20px 16px 120px;
+    -webkit-font-smoothing: antialiased;
+  }
+  header { margin-bottom: 24px; }
+  h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
 
-    /* Custom Gradients */
-    .grad-rhb1 { background: linear-gradient(to bottom right, #f97316, #b91c1c); }
-    .grad-rhb2 { background: linear-gradient(to bottom right, #dc2626, #7f1d1d); }
-    .grad-affin { background: linear-gradient(to bottom right, #3b82f6, #1e3a8a); }
-    .grad-ikhwan { background: linear-gradient(to bottom right, #94a3b8, #334155); }
-    .grad-maybank { background: linear-gradient(to bottom right, #fde047, #d97706); }
+  .card {
+    background: var(--surface);
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+  }
+  .card-bar { height: 4px; width: 100%; }
+  .bar-rhb { background: linear-gradient(90deg, #f97316, #dc2626); }
+  .bar-affin { background: linear-gradient(90deg, #3b82f6, #1e40af); }
+  .bar-ikhwan { background: linear-gradient(90deg, #94a3b8, #475569); }
+  .bar-maybank { background: linear-gradient(90deg, #fbbf24, #d97706); }
+  .card-body { padding: 16px; }
 
-    .card-outer { padding: 2px; border-radius: 1.5rem; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
-    .card-inner { background-color: rgba(0, 0, 0, 0.9); padding: 1.25rem; border-radius: calc(1.5rem - 2px); }
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 6px;
+  }
+  .card-name { font-weight: 700; font-size: 16px; letter-spacing: -0.3px; }
+  .card-right { text-align: right; }
+  .cb-amount {
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, 'Cascadia Mono', monospace;
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--text);
+  }
+  .spend-amount {
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
+  .cycle-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 14px;
+    font-weight: 500;
+  }
 
-    .flex-between { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.25rem; }
-    
-    .card-title { font-size: 1.125rem; font-weight: bold; margin: 0; }
-    .card-reset { font-size: 0.65rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.25rem; display: block; }
-    
-    .text-right { text-align: right; }
-    .text-emerald { color: #34d399; font-size: 1.5rem; font-weight: 900; margin: 0; line-height: 1; }
-    .text-sky { color: #0ea5e9; font-size: 0.65rem; font-weight: bold; margin-top: 0.5rem; display: block; }
+  .amt-input {
+    width: 100%;
+    background: #020617;
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 16px 14px;
+    font-size: 18px;
+    outline: none;
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+    font-weight: 700;
+    height: 56px;
+  }
+  .amt-input::placeholder { color: #334155; }
+  .amt-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(96,165,250,0.12);
+  }
 
-    .input-group { display: flex; gap: 0.5rem; }
-    .w-half { width: 50%; }
-    input, select { background-color: rgba(15, 23, 42, 0.5); border: 1px solid #1e293b; color: white; padding: 0.75rem; border-radius: 0.75rem; font-size: 1rem; font-weight: bold; outline: none; box-sizing: border-box; }
-    input:focus, select:focus { border-color: #64748b; }
-    select { font-size: 0.75rem; }
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+  }
+  .cat-btn {
+    flex: 1;
+    background: var(--btn-bg);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 14px;
+    padding: 14px 4px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .cat-btn:active {
+    background: var(--btn-active);
+    transform: scale(0.98);
+  }
 
-    .history-list { margin-top: 1rem; }
-    .history-item { border-top: 1px solid #1e293b; padding-top: 0.75rem; margin-top: 0.75rem; display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: #94a3b8; }
-    .history-date { color: #64748b; font-family: monospace; margin-right: 8px; font-size: 0.75rem; }
-    .history-amt { color: #fff; font-weight: bold; }
-    .del-btn { background: none; border: none; color: #ef4444; font-size: 1.25rem; font-weight: bold; cursor: pointer; padding: 0 0.5rem; }
-  </style>
+  .history-section { margin-top: 36px; }
+  .history-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .cycle-box {
+    background: var(--surface);
+    border-radius: 16px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    border-left: 4px solid;
+  }
+  .cycle-box.rhb-border { border-left-color: #f97316; }
+  .cycle-box.affin-border { border-left-color: #3b82f6; }
+  .cycle-box.ikhwan-border { border-left-color: #94a3b8; }
+  .cycle-box.maybank-border { border-left-color: #fbbf24; }
+
+  .cycle-header {
+    padding: 14px 16px;
+    background: #0a1225;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    border-bottom: 1px solid transparent;
+  }
+  .cycle-header.active { border-bottom-color: var(--border); }
+  .cycle-name {
+    font-weight: 700;
+    font-size: 13px;
+    letter-spacing: 0.02em;
+  }
+  .cycle-range {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    margin-top: 2px;
+  }
+  .cycle-count {
+    font-size: 12px;
+    color: var(--text-muted);
+    background: #1e293b;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-weight: 600;
+  }
+  .cycle-arrow {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-left: 8px;
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+  .cycle-arrow.open { transform: rotate(180deg); }
+  .cycle-body { display: none; padding: 12px 16px; }
+  .cycle-body.open { display: block; }
+
+  .tx-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid #1e293b;
+    gap: 8px;
+  }
+  .tx-row:last-child { border-bottom: none; }
+  .tx-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .tx-date {
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .tx-cat { font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+  .tx-note {
+    font-size: 11px;
+    color: #475569;
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .tx-right {
+    text-align: right;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 2px;
+    white-space: nowrap;
+  }
+  .tx-amt {
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .tx-del {
+    font-size: 11px;
+    color: #475569;
+    background: #1e293b;
+    border: none;
+    border-radius: 6px;
+    padding: 2px 8px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .tx-del:active { background: #334155; }
+  .history-meta {
+    text-align: center;
+    color: #334155;
+    font-size: 11px;
+    margin-top: 16px;
+    font-weight: 500;
+  }
+  .empty-state {
+    text-align: center;
+    color: #334155;
+    font-size: 13px;
+    padding: 24px;
+    font-weight: 500;
+  }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+</style>
+<base target="_blank">
 </head>
 <body>
-  <div class="max-w-md">
-    <h1 class="header-title">AL</h1>
-    <div id="card-container" class="space-y-5"></div>
-  </div>
 
-  <script>
-    const cardsData = [
-      { name: "RHB Shell 2498", colorClass: "grad-rhb1", resetDay: 13, cats: ["Petrol", "Grocery", "e-Wallet/Online", "Utilities", "Overseas", "Other"] },
-      { name: "RHB Shell 8652", colorClass: "grad-rhb2", resetDay: 23, cats: ["Petrol", "Grocery", "e-Wallet/Online", "Utilities", "Overseas", "Other"] },
-      { name: "Affin Duo Visa 3322", colorClass: "grad-affin", resetDay: 23, cap: 50, cats: ["E-Wallet (3%)", "General (1%)"] },
-      { name: "Ikhwan Platinum 6157", colorClass: "grad-ikhwan", resetDay: 1, cap: 50, cats: ["Weekend (8%)", "Weekday (0%)"] },
-      { name: "Maybank 2 Gold 8943", colorClass: "grad-maybank", resetDay: 1, cap: 50, cats: ["Weekend (5%)", "Weekday (0%)"] }
-    ];
+<header><h1>AL</h1></header>
+<div id="card-container"></div>
 
-    function getCycleStart(day) {
-      const now = new Date();
-      let start = new Date(now.getFullYear(), now.getMonth(), day);
-      if (now.getDate() < day) start.setMonth(start.getMonth() - 1);
-      return start.toISOString();
+<div class="history-section">
+  <div class="history-title">📋 Cycle History</div>
+  <div id="history-container"></div>
+  <div class="history-meta" id="history-meta"></div>
+</div>
+
+<script>
+(function() {
+  'use strict';
+
+  // ====== OFFICIALLY VERIFIED CARD DEFINITIONS ======
+  // Maybank 2 Gold: cashback cap resets per CALENDAR MONTH (1st of month)
+  //   Source: Maybank official FAQ PDF — "capped at RM50 per calendar month"
+  // Ikhwan Platinum: Maybank-issued AMEX, follows same calendar month convention
+  // RHB & Affin: follow statement cycle (resetDay = statement date + 1)
+  const CARDS_DEF = [
+    {
+      name: "RHB Shell 2498",
+      barClass: "bar-rhb",
+      borderClass: "rhb-border",
+      resetDay: 13,
+      cats: ["Petrol", "Grocery", "E-Wallet"],
+      caps: { Petrol: 30, Grocery: 10, "E-Wallet": 10 },
+      minSpend: { Petrol: 0, Grocery: 250, "E-Wallet": 500 },
+      rates: {
+        Petrol:    [0.01, 0.03, 0.05, 0.12],
+        Grocery:   [0.002, 0.01, 0.02, 0.05],
+        "E-Wallet": [0.002, 0.01, 0.02, 0.05]
+      }
+    },
+    {
+      name: "RHB Shell 8652",
+      barClass: "bar-rhb",
+      borderClass: "rhb-border",
+      resetDay: 23,
+      cats: ["Petrol", "Grocery", "E-Wallet"],
+      caps: { Petrol: 30, Grocery: 10, "E-Wallet": 10 },
+      minSpend: { Petrol: 0, Grocery: 250, "E-Wallet": 500 },
+      rates: {
+        Petrol:    [0.01, 0.03, 0.05, 0.12],
+        Grocery:   [0.002, 0.01, 0.02, 0.05],
+        "E-Wallet": [0.002, 0.01, 0.02, 0.05]
+      }
+    },
+    {
+      name: "Affin Duo Visa 3322",
+      barClass: "bar-affin",
+      borderClass: "affin-border",
+      resetDay: 23,
+      cap: 30,
+      cats: ["Auto-Billing", "E-Commerce", "E-Wallet"],
+      rates: { "Auto-Billing": 0.03, "E-Commerce": 0.03, "E-Wallet": 0.03 },
+      autoDebit: { amount: 700, category: "Auto-Billing", note: "Insurance Auto-Debit" }
+    },
+    {
+      name: "Ikhwan Platinum 6157",
+      barClass: "bar-ikhwan",
+      borderClass: "ikhwan-border",
+      resetDay: 1,
+      cap: 50,
+      fixedCategory: "Online (8%)",
+      cats: ["Online (8%)"],
+      rates: { "Online (8%)": 0.08 }
+    },
+    {
+      name: "Maybank 2 Gold 8943",
+      barClass: "bar-maybank",
+      borderClass: "maybank-border",
+      resetDay: 1,
+      cap: 50,
+      fixedCategory: "Weekend (5%)",
+      cats: ["Weekend (5%)"],
+      rates: { "Weekend (5%)": 0.05 }
     }
+  ];
 
-    function safeSave(data) {
-      try { localStorage.setItem('finoryData', JSON.stringify(data)); } 
-      catch (e) { console.log("Storage blocked, running in memory only."); }
-    }
+  const MAX_CYCLES = 3;
 
+  function formatDateDMY(d) {
+    const date = new Date(d + 'T00:00:00');
+    return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+  }
+
+  function getTodayStr() {
+    const n = new Date();
+    return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+  }
+
+  function getCycleStart(day) {
+    const now = new Date();
+    let start = new Date(now.getFullYear(), now.getMonth(), day);
+    if (now.getDate() < day) start.setMonth(start.getMonth() - 1);
+    return `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+  }
+
+  function getCycleEnd(startStr) {
+    const [y, m, d] = startStr.split('-').map(Number);
+    const end = new Date(y, m - 1, d);
+    end.setMonth(end.getMonth() + 1);
+    end.setDate(end.getDate() - 1);
+    return `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
+  }
+
+  function getRateTier(totalSpend) {
+    if (totalSpend >= 3000) return 3;
+    if (totalSpend >= 2000) return 2;
+    if (totalSpend >= 1000) return 1;
+    return 0;
+  }
+
+  function loadState() {
+    const raw = localStorage.getItem('finoryData');
     let state;
-    try {
-      const saved = localStorage.getItem('finoryData');
-      if (saved) state = JSON.parse(saved);
-      if (!state || !state.cards) throw new Error();
-    } catch(e) {
-      state = { cards: cardsData.map(c => ({...c, totalSpend: 0, cashback: 0, categoryCashback: {}, history: [], lastCycleStart: getCycleStart(c.resetDay)})) };
-      safeSave(state);
+    if (raw) {
+      try { state = JSON.parse(raw); } catch(e) { state = null; }
     }
 
-    function recalculateCard(card) {
-      card.totalSpend = 0;
-      card.cashback = 0;
-      card.categoryCashback = {};
-      
-      if (!card.history) card.history = [];
-      
-      // Pass 1: Calculate Global Total Spend to determine RHB Tier
-      card.history.forEach(tx => {
-        card.totalSpend += tx.amt;
-      });
+    if (!state || !state.cards || state.version !== 5) {
+      const cards = CARDS_DEF.map(c => ({
+        ...c,
+        totalSpend: 0,
+        cashback: 0,
+        categoryCashback: {},
+        lastCycleStart: getCycleStart(c.resetDay),
+        autoDebitCycle: null
+      }));
+      state = { version: 5, cards, transactions: [] };
 
-      if (card.name.includes("RHB")) {
-        // Pass 2: Aggregate spend by category
-        let catSpends = { "Petrol": 0, "Grocery": 0, "e-Wallet/Online": 0, "Utilities": 0, "Overseas": 0, "Other": 0 };
-        card.history.forEach(tx => {
-          if (catSpends[tx.cat] !== undefined) catSpends[tx.cat] += tx.amt;
-          else catSpends["Other"] += tx.amt;
-        });
+      if (raw) {
+        try {
+          const old = JSON.parse(raw);
+          if (old.cards && Array.isArray(old.cards)) {
+            old.cards.forEach((oc, i) => {
+              if (state.cards[i]) {
+                state.cards[i].totalSpend = typeof oc.totalSpend === 'number' ? oc.totalSpend : 0;
+                state.cards[i].cashback = typeof oc.cashback === 'number' ? oc.cashback : 0;
+                state.cards[i].categoryCashback = oc.categoryCashback || {};
+                if (oc.lastCycleStart) state.cards[i].lastCycleStart = oc.lastCycleStart;
+                if (oc.autoDebitCycle) state.cards[i].autoDebitCycle = oc.autoDebitCycle;
+              }
+            });
+          }
+          if (old.transactions && Array.isArray(old.transactions)) {
+            state.transactions = old.transactions;
+          }
+        } catch(e) {}
+      }
+      saveState(state);
+    }
+    return state;
+  }
 
-        // Determine RHB Tier Rates based on Monthly Total Spend
-        let rates = { "Petrol": 0, "Grocery": 0, "e-Wallet/Online": 0, "Utilities": 0, "Overseas": 0, "Other": 0 };
-        if (card.totalSpend >= 3000) {
-            rates = { "Petrol": 0.12, "Grocery": 0.05, "e-Wallet/Online": 0.05, "Utilities": 0.05, "Overseas": 0.05, "Other": 0.002 };
-        } else if (card.totalSpend >= 2000) {
-            rates = { "Petrol": 0.05, "Grocery": 0.02, "e-Wallet/Online": 0.02, "Utilities": 0.02, "Overseas": 0.02, "Other": 0.002 };
-        } else if (card.totalSpend >= 1000) {
-            rates = { "Petrol": 0.03, "Grocery": 0.01, "e-Wallet/Online": 0.01, "Utilities": 0.01, "Overseas": 0.01, "Other": 0.002 };
+  function saveState(state) {
+    localStorage.setItem('finoryData', JSON.stringify(state));
+  }
+
+  function checkAndReset(state) {
+    state.cards.forEach(c => {
+      const currentStart = getCycleStart(c.resetDay);
+      if (c.lastCycleStart !== currentStart) {
+        c.totalSpend = 0;
+        c.cashback = 0;
+        c.categoryCashback = {};
+        c.lastCycleStart = currentStart;
+      }
+    });
+  }
+
+  function applyAutoDebits(state) {
+    let changed = false;
+    state.cards.forEach((c, i) => {
+      const def = CARDS_DEF[i];
+      if (def.autoDebit) {
+        if (c.lastCycleStart !== c.autoDebitCycle) {
+          const rate = def.rates[def.autoDebit.category];
+          const rawEarned = def.autoDebit.amount * rate;
+          const cap = def.cap || 999;
+          const remaining = cap - c.cashback;
+          const earned = Math.max(0, Math.min(rawEarned, remaining));
+
+          c.totalSpend += def.autoDebit.amount;
+          c.cashback += earned;
+          c.autoDebitCycle = c.lastCycleStart;
+
+          state.transactions.push({
+            id: Date.now() + '-auto-' + i,
+            cardIndex: i,
+            cardName: def.name,
+            amount: def.autoDebit.amount,
+            category: def.autoDebit.category,
+            note: def.autoDebit.note,
+            date: getTodayStr(),
+            timestamp: Date.now(),
+            cycleStart: c.lastCycleStart
+          });
+          changed = true;
         }
+      }
+    });
+    if (changed) saveState(state);
+  }
 
-        // Apply specific RHB limits
-        const rhbCaps = { "Petrol": 30, "Grocery": 10, "e-Wallet/Online": 10, "Utilities": 10, "Overseas": 50, "Other": Infinity };
-        const rhbMins = { "Petrol": 0, "Grocery": 250, "e-Wallet/Online": 500, "Utilities": 250, "Overseas": 500, "Other": 500 };
+  function getRate(cardDef, cardState, cat, amount) {
+    if (cardDef.name.includes("RHB")) {
+      const min = cardDef.minSpend?.[cat] || 0;
+      if (amount < min) return 0;
+      const tier = getRateTier(cardState.totalSpend + amount);
+      const rates = cardDef.rates[cat];
+      return rates ? rates[tier] : 0;
+    }
+    if (cardDef.rates && cardDef.rates[cat] !== undefined) {
+      return cardDef.rates[cat];
+    }
+    return 0;
+  }
 
-        for (let cat in catSpends) {
-            let catSpend = catSpends[cat];
-            let earned = 0;
-            // Only award cashback if minimum category spend is met
-            if (catSpend >= rhbMins[cat]) {
-                let rawEarned = catSpend * rates[cat];
-                earned = Math.min(rawEarned, rhbCaps[cat]);
-            }
-            card.categoryCashback[cat] = earned;
-            card.cashback += earned;
-        }
+  function recalcCard(state, cardIndex) {
+    const def = CARDS_DEF[cardIndex];
+    const cardState = state.cards[cardIndex];
+    cardState.totalSpend = 0;
+    cardState.cashback = 0;
+    cardState.categoryCashback = {};
 
+    const txs = state.transactions
+      .filter(t => t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart)
+      .sort((a, b) => a.timestamp - b.timestamp);
+
+    txs.forEach(tx => {
+      const rate = getRate(def, cardState, tx.category, tx.amount);
+      let earned = 0;
+      if (def.name.includes("RHB")) {
+        const cap = def.caps[tx.category] || 999;
+        const currentCatCb = cardState.categoryCashback?.[tx.category] || 0;
+        const remaining = cap - currentCatCb;
+        earned = tx.amount * rate;
+        if (earned > remaining) earned = remaining;
+        if (earned < 0) earned = 0;
+        cardState.cashback += earned;
+        cardState.categoryCashback[tx.category] = currentCatCb + earned;
       } else {
-        // Non-RHB Calculation Logic
-        card.history.forEach(tx => {
-          let earned = 0;
-          if (card.name.includes("Ikhwan") && tx.cat.includes("Weekend")) earned = tx.amt * 0.08;
-          else if (card.name.includes("Maybank")) earned = tx.amt * 0.05;
-          else if (card.name.includes("Affin")) earned = tx.cat.includes("E-Wallet") ? tx.amt * 0.03 : tx.amt * 0.01;
-          
-          card.cashback = Math.min(card.cap, card.cashback + earned);
+        earned = tx.amount * rate;
+        const cap = def.cap || 999;
+        const remaining = cap - cardState.cashback;
+        if (earned > remaining) earned = remaining;
+        if (earned < 0) earned = 0;
+        cardState.cashback += earned;
+      }
+      cardState.totalSpend += tx.amount;
+    });
+  }
+
+  function addTransaction(cardIndex, amount, cat, note) {
+    const state = loadState();
+    checkAndReset(state);
+    const cardState = state.cards[cardIndex];
+    const cardDef = CARDS_DEF[cardIndex];
+
+    const rate = getRate(cardDef, cardState, cat, amount);
+    let earned = 0;
+
+    if (cardDef.name.includes("RHB")) {
+      const cap = cardDef.caps[cat] || 999;
+      const currentCatCb = cardState.categoryCashback?.[cat] || 0;
+      const remaining = cap - currentCatCb;
+      earned = amount * rate;
+      if (earned > remaining) earned = remaining;
+      if (earned < 0) earned = 0;
+      cardState.cashback += earned;
+      cardState.categoryCashback[cat] = currentCatCb + earned;
+    } else {
+      earned = amount * rate;
+      const cap = cardDef.cap || 999;
+      const remaining = cap - cardState.cashback;
+      if (earned > remaining) earned = remaining;
+      if (earned < 0) earned = 0;
+      cardState.cashback += earned;
+    }
+
+    cardState.totalSpend += amount;
+
+    const now = new Date();
+    const tx = {
+      id: now.getTime() + '-' + Math.random().toString(36).slice(2, 7),
+      cardIndex,
+      cardName: cardDef.name,
+      amount,
+      category: cat,
+      note: note || '',
+      date: getTodayStr(),
+      timestamp: now.getTime(),
+      cycleStart: cardState.lastCycleStart
+    };
+    state.transactions.push(tx);
+
+    cleanupOldCycles(state);
+    saveState(state);
+    render();
+  }
+
+  function deleteTransaction(txId) {
+    if (!confirm('Delete this transaction?')) return;
+    const state = loadState();
+    const tx = state.transactions.find(t => t.id === txId);
+    if (!tx) return;
+
+    state.transactions = state.transactions.filter(t => t.id !== txId);
+    recalcCard(state, tx.cardIndex);
+    cleanupOldCycles(state);
+    saveState(state);
+    render();
+  }
+
+  function cleanupOldCycles(state) {
+    state.cards.forEach((c, i) => {
+      const cycles = [];
+      state.transactions.forEach(tx => {
+        if (tx.cardIndex === i && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
+      });
+      cycles.sort((a, b) => b.localeCompare(a));
+      if (cycles.length > MAX_CYCLES) {
+        const toDelete = cycles.slice(MAX_CYCLES);
+        state.transactions = state.transactions.filter(tx => {
+          if (tx.cardIndex !== i) return true;
+          return !toDelete.includes(tx.cycleStart);
         });
       }
-    }
+    });
+  }
 
-    function checkAndReset() {
-      state.cards.forEach(c => {
-        const lastStart = new Date(c.lastCycleStart);
-        const currentStart = new Date(getCycleStart(c.resetDay));
-        if (lastStart.getTime() !== currentStart.getTime()) {
-          c.totalSpend = 0;
-          c.cashback = 0;
-          c.categoryCashback = {};
-          c.history = [];
-          c.lastCycleStart = currentStart.toISOString();
-        }
-      });
-    }
+  function saveTx(i, cat) {
+    const amtIn = document.getElementById('amt-' + i);
+    const amt = parseFloat(amtIn.value);
+    if (!amt || amt <= 0) return;
+    addTransaction(i, amt, cat, '');
+    amtIn.value = '';
+    amtIn.focus();
+  }
 
-    function formatDate(dateStr) {
-      const d = new Date(dateStr);
-      return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}/${d.getFullYear()}`;
-    }
+  function renderCards() {
+    const state = loadState();
+    checkAndReset(state);
+    applyAutoDebits(state);
+    saveState(state);
 
-    function formatHistoryDate(isoString) {
-      if (!isoString) return "--/--";
-      const d = new Date(isoString);
-      return `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth()+1).toString().padStart(2, '0')}`;
-    }
+    const container = document.getElementById('card-container');
+    container.innerHTML = state.cards.map((c, i) => {
+      const def = CARDS_DEF[i];
+      const start = c.lastCycleStart;
+      const end = getCycleEnd(start);
 
-    function render() {
-      checkAndReset();
-      const container = document.getElementById('card-container');
-      
-      container.innerHTML = state.cards.map((c, i) => {
-        const start = new Date(c.lastCycleStart);
-        const end = new Date(start);
-        end.setMonth(end.getMonth() + 1);
-        end.setDate(end.getDate() - 1);
-        
-        if (!c.history) c.history = [];
+      let btnHtml;
+      if (def.fixedCategory) {
+        btnHtml = `<div class="btn-row">
+          <button class="cat-btn" onclick="window._app.saveTx(${i}, '${def.fixedCategory}')">Add ${def.fixedCategory}</button>
+        </div>`;
+      } else {
+        btnHtml = `<div class="btn-row">${def.cats.map(cat =>
+          `<button class="cat-btn" onclick="window._app.saveTx(${i}, '${cat}')">${cat}</button>`
+        ).join('')}</div>`;
+      }
 
-        const gradientClass = cardsData[i].colorClass || "grad-ikhwan";
-
-        return `
-        <div class="card-outer ${gradientClass}">
-          <div class="card-inner">
-            <div class="flex-between">
-              <div>
-                  <h2 class="card-title">${c.name}</h2>
-                  <span class="card-reset">Reset: ${c.resetDay}th (${formatDate(start)} - ${formatDate(end)})</span>
-              </div>
-              <div class="text-right">
-                <p class="text-emerald">RM ${c.cashback.toFixed(2)}</p>
-                <span class="text-sky">Usage: RM ${c.totalSpend.toFixed(2)}</span>
+      return `
+        <div class="card">
+          <div class="card-bar ${def.barClass}"></div>
+          <div class="card-body">
+            <div class="card-header">
+              <div class="card-name">${def.name}</div>
+              <div class="card-right">
+                <div class="cb-amount">${c.cashback.toFixed(2)}</div>
+                <div class="spend-amount">Spend: RM ${c.totalSpend.toFixed(2)}</div>
               </div>
             </div>
-            
-            <div class="input-group">
-              <input class="w-half" type="number" id="amt-${i}" placeholder="0.00" onchange="autoAddTx(${i})">
-              <select class="w-half" id="cat-${i}">
-                ${c.cats ? c.cats.map(cat => `<option value="${cat}">${cat}</option>`).join('') : cardsData[i].cats.map(cat => `<option value="${cat}">${cat}</option>`).join('')}
-              </select>
-            </div>
-
-            <div class="history-list">
-              ${c.history.map((tx, idx) => `
-                <div class="history-item">
-                  <span>
-                    <span class="history-date">${formatHistoryDate(tx.date)}</span>
-                    ${tx.cat}: <span class="history-amt">RM ${tx.amt.toFixed(2)}</span>
-                  </span>
-                  <button class="del-btn" onclick="deleteTx(${i}, ${idx})">×</button>
-                </div>
-              `).join('')}
-            </div>
+            <div class="cycle-info">Cycle: ${formatDateDMY(start)} — ${formatDateDMY(end)}</div>
+            <input type="number" id="amt-${i}" class="amt-input" placeholder="0.00" step="0.01">
+            ${btnHtml}
           </div>
         </div>
-        `;
-      }).join('');
+      `;
+    }).join('');
+  }
+
+  function renderHistory() {
+    const state = loadState();
+    const container = document.getElementById('history-container');
+    const meta = document.getElementById('history-meta');
+
+    if (!state.transactions.length) {
+      container.innerHTML = '<div class="empty-state">No transactions yet.</div>';
+      meta.textContent = '';
+      return;
     }
 
-    window.autoAddTx = function(i) {
-      const amtInput = document.getElementById(`amt-${i}`);
-      const amt = parseFloat(amtInput.value);
-      const cat = document.getElementById(`cat-${i}`).value;
-      
-      if (!amt || amt <= 0) return;
-      
-      if (!state.cards[i].history) state.cards[i].history = [];
-      
-      const currentDate = new Date().toISOString();
-      state.cards[i].history.push({ amt: amt, cat: cat, date: currentDate });
-      
-      recalculateCard(state.cards[i]);
-      safeSave(state);
-      render();
-      
-      setTimeout(() => {
-        const nextInput = document.getElementById(`amt-${i}`);
-        if(nextInput) nextInput.focus();
-      }, 10);
-    };
+    const groups = {};
+    state.transactions.forEach(tx => {
+      const key = tx.cardIndex + '|' + tx.cycleStart;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(tx);
+    });
 
-    window.deleteTx = function(cardIdx, txIdx) {
-      state.cards[cardIdx].history.splice(txIdx, 1);
-      recalculateCard(state.cards[cardIdx]);
-      safeSave(state);
-      render();
-    };
+    const sortedKeys = Object.keys(groups).sort((a, b) => {
+      const [ca, sa] = a.split('|');
+      const [cb, sb] = b.split('|');
+      if (ca !== cb) return parseInt(ca) - parseInt(cb);
+      return sb.localeCompare(sa);
+    });
 
-    window.onload = function() {
-      // Data migration to ensure old local storage gets new category structure safely
-      state.cards.forEach((c, i) => {
-        if (c.name.includes("RHB") && c.cats && c.cats[2] !== "e-Wallet/Online") {
-            c.cats = cardsData[i].cats;
-        }
+    const currentCycleStarts = state.cards.map(c => c.lastCycleStart);
+
+    container.innerHTML = sortedKeys.map(key => {
+      const [cardIdx, cycleStart] = key.split('|');
+      const cidx = parseInt(cardIdx);
+      const def = CARDS_DEF[cidx];
+      const txs = groups[key].sort((a, b) => b.timestamp - a.timestamp);
+      const isOpen = currentCycleStarts[cidx] === cycleStart ? 'open' : '';
+      const cycleEnd = getCycleEnd(cycleStart);
+      const total = txs.reduce((s, t) => s + t.amount, 0);
+
+      const rows = txs.map(tx => `
+        <div class="tx-row">
+          <div class="tx-left">
+            <div>
+              <span class="tx-date">${tx.date.slice(8,10)}/${tx.date.slice(5,7)}</span>
+              <span class="tx-cat">${tx.category}</span>
+            </div>
+            ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
+          </div>
+          <div class="tx-right">
+            <div class="tx-amt">RM ${tx.amount.toFixed(2)}</div>
+            <button class="tx-del" onclick="window._app.deleteTransaction('${tx.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="cycle-box ${def.borderClass}">
+          <div class="cycle-header ${isOpen ? 'active' : ''}" onclick="window._app.toggleCycle(this)">
+            <div>
+              <div class="cycle-name">${def.name}</div>
+              <div class="cycle-range">${formatDateDMY(cycleStart)} — ${formatDateDMY(cycleEnd)}</div>
+            </div>
+            <div style="display:flex;align-items:center;">
+              <span class="cycle-count">${txs.length} tx · RM ${total.toFixed(2)}</span>
+              <span class="cycle-arrow ${isOpen ? 'open' : ''}">▼</span>
+            </div>
+          </div>
+          <div class="cycle-body ${isOpen ? 'open' : ''}">
+            ${rows}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    let cycleCounts = [];
+    state.cards.forEach((c, i) => {
+      const cycles = [];
+      state.transactions.forEach(tx => {
+        if (tx.cardIndex === i && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
       });
-      safeSave(state);
-      render();
-    };
-  </script>
+      cycleCounts.push(`${CARDS_DEF[i].name.split(' ').pop()}: ${cycles.length}/${MAX_CYCLES}`);
+    });
+    meta.textContent = `Auto-keep ${MAX_CYCLES} cycles per card • ${cycleCounts.join(' · ')}`;
+  }
+
+  function toggleCycle(header) {
+    const body = header.nextElementSibling;
+    const arrow = header.querySelector('.cycle-arrow');
+    const isOpen = body.classList.contains('open');
+    if (isOpen) {
+      body.classList.remove('open');
+      arrow.classList.remove('open');
+      header.classList.remove('active');
+    } else {
+      body.classList.add('open');
+      arrow.classList.add('open');
+      header.classList.add('active');
+    }
+  }
+
+  function render() {
+    renderCards();
+    renderHistory();
+  }
+
+  window._app = {
+    saveTx,
+    toggleCycle,
+    deleteTransaction
+  };
+
+  render();
+})();
+</script>
 </body>
 </html>
