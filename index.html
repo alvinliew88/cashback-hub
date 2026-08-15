@@ -25,165 +25,201 @@
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 16px;
-    line-height: 1.5;
+    font-size: 15px;
+    line-height: 1.4;
     overscroll-behavior-y: auto;
-    padding: 12px 12px 100px;
+    padding: 10px 10px 60px;
     -webkit-font-smoothing: antialiased;
   }
 
+  /* ====== Compact Card ====== */
   .card {
     background: var(--surface);
-    border-radius: 16px;
+    border-radius: 14px;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
     border: 1px solid var(--border);
   }
-  .card-bar { height: 5px; width: 100%; }
+  .card-bar { height: 4px; width: 100%; }
   .bar-rhb { background: linear-gradient(90deg, #f97316, #ef4444); }
   .bar-affin { background: linear-gradient(90deg, #3b82f6, #2563eb); }
   .bar-ikhwan { background: linear-gradient(90deg, #9ca3af, #4b5563); }
   .bar-maybank { background: linear-gradient(90deg, #fbbf24, #d97706); }
-  .card-body { padding: 18px 16px 16px; }
 
-  .card-header {
+  .card-summary {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
+    align-items: center;
+    padding: 14px 14px;
+    position: relative;
+    cursor: pointer;
+    user-select: none;
   }
-  .card-name { font-weight: 800; font-size: 18px; letter-spacing: -0.3px; color: #fff; }
-  .card-right { text-align: right; }
+  .card-summary-left { flex: 1; min-width: 0; padding-right: 8px; }
+  .card-summary-right { text-align: right; margin-right: 18px; }
+  .card-arrow {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: transform 0.2s;
+  }
+  .card-arrow.open { transform: translateY(-50%) rotate(180deg); }
+
+  .card-name { font-weight: 800; font-size: 15px; letter-spacing: -0.3px; color: #fff; line-height: 1.2; }
   .cb-amount {
     font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, 'Cascadia Mono', monospace;
-    font-size: 32px;
+    font-size: 22px;
     font-weight: 900;
     line-height: 1;
     color: #fff;
   }
   .spend-amount {
     font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 13px;
+    font-size: 11px;
     color: var(--text-muted);
-    margin-top: 6px;
+    margin-top: 3px;
   }
   .cycle-info {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-muted);
     text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 16px;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
     font-weight: 600;
   }
 
-  /* Category Progress Bars - DISTINCT NEON COLORS */
-  .cat-progress-list { margin-bottom: 18px; }
-  .cat-progress {
-    margin-bottom: 14px;
+  /* ====== Card Detail (expandable) ====== */
+  .card-detail {
+    display: none;
+    padding: 0 14px 14px;
+    border-top: 1px solid var(--border);
   }
+  .card-detail.open { display: block; }
+
+  /* Category Progress Bars */
+  .cat-progress-list { margin-top: 12px; margin-bottom: 0; }
+  .cat-progress { margin-bottom: 10px; }
   .cat-progress:last-child { margin-bottom: 0; }
   .cat-label-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
   }
-  .cat-label-name {
-    font-size: 15px;
-    font-weight: 700;
-    color: #e5e5e5;
-  }
+  .cat-label-name { font-size: 14px; font-weight: 700; color: #e5e5e5; }
   .cat-label-value {
     font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text-secondary);
     font-weight: 600;
   }
   .cat-track {
     width: 100%;
-    height: 10px;
+    height: 8px;
     background: #111111;
-    border-radius: 5px;
+    border-radius: 4px;
     overflow: hidden;
     border: 1px solid #222;
   }
   .cat-fill {
     height: 100%;
-    border-radius: 5px;
+    border-radius: 4px;
     transition: width 0.3s ease;
     min-width: 2px;
   }
-  /* Distinct bright neon colors - very different from top bar colors */
-  .fill-cyan   { background: linear-gradient(90deg, #22d3ee, #06b6d4); box-shadow: 0 0 8px rgba(34,211,238,0.3); }
-  .fill-lime   { background: linear-gradient(90deg, #a3e635, #65a30d); box-shadow: 0 0 8px rgba(163,230,53,0.3); }
-  .fill-violet { background: linear-gradient(90deg, #c084fc, #7c3aed); box-shadow: 0 0 8px rgba(192,132,252,0.3); }
-  .fill-coral  { background: linear-gradient(90deg, #fb7185, #e11d48); box-shadow: 0 0 8px rgba(251,113,133,0.3); }
-  .fill-amber  { background: linear-gradient(90deg, #fbbf24, #d97706); box-shadow: 0 0 8px rgba(251,191,36,0.3); }
+  .fill-cyan   { background: linear-gradient(90deg, #22d3ee, #06b6d4); box-shadow: 0 0 6px rgba(34,211,238,0.25); }
+  .fill-lime   { background: linear-gradient(90deg, #a3e635, #65a30d); box-shadow: 0 0 6px rgba(163,230,53,0.25); }
+  .fill-violet { background: linear-gradient(90deg, #c084fc, #7c3aed); box-shadow: 0 0 6px rgba(192,132,252,0.25); }
+  .fill-coral  { background: linear-gradient(90deg, #fb7185, #e11d48); box-shadow: 0 0 6px rgba(251,113,133,0.25); }
+  .fill-amber  { background: linear-gradient(90deg, #fbbf24, #d97706); box-shadow: 0 0 6px rgba(251,191,36,0.25); }
 
   .amt-input {
     width: 100%;
     background: #111;
     border: 1px solid var(--border);
     color: #fff;
-    border-radius: 14px;
-    padding: 18px 16px;
-    font-size: 20px;
+    border-radius: 12px;
+    padding: 14px;
+    font-size: 18px;
     outline: none;
     font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
     font-weight: 800;
-    height: 60px;
-    margin-bottom: 12px;
+    height: 50px;
+    margin-top: 12px;
+    margin-bottom: 8px;
   }
   .amt-input::placeholder { color: #333; }
   .amt-input:focus {
     border-color: #3b82f6;
-    box-shadow: 0 0 0 4px rgba(59,130,246,0.15);
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
   }
 
   .btn-row {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
   }
   .cat-btn {
     width: 100%;
     background: var(--btn-bg);
     border: 1px solid var(--border);
     color: #fff;
-    border-radius: 14px;
-    padding: 16px;
-    font-size: 15px;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
     font-weight: 700;
     cursor: pointer;
     text-align: center;
-    min-height: 52px;
+    min-height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     letter-spacing: 0.02em;
   }
-  .cat-btn:active {
-    background: var(--btn-active);
-    transform: scale(0.98);
-  }
-  .cat-btn.maxed {
-    opacity: 0.25;
-    pointer-events: none;
-  }
+  .cat-btn:active { background: var(--btn-active); transform: scale(0.98); }
+  .cat-btn.maxed { opacity: 0.25; pointer-events: none; }
 
-  .history-section { margin-top: 40px; }
+  /* In-card transaction list */
+  .card-tx-section {
+    margin-top: 12px;
+    border-top: 1px solid var(--border);
+    padding-top: 10px;
+  }
+  .card-tx-title {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 6px;
+  }
+  .card-tx-empty {
+    text-align: center;
+    color: #333;
+    font-size: 13px;
+    padding: 8px 0;
+    font-weight: 600;
+  }
+  .card-detail .tx-row { padding: 8px 0; }
+  .card-detail .tx-del { padding: 2px 8px; font-size: 10px; }
+
+  /* ====== Bottom History ====== */
+  .history-section { margin-top: 28px; }
   .history-title {
-    font-size: 20px;
+    font-size: 18px;
     font-weight: 800;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     color: #fff;
   }
   .cycle-box {
     background: var(--surface);
-    border-radius: 16px;
-    margin-bottom: 14px;
+    border-radius: 14px;
+    margin-bottom: 10px;
     overflow: hidden;
-    border-left: 5px solid;
+    border-left: 4px solid;
   }
   .cycle-box.rhb-border { border-left-color: #f97316; }
   .cycle-box.affin-border { border-left-color: #3b82f6; }
@@ -191,7 +227,7 @@
   .cycle-box.maybank-border { border-left-color: #fbbf24; }
 
   .cycle-header {
-    padding: 16px;
+    padding: 14px;
     background: #0f0f0f;
     display: flex;
     justify-content: space-between;
@@ -201,30 +237,30 @@
     border-bottom: 1px solid transparent;
   }
   .cycle-header.active { border-bottom-color: var(--border); }
-  .cycle-name { font-weight: 800; font-size: 15px; color: #fff; }
+  .cycle-name { font-weight: 800; font-size: 14px; color: #fff; }
   .cycle-range {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-muted);
     font-weight: 600;
-    margin-top: 3px;
+    margin-top: 2px;
   }
   .cycle-count {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-muted);
     background: #1a1a1a;
-    padding: 3px 10px;
-    border-radius: 12px;
+    padding: 3px 8px;
+    border-radius: 10px;
     font-weight: 700;
   }
   .cycle-arrow {
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-muted);
-    margin-left: 8px;
+    margin-left: 6px;
     transition: transform 0.2s;
     display: inline-block;
   }
   .cycle-arrow.open { transform: rotate(180deg); }
-  .cycle-body { display: none; padding: 14px 16px; }
+  .cycle-body { display: none; padding: 12px 14px; }
   .cycle-body.open { display: block; }
 
   .tx-row {
@@ -236,15 +272,15 @@
     gap: 10px;
   }
   .tx-row:last-child { border-bottom: none; }
-  .tx-left { display: flex; flex-direction: column; gap: 3px; flex: 1; min-width: 0; }
+  .tx-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
   .tx-date {
     font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--text-muted);
   }
-  .tx-cat { font-size: 14px; color: var(--text-secondary); font-weight: 700; }
+  .tx-cat { font-size: 13px; color: var(--text-secondary); font-weight: 700; }
   .tx-note {
-    font-size: 12px;
+    font-size: 11px;
     color: #444;
     font-style: italic;
     white-space: nowrap;
@@ -256,12 +292,12 @@
     display: flex;
     flex-direction: column;
     align-items: flex-end;
-    gap: 4px;
+    gap: 3px;
     white-space: nowrap;
   }
   .tx-amt {
     font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 800;
     color: #fff;
   }
@@ -279,15 +315,15 @@
   .history-meta {
     text-align: center;
     color: #333;
-    font-size: 12px;
-    margin-top: 20px;
+    font-size: 11px;
+    margin-top: 16px;
     font-weight: 600;
   }
   .empty-state {
     text-align: center;
     color: #333;
     font-size: 14px;
-    padding: 30px;
+    padding: 24px;
     font-weight: 600;
   }
   ::-webkit-scrollbar { width: 0; height: 0; }
@@ -299,7 +335,7 @@
 <div id="card-container"></div>
 
 <div class="history-section">
-  <div class="history-title">📋 Cycle History</div>
+  <div class="history-title">📋 History (90 Days)</div>
   <div id="history-container"></div>
   <div class="history-meta" id="history-meta"></div>
 </div>
@@ -683,9 +719,23 @@
     if (!amt || amt <= 0) return;
     addTransaction(i, amt, cat, '');
     amtIn.value = '';
-    amtIn.focus();
   }
 
+  /* ====== UI: Card Toggle ====== */
+  function toggleCard(i) {
+    const detail = document.getElementById('card-detail-' + i);
+    const arrow = document.getElementById('card-arrow-' + i);
+    const isOpen = detail.classList.contains('open');
+    if (isOpen) {
+      detail.classList.remove('open');
+      if (arrow) arrow.classList.remove('open');
+    } else {
+      detail.classList.add('open');
+      if (arrow) arrow.classList.add('open');
+    }
+  }
+
+  /* ====== UI: Render Cards (compact + expandable) ====== */
   function renderCards() {
     const state = loadState();
     checkAndReset(state);
@@ -699,12 +749,34 @@
       const end = getCycleEnd(start);
       const progressHtml = buildProgressHtml(c, def);
 
+      const currentTxs = state.transactions
+        .filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart)
+        .sort((a, b) => b.timestamp - a.timestamp);
+
+      const txRows = currentTxs.map(tx => `
+        <div class="tx-row">
+          <div class="tx-left">
+            <div>
+              <span class="tx-date">${tx.date.slice(8,10)}/${tx.date.slice(5,7)}</span>
+              <span class="tx-cat">${tx.category}</span>
+            </div>
+            ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
+          </div>
+          <div class="tx-right">
+            <div class="tx-amt">RM ${tx.amount.toFixed(2)}</div>
+            <button class="tx-del" onclick="window._app.deleteTransaction('${tx.id}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+
+      const txSection = currentTxs.length
+        ? `<div class="card-tx-section"><div class="card-tx-title">This Cycle (${currentTxs.length})</div>${txRows}</div>`
+        : '<div class="card-tx-section card-tx-empty">No transactions this cycle</div>';
+
       let btnHtml;
       if (def.fixedCategory) {
         const maxed = isCatMaxed(c, def, def.fixedCategory) ? 'maxed' : '';
-        btnHtml = `<div class="btn-row">
-          <button class="cat-btn ${maxed}" onclick="window._app.saveTx(${i}, '${def.fixedCategory}')">Add ${def.fixedCategory}</button>
-        </div>`;
+        btnHtml = `<div class="btn-row"><button class="cat-btn ${maxed}" onclick="window._app.saveTx(${i}, '${def.fixedCategory}')">Add ${def.fixedCategory}</button></div>`;
       } else {
         btnHtml = `<div class="btn-row">${def.cats.map(cat => {
           const maxed = isCatMaxed(c, def, cat) ? 'maxed' : '';
@@ -715,39 +787,45 @@
       return `
         <div class="card">
           <div class="card-bar ${def.barClass}"></div>
-          <div class="card-body">
-            <div class="card-header">
+          <div class="card-summary" onclick="window._app.toggleCard(${i})">
+            <div class="card-summary-left">
               <div class="card-name">${def.name}</div>
-              <div class="card-right">
-                <div class="cb-amount">${c.cashback.toFixed(2)}</div>
-                <div class="spend-amount">Spend: RM ${c.totalSpend.toFixed(2)}</div>
-              </div>
+              <div class="cycle-info">${formatDateDMY(start)} — ${formatDateDMY(end)}</div>
             </div>
-            <div class="cycle-info">Cycle: ${formatDateDMY(start)} — ${formatDateDMY(end)}</div>
-
+            <div class="card-summary-right">
+              <div class="cb-amount">RM ${c.cashback.toFixed(2)}</div>
+              <div class="spend-amount">Spend RM ${c.totalSpend.toFixed(2)}</div>
+            </div>
+            <div class="card-arrow" id="card-arrow-${i}">▼</div>
+          </div>
+          <div class="card-detail" id="card-detail-${i}">
             <div class="cat-progress-list">${progressHtml}</div>
-
             <input type="number" id="amt-${i}" class="amt-input" placeholder="0.00" step="0.01">
             ${btnHtml}
+            ${txSection}
           </div>
         </div>
       `;
     }).join('');
   }
 
+  /* ====== UI: Render History (past cycles only, collapsed by default) ====== */
   function renderHistory() {
     const state = loadState();
     const container = document.getElementById('history-container');
     const meta = document.getElementById('history-meta');
 
-    if (!state.transactions.length) {
-      container.innerHTML = '<div class="empty-state">No transactions yet.</div>';
+    const currentCycleStarts = state.cards.map(c => c.lastCycleStart);
+    const pastTransactions = state.transactions.filter(tx => tx.cycleStart !== currentCycleStarts[tx.cardIndex]);
+
+    if (!pastTransactions.length) {
+      container.innerHTML = '<div class="empty-state">No past transactions.</div>';
       meta.textContent = '';
       return;
     }
 
     const groups = {};
-    state.transactions.forEach(tx => {
+    pastTransactions.forEach(tx => {
       const key = tx.cardIndex + '|' + tx.cycleStart;
       if (!groups[key]) groups[key] = [];
       groups[key].push(tx);
@@ -756,18 +834,15 @@
     const sortedKeys = Object.keys(groups).sort((a, b) => {
       const [ca, sa] = a.split('|');
       const [cb, sb] = b.split('|');
-      if (ca !== cb) return parseInt(ca) - parseInt(cb);
-      return sb.localeCompare(sa);
+      if (sa !== sb) return sb.localeCompare(sa);
+      return parseInt(ca) - parseInt(cb);
     });
-
-    const currentCycleStarts = state.cards.map(c => c.lastCycleStart);
 
     container.innerHTML = sortedKeys.map(key => {
       const [cardIdx, cycleStart] = key.split('|');
       const cidx = parseInt(cardIdx);
       const def = CARDS_DEF[cidx];
       const txs = groups[key].sort((a, b) => b.timestamp - a.timestamp);
-      const isOpen = currentCycleStarts[cidx] === cycleStart ? 'open' : '';
       const cycleEnd = getCycleEnd(cycleStart);
       const total = txs.reduce((s, t) => s + t.amount, 0);
 
@@ -789,17 +864,17 @@
 
       return `
         <div class="cycle-box ${def.borderClass}">
-          <div class="cycle-header ${isOpen ? 'active' : ''}" onclick="window._app.toggleCycle(this)">
+          <div class="cycle-header" onclick="window._app.toggleCycle(this)">
             <div>
               <div class="cycle-name">${def.name}</div>
               <div class="cycle-range">${formatDateDMY(cycleStart)} — ${formatDateDMY(cycleEnd)}</div>
             </div>
             <div style="display:flex;align-items:center;">
               <span class="cycle-count">${txs.length} tx · RM ${total.toFixed(2)}</span>
-              <span class="cycle-arrow ${isOpen ? 'open' : ''}">▼</span>
+              <span class="cycle-arrow">▼</span>
             </div>
           </div>
-          <div class="cycle-body ${isOpen ? 'open' : ''}">
+          <div class="cycle-body">
             ${rows}
           </div>
         </div>
@@ -810,11 +885,11 @@
     state.cards.forEach((c, i) => {
       const cycles = [];
       state.transactions.forEach(tx => {
-        if (tx.cardIndex === i && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
+        if (tx.cardIndex === i && tx.cycleStart !== c.lastCycleStart && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
       });
       cycleCounts.push(`${CARDS_DEF[i].name.split(' ').pop()}: ${cycles.length}/${MAX_CYCLES}`);
     });
-    meta.textContent = `Auto-keep ${MAX_CYCLES} cycles per card • ${cycleCounts.join(' · ')}`;
+    meta.textContent = `Past cycles kept for 90 days • ${cycleCounts.join(' · ')}`;
   }
 
   function toggleCycle(header) {
@@ -839,6 +914,7 @@
 
   window._app = {
     saveTx,
+    toggleCard,
     toggleCycle,
     deleteTransaction
   };
