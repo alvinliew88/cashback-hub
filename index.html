@@ -405,7 +405,7 @@
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<div class="version-info">Version 2.3 — 2026-09-03 (recalc fix)</div>
+<div class="version-info">Version 2.4 — 2026-09-03 (non-RHB progress fixed)</div>
 
 <script>
 (function() {
@@ -666,14 +666,12 @@
     });
   }
 
-  // ===== 核心修改：addTransaction 使用 recalcCard =====
   function addTransaction(cardIndex, amount, cat, note) {
     const state = loadState();
     checkAndReset(state);
     const cardState = state.cards[cardIndex];
     const cardDef = CARDS_DEF[cardIndex];
 
-    // 先创建交易并添加到列表
     const now = new Date();
     const tx = {
       id: now.getTime() + '-' + Math.random().toString(36).slice(2, 7),
@@ -688,16 +686,9 @@
     };
     state.transactions.push(tx);
 
-    // 重新计算该卡所有数据（从所有交易重新累加）
     recalcCard(state, cardIndex);
-
     cleanupOldCycles(state);
     saveState(state);
-
-    // 调试弹窗显示更新后的类别消费
-    const updatedSpend = state.cards[cardIndex].categorySpend[cat] || 0;
-    alert('✅ 已记录 RM ' + amount + ' 到 ' + cat + '。\n' + cat + ' 总消费：RM ' + updatedSpend.toFixed(2));
-
     render();
   }
 
@@ -767,17 +758,37 @@
       }).join('');
     }
 
+    // 非RHB卡：消费金额进度（目标 = cap / rate）
     const cap = cardDef.cap || 999;
-    const used = cardState.cashback;
-    const pct = getProgressPct(used, cap);
+    // 获取当前类别的 rate，对于固定类别卡，取第一个 rate
+    let rate = 0;
+    if (cardDef.fixedCategory) {
+      rate = cardDef.rates[cardDef.fixedCategory] || 0;
+    } else {
+      // 多类别卡（如 Affin），所有 rate 相同，取第一个
+      const firstCat = cardDef.cats[0];
+      rate = cardDef.rates[firstCat] || 0;
+    }
+    const target = rate > 0 ? cap / rate : 999;
+
+    // 计算已用消费：对于固定类别卡，取该类别 spend；对于多类别卡，取总 spend（因为共享 cap）
+    let spent = 0;
+    if (cardDef.fixedCategory) {
+      spent = cardState.categorySpend[cardDef.fixedCategory] || 0;
+    } else {
+      // 多类别卡（Affin）使用总消费
+      spent = cardState.totalSpend || 0;
+    }
+
+    const pct = getProgressPct(spent, target);
     const colorClass = FILL_COLORS[0];
-    const remaining = Math.max(0, cap - used);
+    const remaining = Math.max(0, target - spent);
     const catName = cardDef.fixedCategory || 'Cashback';
     return `
       <div class="cat-progress">
         <div class="cat-label-row">
           <span class="cat-label-name">${catName}</span>
-          <span class="cat-label-value">RM ${used.toFixed(2)} / ${cap} · ${remaining.toFixed(2)} left</span>
+          <span class="cat-label-value">RM ${spent.toFixed(2)} / ${target.toFixed(0)} · ${remaining.toFixed(2)} left</span>
         </div>
         <div class="cat-track">
           <div class="cat-fill ${colorClass}" style="width:${pct}%"></div>
@@ -786,18 +797,11 @@
     `;
   }
 
-  // ===== saveTx 保留调试弹窗，但已改为不重复 alert（由 addTransaction 弹窗） =====
   function saveTx(i, cat) {
     const amtIn = document.getElementById('amt-' + i);
-    if (!amtIn) {
-      alert('输入框未找到');
-      return;
-    }
+    if (!amtIn) return;
     const amt = parseFloat(amtIn.value);
-    if (!amt || amt <= 0) {
-      alert('请输入有效金额');
-      return;
-    }
+    if (!amt || amt <= 0) return;
     addTransaction(i, amt, cat, '');
     amtIn.value = '';
   }
