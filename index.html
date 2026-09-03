@@ -182,7 +182,16 @@
     letter-spacing: 0.02em;
   }
   .cat-btn:active { background: var(--btn-active); transform: scale(0.98); }
-  .cat-btn.maxed { opacity: 0.25; pointer-events: none; }
+  /* 已满返现的按钮：红色背景，但不阻止点击 */
+  .cat-btn.maxed {
+    background: #7f1d1d;
+    border-color: #dc2626;
+    color: #ffffff;
+    /* 保留 pointer-events: auto，可以点击 */
+  }
+  .cat-btn.maxed:active {
+    background: #991b1b;
+  }
 
   .card-tx-section {
     margin-top: 12px;
@@ -406,7 +415,6 @@
         Utilities: [0.002, 0.01, 0.02, 0.05],
         "E-Wallet": [0.002, 0.01, 0.02, 0.05]
       },
-      // 修改：E-Wallet 进度目标改为 3000
       progressTargets: {
         Petrol: 250,
         Utilities: 250,
@@ -773,12 +781,14 @@
     `;
   }
 
+  // 判断某个类别是否已满返现（用于按钮红色提醒）
   function isCatMaxed(cardState, cardDef, cat) {
     if (cardDef.name.includes("RHB")) {
       const cap = cardDef.caps[cat] || 999;
       const used = cardState.categoryCashback?.[cat] || 0;
       return used >= cap;
     }
+    // 非RHB卡，单卡总返现上限
     return cardState.cashback >= (cardDef.cap || 999);
   }
 
