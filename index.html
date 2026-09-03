@@ -405,7 +405,7 @@
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<div class="version-info">Version 2.4 — 2026-09-03 (non-RHB progress fixed)</div>
+<div class="version-info">Version 2.5 — 2026-09-03 (fix empty cards)</div>
 
 <script>
 (function() {
@@ -524,7 +524,8 @@
       try { state = JSON.parse(raw); } catch(e) { state = null; }
     }
 
-    if (!state || !state.cards || state.version !== 7) {
+    // 强制重建条件：无数据、版本不对、或 cards 不是数组或长度为0
+    if (!state || !state.cards || !Array.isArray(state.cards) || state.cards.length === 0 || state.version !== 7) {
       const cards = CARDS_DEF.map(c => ({
         ...c,
         totalSpend: 0,
@@ -536,21 +537,10 @@
       }));
       state = { version: 7, cards, transactions: [] };
 
+      // 如果有旧数据但 cards 为空，尝试保留交易记录（但通常不会）
       if (raw) {
         try {
           const old = JSON.parse(raw);
-          if (old.cards && Array.isArray(old.cards)) {
-            old.cards.forEach((oc, i) => {
-              if (state.cards[i]) {
-                state.cards[i].totalSpend = typeof oc.totalSpend === 'number' ? oc.totalSpend : 0;
-                state.cards[i].cashback = typeof oc.cashback === 'number' ? oc.cashback : 0;
-                state.cards[i].categoryCashback = oc.categoryCashback || {};
-                state.cards[i].categorySpend = oc.categorySpend || {};
-                if (oc.lastCycleStart) state.cards[i].lastCycleStart = oc.lastCycleStart;
-                if (oc.autoDebitCycle) state.cards[i].autoDebitCycle = oc.autoDebitCycle;
-              }
-            });
-          }
           if (old.transactions && Array.isArray(old.transactions)) {
             state.transactions = old.transactions;
           }
@@ -760,23 +750,19 @@
 
     // 非RHB卡：消费金额进度（目标 = cap / rate）
     const cap = cardDef.cap || 999;
-    // 获取当前类别的 rate，对于固定类别卡，取第一个 rate
     let rate = 0;
     if (cardDef.fixedCategory) {
       rate = cardDef.rates[cardDef.fixedCategory] || 0;
     } else {
-      // 多类别卡（如 Affin），所有 rate 相同，取第一个
       const firstCat = cardDef.cats[0];
       rate = cardDef.rates[firstCat] || 0;
     }
     const target = rate > 0 ? cap / rate : 999;
 
-    // 计算已用消费：对于固定类别卡，取该类别 spend；对于多类别卡，取总 spend（因为共享 cap）
     let spent = 0;
     if (cardDef.fixedCategory) {
       spent = cardState.categorySpend[cardDef.fixedCategory] || 0;
     } else {
-      // 多类别卡（Affin）使用总消费
       spent = cardState.totalSpend || 0;
     }
 
