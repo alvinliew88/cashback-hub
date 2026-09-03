@@ -182,7 +182,6 @@
     letter-spacing: 0.02em;
   }
   .cat-btn:active { background: var(--btn-active); transform: scale(0.98); }
-  /* 返现已达上限：红色按钮，但依然可点击 */
   .cat-btn.maxed {
     background: #7f1d1d;
     border-color: #dc2626;
@@ -384,6 +383,17 @@
     font-weight: 600;
   }
   ::-webkit-scrollbar { width: 0; height: 0; }
+
+  /* 版本号样式 */
+  .version-info {
+    text-align: center;
+    color: #333;
+    font-size: 11px;
+    margin-top: 20px;
+    padding: 10px;
+    border-top: 1px solid #1a1a1a;
+    font-family: monospace;
+  }
 </style>
 </head>
 <body>
@@ -396,12 +406,15 @@
   <div class="history-meta" id="history-meta"></div>
 </div>
 
+<!-- 版本号 -->
+<div class="version-info">Version 2.1 — 2026-09-03</div>
+
 <script>
 (function() {
   'use strict';
 
   // ============================================================
-  // 1. 卡片定义 —— 正确配置 RHB 的类别和进度目标
+  // 1. 卡片定义
   // ============================================================
   const CARDS_DEF = [
     {
@@ -628,7 +641,6 @@
     return 0;
   }
 
-  // 重新计算某张卡的所有数据（基于当前周期交易）
   function recalcCard(state, cardIndex) {
     const def = CARDS_DEF[cardIndex];
     const cardState = state.cards[cardIndex];
@@ -668,7 +680,6 @@
     });
   }
 
-  // 新增交易
   function addTransaction(cardIndex, amount, cat, note) {
     const state = loadState();
     checkAndReset(state);
@@ -757,7 +768,6 @@
     return Math.min(100, Math.max(0, (used / target) * 100));
   }
 
-  // 判断某类别返现是否已满（用于红色按钮标记）
   function isCatMaxed(cardState, cardDef, cat) {
     if (cardDef.name.includes("RHB")) {
       const cap = cardDef.caps[cat] || 999;
@@ -789,7 +799,6 @@
       }).join('');
     }
 
-    // 非RHB卡：返现金额进度
     const cap = cardDef.cap || 999;
     const used = cardState.cashback;
     const pct = getProgressPct(used, cap);
@@ -863,7 +872,6 @@
       const end = getCycleEnd(start);
       const progressHtml = buildProgressHtml(c, def);
 
-      // 上一周期总额
       const allPrevTxs = state.transactions
         .filter(t => t.cardIndex === i && t.cycleStart !== c.lastCycleStart)
         .sort((a, b) => b.cycleStart.localeCompare(a.cycleStart));
@@ -878,7 +886,6 @@
         prevCycleLabel = `(${formatDateDMY(latestPrevCycle)} - ${formatDateDMY(prevEnd)})`;
       }
 
-      // 当前周期交易
       const currentTxs = state.transactions
         .filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart)
         .sort((a, b) => b.timestamp - a.timestamp);
@@ -903,7 +910,6 @@
         ? `<div class="card-tx-section"><div class="card-tx-title">This Cycle (${currentTxs.length})</div>${txRows}</div>`
         : '<div class="card-tx-section card-tx-empty">No transactions this cycle</div>';
 
-      // 生成类别按钮
       let btnHtml;
       if (def.fixedCategory) {
         const maxed = isCatMaxed(c, def, def.fixedCategory) ? 'maxed' : '';
@@ -1054,7 +1060,6 @@
     deleteTransaction: deleteTransaction
   };
 
-  // 启动
   render();
 })();
 </script>
