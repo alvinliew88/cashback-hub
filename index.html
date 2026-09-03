@@ -384,7 +384,6 @@
   }
   ::-webkit-scrollbar { width: 0; height: 0; }
 
-  /* 版本号样式 */
   .version-info {
     text-align: center;
     color: #333;
@@ -406,16 +405,12 @@
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<!-- 版本号 -->
-<div class="version-info">Version 2.1 — 2026-09-03</div>
+<div class="version-info">Version 2.2 — 2026-09-03 (debug)</div>
 
 <script>
 (function() {
   'use strict';
 
-  // ============================================================
-  // 1. 卡片定义
-  // ============================================================
   const CARDS_DEF = [
     {
       name: "RHB Shell 2498",
@@ -490,9 +485,6 @@
   const MAX_CYCLES = 3;
   const FILL_COLORS = ['fill-cyan', 'fill-lime', 'fill-violet', 'fill-coral', 'fill-amber'];
 
-  // ============================================================
-  // 2. 工具函数
-  // ============================================================
   function formatDateDMY(d) {
     const date = new Date(d + 'T00:00:00');
     return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
@@ -525,9 +517,6 @@
     return 0;
   }
 
-  // ============================================================
-  // 3. 数据持久化
-  // ============================================================
   function loadState() {
     const raw = localStorage.getItem('finoryData');
     let state;
@@ -576,9 +565,6 @@
     localStorage.setItem('finoryData', JSON.stringify(state));
   }
 
-  // ============================================================
-  // 4. 核心业务逻辑
-  // ============================================================
   function checkAndReset(state) {
     state.cards.forEach(c => {
       const currentStart = getCycleStart(c.resetDay);
@@ -760,9 +746,6 @@
     });
   }
 
-  // ============================================================
-  // 5. UI 渲染
-  // ============================================================
   function getProgressPct(used, target) {
     if (target <= 0) return 0;
     return Math.min(100, Math.max(0, (used / target) * 100));
@@ -818,11 +801,21 @@
     `;
   }
 
+  // ============ 关键修改：saveTx 加入调试弹窗 ============
   function saveTx(i, cat) {
+    // 调试弹窗，确认点击事件触发
+    alert('点击了卡片 ' + i + ' 的 ' + cat + ' 按钮');
+
     const amtIn = document.getElementById('amt-' + i);
-    if (!amtIn) return;
+    if (!amtIn) {
+      alert('输入框未找到');
+      return;
+    }
     const amt = parseFloat(amtIn.value);
-    if (!amt || amt <= 0) return;
+    if (!amt || amt <= 0) {
+      alert('请输入有效金额');
+      return;
+    }
     addTransaction(i, amt, cat, '');
     amtIn.value = '';
   }
@@ -1050,9 +1043,7 @@
     renderHistory();
   }
 
-  // ============================================================
-  // 6. 暴露全局接口
-  // ============================================================
+  // ============ 暴露全局接口 ============
   window._app = {
     saveTx: saveTx,
     toggleCard: toggleCard,
