@@ -182,12 +182,11 @@
     letter-spacing: 0.02em;
   }
   .cat-btn:active { background: var(--btn-active); transform: scale(0.98); }
-  /* 已满返现的按钮：红色背景，但不阻止点击 */
+  /* 返现已达上限：红色按钮，但依然可点击 */
   .cat-btn.maxed {
     background: #7f1d1d;
     border-color: #dc2626;
     color: #ffffff;
-    /* 保留 pointer-events: auto，可以点击 */
   }
   .cat-btn.maxed:active {
     background: #991b1b;
@@ -401,25 +400,27 @@
 (function() {
   'use strict';
 
+  // ============================================================
+  // 1. 卡片定义 —— 正确配置 RHB 的类别和进度目标
+  // ============================================================
   const CARDS_DEF = [
     {
       name: "RHB Shell 2498",
       barClass: "bar-rhb",
       borderClass: "rhb-border",
       resetDay: 13,
-      // 类别改为 Petrol, Utilities, Online
       cats: ["Petrol", "Utilities", "Online"],
-      caps: { Petrol: 30, Utilities: 10, "Online": 10 },
-      minSpend: { Petrol: 0, Utilities: 250, "Online": 500 },
+      caps: { Petrol: 30, Utilities: 10, Online: 10 },
+      minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
       rates: {
         Petrol:    [0.01, 0.03, 0.05, 0.12],
         Utilities: [0.002, 0.01, 0.02, 0.05],
-        "Online":   [0.002, 0.01, 0.02, 0.05]
+        Online:    [0.002, 0.01, 0.02, 0.05]
       },
       progressTargets: {
         Petrol: 250,
         Utilities: 250,
-        "Online": 3000
+        Online: 3000
       }
     },
     {
@@ -428,17 +429,17 @@
       borderClass: "rhb-border",
       resetDay: 23,
       cats: ["Petrol", "Utilities", "Online"],
-      caps: { Petrol: 30, Utilities: 10, "Online": 10 },
-      minSpend: { Petrol: 0, Utilities: 250, "Online": 500 },
+      caps: { Petrol: 30, Utilities: 10, Online: 10 },
+      minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
       rates: {
         Petrol:    [0.01, 0.03, 0.05, 0.12],
         Utilities: [0.002, 0.01, 0.02, 0.05],
-        "Online":   [0.002, 0.01, 0.02, 0.05]
+        Online:    [0.002, 0.01, 0.02, 0.05]
       },
       progressTargets: {
         Petrol: 250,
         Utilities: 250,
-        "Online": 3000
+        Online: 3000
       }
     },
     {
@@ -476,6 +477,9 @@
   const MAX_CYCLES = 3;
   const FILL_COLORS = ['fill-cyan', 'fill-lime', 'fill-violet', 'fill-coral', 'fill-amber'];
 
+  // ============================================================
+  // 2. 工具函数
+  // ============================================================
   function formatDateDMY(d) {
     const date = new Date(d + 'T00:00:00');
     return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
@@ -508,6 +512,9 @@
     return 0;
   }
 
+  // ============================================================
+  // 3. 数据持久化
+  // ============================================================
   function loadState() {
     const raw = localStorage.getItem('finoryData');
     let state;
@@ -556,6 +563,9 @@
     localStorage.setItem('finoryData', JSON.stringify(state));
   }
 
+  // ============================================================
+  // 4. 核心业务逻辑
+  // ============================================================
   function checkAndReset(state) {
     state.cards.forEach(c => {
       const currentStart = getCycleStart(c.resetDay);
@@ -618,6 +628,7 @@
     return 0;
   }
 
+  // 重新计算某张卡的所有数据（基于当前周期交易）
   function recalcCard(state, cardIndex) {
     const def = CARDS_DEF[cardIndex];
     const cardState = state.cards[cardIndex];
@@ -633,6 +644,7 @@
     txs.forEach(tx => {
       const rate = getRate(def, cardState, tx.category, tx.amount);
       let earned = 0;
+
       if (def.name.includes("RHB")) {
         const cap = def.caps[tx.category] || 999;
         const currentCatCb = cardState.categoryCashback?.[tx.category] || 0;
@@ -641,7 +653,7 @@
         if (earned > remaining) earned = remaining;
         if (earned < 0) earned = 0;
         cardState.cashback += earned;
-        cardState.categoryCashback[tx.category] = currentCatCb + earned;
+        cardState.categoryCashback[tx.category] = (cardState.categoryCashback[tx.category] || 0) + earned;
         cardState.categorySpend[tx.category] = (cardState.categorySpend[tx.category] || 0) + tx.amount;
       } else {
         earned = tx.amount * rate;
@@ -656,6 +668,7 @@
     });
   }
 
+  // 新增交易
   function addTransaction(cardIndex, amount, cat, note) {
     const state = loadState();
     checkAndReset(state);
@@ -673,7 +686,7 @@
       if (earned > remaining) earned = remaining;
       if (earned < 0) earned = 0;
       cardState.cashback += earned;
-      cardState.categoryCashback[cat] = currentCatCb + earned;
+      cardState.categoryCashback[cat] = (cardState.categoryCashback[cat] || 0) + earned;
       cardState.categorySpend[cat] = (cardState.categorySpend[cat] || 0) + amount;
     } else {
       earned = amount * rate;
@@ -690,9 +703,9 @@
     const now = new Date();
     const tx = {
       id: now.getTime() + '-' + Math.random().toString(36).slice(2, 7),
-      cardIndex,
+      cardIndex: cardIndex,
       cardName: cardDef.name,
-      amount,
+      amount: amount,
       category: cat,
       note: note || '',
       date: getTodayStr(),
@@ -736,9 +749,22 @@
     });
   }
 
+  // ============================================================
+  // 5. UI 渲染
+  // ============================================================
   function getProgressPct(used, target) {
     if (target <= 0) return 0;
     return Math.min(100, Math.max(0, (used / target) * 100));
+  }
+
+  // 判断某类别返现是否已满（用于红色按钮标记）
+  function isCatMaxed(cardState, cardDef, cat) {
+    if (cardDef.name.includes("RHB")) {
+      const cap = cardDef.caps[cat] || 999;
+      const used = cardState.categoryCashback?.[cat] || 0;
+      return used >= cap;
+    }
+    return cardState.cashback >= (cardDef.cap || 999);
   }
 
   function buildProgressHtml(cardState, cardDef) {
@@ -763,6 +789,7 @@
       }).join('');
     }
 
+    // 非RHB卡：返现金额进度
     const cap = cardDef.cap || 999;
     const used = cardState.cashback;
     const pct = getProgressPct(used, cap);
@@ -782,19 +809,9 @@
     `;
   }
 
-  // 判断某个类别是否已满返现（用于按钮红色提醒）
-  function isCatMaxed(cardState, cardDef, cat) {
-    if (cardDef.name.includes("RHB")) {
-      const cap = cardDef.caps[cat] || 999;
-      const used = cardState.categoryCashback?.[cat] || 0;
-      return used >= cap;
-    }
-    // 非RHB卡，单卡总返现上限
-    return cardState.cashback >= (cardDef.cap || 999);
-  }
-
   function saveTx(i, cat) {
     const amtIn = document.getElementById('amt-' + i);
+    if (!amtIn) return;
     const amt = parseFloat(amtIn.value);
     if (!amt || amt <= 0) return;
     addTransaction(i, amt, cat, '');
@@ -804,6 +821,7 @@
   function toggleCard(i) {
     const detail = document.getElementById('card-detail-' + i);
     const arrow = document.getElementById('card-arrow-' + i);
+    if (!detail) return;
     const isOpen = detail.classList.contains('open');
     if (isOpen) {
       detail.classList.remove('open');
@@ -814,6 +832,22 @@
     }
   }
 
+  function toggleCycle(header) {
+    const body = header.nextElementSibling;
+    const arrow = header.querySelector('.cycle-arrow');
+    if (!body) return;
+    const isOpen = body.classList.contains('open');
+    if (isOpen) {
+      body.classList.remove('open');
+      if (arrow) arrow.classList.remove('open');
+      header.classList.remove('active');
+    } else {
+      body.classList.add('open');
+      if (arrow) arrow.classList.add('open');
+      header.classList.add('active');
+    }
+  }
+
   function renderCards() {
     const state = loadState();
     checkAndReset(state);
@@ -821,12 +855,15 @@
     saveState(state);
 
     const container = document.getElementById('card-container');
+    if (!container) return;
+
     container.innerHTML = state.cards.map((c, i) => {
       const def = CARDS_DEF[i];
       const start = c.lastCycleStart;
       const end = getCycleEnd(start);
       const progressHtml = buildProgressHtml(c, def);
 
+      // 上一周期总额
       const allPrevTxs = state.transactions
         .filter(t => t.cardIndex === i && t.cycleStart !== c.lastCycleStart)
         .sort((a, b) => b.cycleStart.localeCompare(a.cycleStart));
@@ -841,6 +878,7 @@
         prevCycleLabel = `(${formatDateDMY(latestPrevCycle)} - ${formatDateDMY(prevEnd)})`;
       }
 
+      // 当前周期交易
       const currentTxs = state.transactions
         .filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart)
         .sort((a, b) => b.timestamp - a.timestamp);
@@ -865,6 +903,7 @@
         ? `<div class="card-tx-section"><div class="card-tx-title">This Cycle (${currentTxs.length})</div>${txRows}</div>`
         : '<div class="card-tx-section card-tx-empty">No transactions this cycle</div>';
 
+      // 生成类别按钮
       let btnHtml;
       if (def.fixedCategory) {
         const maxed = isCatMaxed(c, def, def.fixedCategory) ? 'maxed' : '';
@@ -921,6 +960,7 @@
     const state = loadState();
     const container = document.getElementById('history-container');
     const meta = document.getElementById('history-meta');
+    if (!container || !meta) return;
 
     const currentCycleStarts = state.cards.map(c => c.lastCycleStart);
     const pastTransactions = state.transactions.filter(tx => tx.cycleStart !== currentCycleStarts[tx.cardIndex]);
@@ -999,33 +1039,22 @@
     meta.textContent = `Past cycles kept for 90 days • ${cycleCounts.join(' · ')}`;
   }
 
-  function toggleCycle(header) {
-    const body = header.nextElementSibling;
-    const arrow = header.querySelector('.cycle-arrow');
-    const isOpen = body.classList.contains('open');
-    if (isOpen) {
-      body.classList.remove('open');
-      arrow.classList.remove('open');
-      header.classList.remove('active');
-    } else {
-      body.classList.add('open');
-      arrow.classList.add('open');
-      header.classList.add('active');
-    }
-  }
-
   function render() {
     renderCards();
     renderHistory();
   }
 
+  // ============================================================
+  // 6. 暴露全局接口
+  // ============================================================
   window._app = {
-    saveTx,
-    toggleCard,
-    toggleCycle,
-    deleteTransaction
+    saveTx: saveTx,
+    toggleCard: toggleCard,
+    toggleCycle: toggleCycle,
+    deleteTransaction: deleteTransaction
   };
 
+  // 启动
   render();
 })();
 </script>
