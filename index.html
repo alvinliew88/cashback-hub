@@ -228,6 +228,33 @@
     font-weight: 900;
     color: #7dd3fc;
   }
+  /* 新增：上一期账单总额样式（亮黄色） */
+  .prev-stmt-total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0 6px 0;
+    margin-top: 10px;
+    border-top: 1px solid #2a2a2a;
+  }
+  .prev-stmt-total-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #facc15;
+    letter-spacing: 0.04em;
+  }
+  .prev-stmt-total-value {
+    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
+    font-size: 16px;
+    font-weight: 900;
+    color: #facc15;
+  }
+  .prev-stmt-cycle {
+    font-size: 10px;
+    color: #777;
+    font-weight: 600;
+    margin-left: 6px;
+  }
 
   .history-section { margin-top: 28px; }
   .history-title {
@@ -371,13 +398,14 @@
       barClass: "bar-rhb",
       borderClass: "rhb-border",
       resetDay: 13,
-      cats: ["Petrol", "Grocery", "E-Wallet"],
-      caps: { Petrol: 30, Grocery: 10, "E-Wallet": 10 },
-      minSpend: { Petrol: 0, Grocery: 250, "E-Wallet": 500 },
+      cats: ["Petrol", "Grocery", "E-Wallet", "Utilities"],
+      caps: { Petrol: 30, Grocery: 10, "E-Wallet": 10, "Utilities": 10 },
+      minSpend: { Petrol: 0, Grocery: 250, "E-Wallet": 500, "Utilities": 250 },
       rates: {
         Petrol:    [0.01, 0.03, 0.05, 0.12],
         Grocery:   [0.002, 0.01, 0.02, 0.05],
-        "E-Wallet": [0.002, 0.01, 0.02, 0.05]
+        "E-Wallet": [0.002, 0.01, 0.02, 0.05],
+        "Utilities": [0.002, 0.01, 0.02, 0.05]
       }
     },
     {
@@ -385,13 +413,14 @@
       barClass: "bar-rhb",
       borderClass: "rhb-border",
       resetDay: 23,
-      cats: ["Petrol", "Grocery", "E-Wallet"],
-      caps: { Petrol: 30, Grocery: 10, "E-Wallet": 10 },
-      minSpend: { Petrol: 0, Grocery: 250, "E-Wallet": 500 },
+      cats: ["Petrol", "Grocery", "E-Wallet", "Utilities"],
+      caps: { Petrol: 30, Grocery: 10, "E-Wallet": 10, "Utilities": 10 },
+      minSpend: { Petrol: 0, Grocery: 250, "E-Wallet": 500, "Utilities": 250 },
       rates: {
         Petrol:    [0.01, 0.03, 0.05, 0.12],
         Grocery:   [0.002, 0.01, 0.02, 0.05],
-        "E-Wallet": [0.002, 0.01, 0.02, 0.05]
+        "E-Wallet": [0.002, 0.01, 0.02, 0.05],
+        "Utilities": [0.002, 0.01, 0.02, 0.05]
       }
     },
     {
@@ -768,6 +797,22 @@
       const end = getCycleEnd(start);
       const progressHtml = buildProgressHtml(c, def);
 
+      // ---- 获取上一周期总额（用于对账） ----
+      const allPrevTxs = state.transactions
+        .filter(t => t.cardIndex === i && t.cycleStart !== c.lastCycleStart)
+        .sort((a, b) => b.cycleStart.localeCompare(a.cycleStart));
+
+      let prevTotal = 0;
+      let prevCycleLabel = '';
+      if (allPrevTxs.length > 0) {
+        const latestPrevCycle = allPrevTxs[0].cycleStart;
+        const filteredPrev = allPrevTxs.filter(t => t.cycleStart === latestPrevCycle);
+        prevTotal = filteredPrev.reduce((sum, t) => sum + t.amount, 0);
+        const prevEnd = getCycleEnd(latestPrevCycle);
+        prevCycleLabel = `(${formatDateDMY(latestPrevCycle)} - ${formatDateDMY(prevEnd)})`;
+      }
+
+      // ---- 当前周期交易 ----
       const currentTxs = state.transactions
         .filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart)
         .sort((a, b) => b.timestamp - a.timestamp);
@@ -803,6 +848,14 @@
         }).join('')}</div>`;
       }
 
+      // 构建上一周期对账行（放在按钮和交易历史下方）
+      const prevRowHtml = prevTotal > 0 ? `
+        <div class="prev-stmt-total-row">
+          <span class="prev-stmt-total-label">📄 上期账单总额 (已结算) <span class="prev-stmt-cycle">${prevCycleLabel}</span></span>
+          <span class="prev-stmt-total-value">RM ${prevTotal.toFixed(2)}</span>
+        </div>
+      ` : '';
+
       return `
         <div class="card">
           <div class="card-bar ${def.barClass}"></div>
@@ -818,16 +871,19 @@
             <div class="card-arrow" id="card-arrow-${i}">▼</div>
           </div>
           <div class="card-detail" id="card-detail-${i}">
-            <div class="cat-progress-list">${progressHtml}</div>
-
             <div class="stmt-total-row">
-              <span class="stmt-total-label">Statement Total</span>
+              <span class="stmt-total-label">本周期消费总额 (当前)</span>
               <span class="stmt-total-value">RM ${c.totalSpend.toFixed(2)}</span>
             </div>
+
+            <div class="cat-progress-list">${progressHtml}</div>
 
             <input type="number" id="amt-${i}" class="amt-input" placeholder="0.00" step="0.01">
             ${btnHtml}
             ${txSection}
+
+            <!-- 上一期账单总额：放在输入框、按钮、交易历史的下方 -->
+            ${prevRowHtml}
           </div>
         </div>
       `;
