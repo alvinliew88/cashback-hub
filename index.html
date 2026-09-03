@@ -403,7 +403,7 @@
   <div id="history-container"></div>
   <div class="history-meta" id="history-meta"></div>
 </div>
-<div class="version-info">Version 3.2 — 2026-09-04 (Debug + Fix)</div>
+<div class="version-info">Version 3.3 — 2026-09-04 (Fixed Ikhwan & Maybank)</div>
 
 <script>
 // ============================================================
@@ -460,7 +460,9 @@ const CARDS_DEF = [
     cap: 50,
     fixedCategory: "Online (8%)",
     cats: ["Online (8%)"],
-    rates: { "Online (8%)": 0.08 }
+    rates: { "Online (8%)": 0.08 },
+    // 新增：进度目标用于固定类别卡片
+    progressTargets: { "Online (8%)": 625 }
   },
   {
     name: "Maybank 2 Gold 8943",
@@ -470,7 +472,8 @@ const CARDS_DEF = [
     cap: 50,
     fixedCategory: "Weekend (5%)",
     cats: ["Weekend (5%)"],
-    rates: { "Weekend (5%)": 0.05 }
+    rates: { "Weekend (5%)": 0.05 },
+    progressTargets: { "Weekend (5%)": 1000 }
   }
 ];
 
@@ -530,7 +533,7 @@ function getDefaultState() {
     lastCycleStart: getCycleStart(c.resetDay),
     autoDebitCycle: null
   }));
-  return { version: 9, cards, transactions: [] };
+  return { version: 10, cards, transactions: [] };
 }
 
 function loadState() {
@@ -539,11 +542,11 @@ function loadState() {
   if (raw) {
     try { state = JSON.parse(raw); } catch(e) { state = null; }
   }
-  if (!state || state.version !== 9) {
+  if (!state || state.version !== 10) {
     state = getDefaultState();
     saveState(state);
   }
-  // 确保每个卡片都有 categorySpend
+  // 确保每个卡片都有 categorySpend 和 categoryCashback
   state.cards.forEach((c, i) => {
     if (!c.categorySpend) c.categorySpend = {};
     if (!c.categoryCashback) c.categoryCashback = {};
@@ -675,6 +678,7 @@ function addTransaction(cardIndex, amount, cat, note) {
     cardState.cashback += earned;
   }
   cardState.totalSpend += amount;
+  // 关键：更新 categorySpend
   cardState.categorySpend[cat] = (cardState.categorySpend[cat] || 0) + amount;
 
   const tx = {
@@ -692,7 +696,6 @@ function addTransaction(cardIndex, amount, cat, note) {
 
   cleanupOldCycles(state);
   saveState(state);
-  // 重新渲染
   renderAll();
   showToast('✅ 已添加 RM ' + amount.toFixed(2) + ' 到 ' + cat);
 }
@@ -737,8 +740,11 @@ function isCatMaxed(cardState, cardDef, cat) {
 
 // ---------- 渲染 ----------
 function buildProgressHtml(cardState, cardDef) {
-  if (cardDef.name.includes("RHB")) {
-    return cardDef.cats.map((cat, idx) => {
+  // 针对所有卡片统一处理：如果有 progressTargets 则使用消费金额进度，否则使用返现金额进度
+  if (cardDef.progressTargets) {
+    // 对于固定类别卡片（Ikhwan, Maybank），使用其 fixedCategory 作为 key
+    const cats = cardDef.fixedCategory ? [cardDef.fixedCategory] : cardDef.cats;
+    return cats.map((cat, idx) => {
       const target = cardDef.progressTargets?.[cat] || 100;
       const spent = cardState.categorySpend?.[cat] || 0;
       const pct = getProgressPct(spent, target);
@@ -757,6 +763,8 @@ function buildProgressHtml(cardState, cardDef) {
       `;
     }).join('');
   }
+
+  // 回退：返现金额进度（适用于没有 progressTargets 的卡片）
   const cap = cardDef.cap || 999;
   const used = cardState.cashback;
   const pct = getProgressPct(used, cap);
