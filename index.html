@@ -403,7 +403,7 @@
   <div id="history-container"></div>
   <div class="history-meta" id="history-meta"></div>
 </div>
-<div class="version-info">Version 3.3 — 2026-09-04 (Fixed Ikhwan & Maybank)</div>
+<div class="version-info">Version 3.4 — 2026-09-04 (Dynamic Tier & Correct Cap)</div>
 
 <script>
 // ============================================================
@@ -421,11 +421,10 @@ const CARDS_DEF = [
     caps: { Petrol: 30, Utilities: 10, Online: 10 },
     minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
     rates: {
-      Petrol: [0.01, 0.03, 0.05, 0.12],
+      Petrol:    [0.01, 0.03, 0.05, 0.12],   // tier 0,1,2,3
       Utilities: [0.002, 0.01, 0.02, 0.05],
-      Online: [0.002, 0.01, 0.02, 0.05]
-    },
-    progressTargets: { Petrol: 250, Utilities: 250, Online: 3000 }
+      Online:    [0.002, 0.01, 0.02, 0.05]
+    }
   },
   {
     name: "RHB Shell 8652",
@@ -436,11 +435,10 @@ const CARDS_DEF = [
     caps: { Petrol: 30, Utilities: 10, Online: 10 },
     minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
     rates: {
-      Petrol: [0.01, 0.03, 0.05, 0.12],
+      Petrol:    [0.01, 0.03, 0.05, 0.12],
       Utilities: [0.002, 0.01, 0.02, 0.05],
-      Online: [0.002, 0.01, 0.02, 0.05]
-    },
-    progressTargets: { Petrol: 250, Utilities: 250, Online: 3000 }
+      Online:    [0.002, 0.01, 0.02, 0.05]
+    }
   },
   {
     name: "Affin Duo Visa 3322",
@@ -461,8 +459,7 @@ const CARDS_DEF = [
     fixedCategory: "Online (8%)",
     cats: ["Online (8%)"],
     rates: { "Online (8%)": 0.08 },
-    // 新增：进度目标用于固定类别卡片
-    progressTargets: { "Online (8%)": 625 }
+    progressTargets: { "Online (8%)": 625 }   // 固定目标
   },
   {
     name: "Maybank 2 Gold 8943",
@@ -512,6 +509,7 @@ function getProgressPct(used, target) {
   if (target <= 0) return 0;
   return Math.min(100, Math.max(0, (used / target) * 100));
 }
+function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
 
 // ---------- Toast 提示 ----------
 function showToast(msg, isError) {
@@ -533,7 +531,7 @@ function getDefaultState() {
     lastCycleStart: getCycleStart(c.resetDay),
     autoDebitCycle: null
   }));
-  return { version: 10, cards, transactions: [] };
+  return { version: 11, cards, transactions: [] };
 }
 
 function loadState() {
@@ -542,11 +540,10 @@ function loadState() {
   if (raw) {
     try { state = JSON.parse(raw); } catch(e) { state = null; }
   }
-  if (!state || state.version !== 10) {
+  if (!state || state.version !== 11) {
     state = getDefaultState();
     saveState(state);
   }
-  // 确保每个卡片都有 categorySpend 和 categoryCashback
   state.cards.forEach((c, i) => {
     if (!c.categorySpend) c.categorySpend = {};
     if (!c.categoryCashback) c.categoryCashback = {};
@@ -605,13 +602,43 @@ function applyAutoDebits(state) {
   if (changed) saveState(state);
 }
 
+// 获取某个类别在给定tier下的返现率
+function getRateForCategory(cardDef, cat, tier) {
+  if (cardDef.name.includes("RHB")) {
+    const ratesArr = cardDef.rates[cat];
+    if (ratesArr && ratesArr.length > tier) return ratesArr[tier];
+    return 0;
+  }
+  // 非RHB固定卡
+  return cardDef.rates?.[cat] || 0;
+}
+
+// 计算某个类别的进度目标（动态基于当前总消费）
+function computeCategoryTarget(cardDef, cardState, cat) {
+  if (!cardDef.name.includes("RHB")) return null; // 非RHB不适用动态目标
+  const tier = getRateTier(cardState.totalSpend);
+  const rate = getRateForCategory(cardDef, cat, tier);
+  if (rate === 0) return Infinity;
+  const cap = cardDef.caps[cat] || 0;
+  const minSpend = cardDef.minSpend[cat] || 0;
+  // 理论目标 = cap / rate，但必须至少达到 minSpend
+  let target = cap / rate;
+  if (target < minSpend) target = minSpend;
+  return target;
+}
+
 function getRate(cardDef, cardState, cat, amount) {
   if (cardDef.name.includes("RHB")) {
     const min = cardDef.minSpend?.[cat] || 0;
-    if (amount < min) return 0;
+    // 注意：这里计算 tier 时，需要用当前总消费 + 本次金额，因为返现率取决于消费后的总消费
     const tier = getRateTier(cardState.totalSpend + amount);
     const rates = cardDef.rates[cat];
-    return rates ? rates[tier] : 0;
+    if (rates && rates.length > tier) {
+      // 如果当前类别消费低于最低消费，返现率为0
+      if (cardState.categorySpend[cat] + amount < min) return 0;
+      return rates[tier];
+    }
+    return 0;
   }
   return cardDef.rates?.[cat] || 0;
 }
@@ -627,6 +654,14 @@ function recalcCard(state, cardIndex) {
   const txs = state.transactions.filter(t => t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart);
   txs.sort((a, b) => a.timestamp - b.timestamp);
 
+  // 先计算总消费
+  let total = 0;
+  txs.forEach(tx => { total += tx.amount; });
+  cardState.totalSpend = total;
+
+  // 重新计算每个交易的返现
+  // 由于返现率取决于总消费，必须按顺序计算（因为总消费是累积的）
+  let tempTotal = 0;
   txs.forEach(tx => {
     const rate = getRate(def, cardState, tx.category, tx.amount);
     let earned = 0;
@@ -640,15 +675,15 @@ function recalcCard(state, cardIndex) {
       cardState.cashback += earned;
       cardState.categoryCashback[tx.category] = (cardState.categoryCashback[tx.category] || 0) + earned;
     } else {
-      earned = tx.amount * rate;
       const cap = def.cap || 999;
       const remaining = cap - cardState.cashback;
+      earned = tx.amount * rate;
       if (earned > remaining) earned = remaining;
       if (earned < 0) earned = 0;
       cardState.cashback += earned;
     }
-    cardState.totalSpend += tx.amount;
     cardState.categorySpend[tx.category] = (cardState.categorySpend[tx.category] || 0) + tx.amount;
+    tempTotal += tx.amount;
   });
 }
 
@@ -658,6 +693,7 @@ function addTransaction(cardIndex, amount, cat, note) {
   const cardState = state.cards[cardIndex];
   const cardDef = CARDS_DEF[cardIndex];
 
+  // 计算本次交易的返现率（基于加入本次交易后的总消费）
   const rate = getRate(cardDef, cardState, cat, amount);
   let earned = 0;
   if (cardDef.name.includes("RHB")) {
@@ -678,7 +714,6 @@ function addTransaction(cardIndex, amount, cat, note) {
     cardState.cashback += earned;
   }
   cardState.totalSpend += amount;
-  // 关键：更新 categorySpend
   cardState.categorySpend[cat] = (cardState.categorySpend[cat] || 0) + amount;
 
   const tx = {
@@ -740,21 +775,59 @@ function isCatMaxed(cardState, cardDef, cat) {
 
 // ---------- 渲染 ----------
 function buildProgressHtml(cardState, cardDef) {
-  // 针对所有卡片统一处理：如果有 progressTargets 则使用消费金额进度，否则使用返现金额进度
+  // 如果是固定目标卡片（Ikhwan, Maybank）
   if (cardDef.progressTargets) {
-    // 对于固定类别卡片（Ikhwan, Maybank），使用其 fixedCategory 作为 key
-    const cats = cardDef.fixedCategory ? [cardDef.fixedCategory] : cardDef.cats;
-    return cats.map((cat, idx) => {
-      const target = cardDef.progressTargets?.[cat] || 100;
+    const cat = cardDef.fixedCategory || cardDef.cats[0];
+    const target = cardDef.progressTargets[cat] || 100;
+    const spent = cardState.categorySpend?.[cat] || 0;
+    const pct = getProgressPct(spent, target);
+    const colorClass = FILL_COLORS[0];
+    const remaining = Math.max(0, target - spent);
+    return `
+      <div class="cat-progress">
+        <div class="cat-label-row">
+          <span class="cat-label-name">${cat}</span>
+          <span class="cat-label-value">RM ${spent.toFixed(2)} / ${target} · ${remaining.toFixed(2)} left</span>
+        </div>
+        <div class="cat-track">
+          <div class="cat-fill ${colorClass}" style="width:${pct}%"></div>
+        </div>
+      </div>
+    `;
+  }
+
+  // RHB 卡片：动态计算目标
+  if (cardDef.name.includes("RHB")) {
+    return cardDef.cats.map((cat, idx) => {
       const spent = cardState.categorySpend?.[cat] || 0;
+      const target = computeCategoryTarget(cardDef, cardState, cat);
+      if (target === Infinity) {
+        // 返现率为0，无法获得返现，显示特别提示
+        return `
+          <div class="cat-progress">
+            <div class="cat-label-row">
+              <span class="cat-label-name">${cat}</span>
+              <span class="cat-label-value" style="color:#888;">返现率 0% (需达到更高总消费)</span>
+            </div>
+            <div class="cat-track" style="background:#333;">
+              <div class="cat-fill" style="width:0%;background:#666;"></div>
+            </div>
+          </div>
+        `;
+      }
       const pct = getProgressPct(spent, target);
       const colorClass = FILL_COLORS[idx % FILL_COLORS.length];
       const remaining = Math.max(0, target - spent);
+      const minSpend = cardDef.minSpend[cat] || 0;
+      let extraInfo = '';
+      if (spent < minSpend) {
+        extraInfo = ` (需达 RM${minSpend} 才获返现)`;
+      }
       return `
         <div class="cat-progress">
           <div class="cat-label-row">
             <span class="cat-label-name">${cat}</span>
-            <span class="cat-label-value">RM ${spent.toFixed(2)} / ${target} · ${remaining.toFixed(2)} left</span>
+            <span class="cat-label-value">RM ${spent.toFixed(2)} / ${target.toFixed(0)} · ${remaining.toFixed(2)} left${extraInfo}</span>
           </div>
           <div class="cat-track">
             <div class="cat-fill ${colorClass}" style="width:${pct}%"></div>
@@ -764,7 +837,7 @@ function buildProgressHtml(cardState, cardDef) {
     }).join('');
   }
 
-  // 回退：返现金额进度（适用于没有 progressTargets 的卡片）
+  // 其他卡片（Affin）使用返现金额进度
   const cap = cardDef.cap || 999;
   const used = cardState.cashback;
   const pct = getProgressPct(used, cap);
