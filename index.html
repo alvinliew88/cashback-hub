@@ -1,1097 +1,380 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Finory</title>
-<style>
-  :root {
-    --bg: #000000;
-    --surface: #0a0a0a;
-    --border: #1a1a1a;
-    --text: #ffffff;
-    --text-secondary: #a0a0a0;
-    --text-muted: #555555;
-    --accent: #3b82f6;
-    --btn-bg: #141414;
-    --btn-active: #222222;
-    --input-bg: #7dd3fc;
-    --input-border: #38bdf8;
-    --input-shadow: rgba(56, 189, 248, 0.4);
-  }
-  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0;
-    background: var(--bg);
-    color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-    font-size: 15px;
-    line-height: 1.4;
-    overscroll-behavior-y: auto;
-    padding: 10px 10px 60px;
-    -webkit-font-smoothing: antialiased;
-  }
-  .card {
-    background: var(--surface);
-    border-radius: 14px;
-    overflow: hidden;
-    margin-bottom: 10px;
-    border: 1px solid var(--border);
-  }
-  .card-bar { height: 4px; width: 100%; }
-  .bar-rhb { background: linear-gradient(90deg, #f97316, #ef4444); }
-  .bar-affin { background: linear-gradient(90deg, #3b82f6, #2563eb); }
-  .bar-ikhwan { background: linear-gradient(90deg, #9ca3af, #4b5563); }
-  .bar-maybank { background: linear-gradient(90deg, #fbbf24, #d97706); }
-  .card-summary {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 14px;
-    position: relative;
-    cursor: pointer;
-    user-select: none;
-  }
-  .card-summary-left { flex: 1; min-width: 0; padding-right: 8px; }
-  .card-summary-right { text-align: right; margin-right: 18px; }
-  .card-arrow {
-    position: absolute;
-    right: 14px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 11px;
-    color: var(--text-muted);
-    transition: transform 0.2s;
-  }
-  .card-arrow.open { transform: translateY(-50%) rotate(180deg); }
-  .card-name { font-weight: 800; font-size: 15px; letter-spacing: -0.3px; color: #fff; line-height: 1.2; }
-  .cycle-info {
-    font-size: 11px;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-top: 4px;
-    font-weight: 600;
-  }
-  .cb-amount {
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, 'Cascadia Mono', monospace;
-    font-size: 22px;
-    font-weight: 900;
-    line-height: 1;
-    color: #fff;
-  }
-  .spend-amount {
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 11px;
-    color: #7dd3fc;
-    margin-top: 3px;
-    font-weight: 700;
-  }
-  .card-detail {
-    display: none;
-    padding: 0 14px 14px;
-    border-top: 1px solid var(--border);
-  }
-  .card-detail.open { display: block; }
-  .cat-progress-list { margin-top: 12px; margin-bottom: 0; }
-  .cat-progress { margin-bottom: 10px; }
-  .cat-progress:last-child { margin-bottom: 0; }
-  .cat-label-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    margin-bottom: 5px;
-  }
-  .cat-label-name { font-size: 14px; font-weight: 700; color: #e5e5e5; }
-  .cat-label-value {
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 600;
-  }
-  .cat-track {
-    width: 100%;
-    height: 8px;
-    background: #111111;
-    border-radius: 4px;
-    overflow: hidden;
-    border: 1px solid #222;
-  }
-  .cat-fill {
-    height: 100%;
-    border-radius: 4px;
-    transition: width 0.3s ease;
-    min-width: 2px;
-  }
-  .fill-cyan   { background: linear-gradient(90deg, #22d3ee, #06b6d4); box-shadow: 0 0 6px rgba(34,211,238,0.25); }
-  .fill-lime   { background: linear-gradient(90deg, #a3e635, #65a30d); box-shadow: 0 0 6px rgba(163,230,53,0.25); }
-  .fill-violet { background: linear-gradient(90deg, #c084fc, #7c3aed); box-shadow: 0 0 6px rgba(192,132,252,0.25); }
-  .fill-coral  { background: linear-gradient(90deg, #fb7185, #e11d48); box-shadow: 0 0 6px rgba(251,113,133,0.25); }
-  .fill-amber  { background: linear-gradient(90deg, #fbbf24, #d97706); box-shadow: 0 0 6px rgba(251,191,36,0.25); }
-  .amt-input {
-    width: 100%;
-    background: var(--input-bg);
-    border: 2px solid var(--input-border);
-    color: #000;
-    border-radius: 12px;
-    padding: 14px;
-    font-size: 20px;
-    outline: none;
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-weight: 900;
-    height: 52px;
-    margin-top: 12px;
-    margin-bottom: 8px;
-    box-shadow: 0 0 12px var(--input-shadow);
-  }
-  .amt-input::placeholder { color: #0369a1; font-weight: 700; }
-  .amt-input:focus {
-    border-color: #fff;
-    box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.5), 0 0 20px rgba(56, 189, 248, 0.6);
-  }
-  .btn-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .cat-btn {
-    width: 100%;
-    background: var(--btn-bg);
-    border: 1px solid var(--border);
-    color: #fff;
-    border-radius: 12px;
-    padding: 12px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-    text-align: center;
-    min-height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    letter-spacing: 0.02em;
-  }
-  .cat-btn:active { background: var(--btn-active); transform: scale(0.98); }
-  .cat-btn.maxed {
-    background: #7f1d1d;
-    border-color: #dc2626;
-    color: #ffffff;
-  }
-  .cat-btn.maxed:active { background: #991b1b; }
-  .card-tx-section {
-    margin-top: 12px;
-    border-top: 1px solid var(--border);
-    padding-top: 10px;
-  }
-  .card-tx-title {
-    font-size: 11px;
-    font-weight: 700;
-    color: var(--text-muted);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    margin-bottom: 6px;
-  }
-  .card-tx-empty {
-    text-align: center;
-    color: #333;
-    font-size: 13px;
-    padding: 8px 0;
-    font-weight: 600;
-  }
-  .card-detail .tx-row { padding: 8px 0; }
-  .card-detail .tx-del { padding: 2px 8px; font-size: 10px; }
-  .stmt-total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 8px;
-  }
-  .stmt-total-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: #7dd3fc;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-  }
-  .stmt-total-value {
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 16px;
-    font-weight: 900;
-    color: #7dd3fc;
-  }
-  .prev-stmt-total-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0 6px 0;
-    margin-top: 10px;
-    border-top: 1px solid #2a2a2a;
-  }
-  .prev-stmt-total-label {
-    font-size: 13px;
-    font-weight: 700;
-    color: #facc15;
-    letter-spacing: 0.04em;
-  }
-  .prev-stmt-total-value {
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 16px;
-    font-weight: 900;
-    color: #facc15;
-  }
-  .prev-stmt-cycle {
-    font-size: 10px;
-    color: #777;
-    font-weight: 600;
-    margin-left: 6px;
-  }
-  .history-section { margin-top: 28px; }
-  .history-title {
-    font-size: 18px;
-    font-weight: 800;
-    margin-bottom: 12px;
-    color: #fff;
-  }
-  .cycle-box {
-    background: var(--surface);
-    border-radius: 14px;
-    margin-bottom: 10px;
-    overflow: hidden;
-    border-left: 4px solid;
-  }
-  .cycle-box.rhb-border { border-left-color: #f97316; }
-  .cycle-box.affin-border { border-left-color: #3b82f6; }
-  .cycle-box.ikhwan-border { border-left-color: #9ca3af; }
-  .cycle-box.maybank-border { border-left-color: #fbbf24; }
-  .cycle-header {
-    padding: 14px;
-    background: #0f0f0f;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-    user-select: none;
-    border-bottom: 1px solid transparent;
-  }
-  .cycle-header.active { border-bottom-color: var(--border); }
-  .cycle-name { font-weight: 800; font-size: 14px; color: #fff; }
-  .cycle-range {
-    font-size: 11px;
-    color: var(--text-muted);
-    font-weight: 600;
-    margin-top: 2px;
-  }
-  .cycle-count {
-    font-size: 11px;
-    color: var(--text-muted);
-    background: #1a1a1a;
-    padding: 3px 8px;
-    border-radius: 10px;
-    font-weight: 700;
-  }
-  .cycle-arrow {
-    font-size: 11px;
-    color: var(--text-muted);
-    margin-left: 6px;
-    transition: transform 0.2s;
-    display: inline-block;
-  }
-  .cycle-arrow.open { transform: rotate(180deg); }
-  .cycle-body { display: none; padding: 12px 14px; }
-  .cycle-body.open { display: block; }
-  .tx-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    padding: 10px 0;
-    border-bottom: 1px solid #1a1a1a;
-    gap: 10px;
-  }
-  .tx-row:last-child { border-bottom: none; }
-  .tx-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
-  .tx-date {
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 11px;
-    color: var(--text-muted);
-  }
-  .tx-cat { font-size: 13px; color: var(--text-secondary); font-weight: 700; }
-  .tx-note {
-    font-size: 11px;
-    color: #444;
-    font-style: italic;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .tx-right {
-    text-align: right;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 3px;
-    white-space: nowrap;
-  }
-  .tx-amt {
-    font-family: 'SF Mono', SFMono-Regular, ui-monospace, Menlo, Monaco, monospace;
-    font-size: 13px;
-    font-weight: 800;
-    color: #fff;
-  }
-  .tx-del {
-    font-size: 11px;
-    color: #666;
-    background: #1a1a1a;
-    border: 1px solid #222;
-    border-radius: 6px;
-    padding: 3px 10px;
-    cursor: pointer;
-    font-weight: 700;
-  }
-  .tx-del:active { background: #222; }
-  .history-meta {
-    text-align: center;
-    color: #333;
-    font-size: 11px;
-    margin-top: 16px;
-    font-weight: 600;
-  }
-  .empty-state {
-    text-align: center;
-    color: #333;
-    font-size: 14px;
-    padding: 24px;
-    font-weight: 600;
-  }
-  ::-webkit-scrollbar { width: 0; height: 0; }
-  .version-info {
-    text-align: center;
-    color: #333;
-    font-size: 11px;
-    margin-top: 20px;
-    font-weight: 600;
-  }
-  #toast {
-    position: fixed;
-    bottom: 80px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e7e34;
-    color: #fff;
-    padding: 8px 20px;
-    border-radius: 20px;
-    font-size: 14px;
-    display: none;
-    z-index: 999;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-  }
-  #toast.error {
-    background: #b91c1c;
-  }
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Home</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100;200;300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://code.iconify.design/iconify-icon/3.0.0/iconify-icon.min.js"></script>
+    <style type="text/tailwindcss">
+      @theme inline {
+        --color-background: var(--background);
+        --color-foreground: var(--foreground);
+        --color-primary: var(--primary);
+        --color-primary-foreground: var(--primary-foreground);
+        --color-secondary: var(--secondary);
+        --color-secondary-foreground: var(--secondary-foreground);
+        --color-muted: var(--muted);
+        --color-muted-foreground: var(--muted-foreground);
+        --color-accent: var(--accent);
+        --color-accent-foreground: var(--accent-foreground);
+        --color-destructive: var(--destructive);
+        --color-card: var(--card);
+        --color-card-foreground: var(--card-foreground);
+        --color-popover: var(--popover);
+        --color-popover-foreground: var(--popover-foreground);
+        --color-border: var(--border);
+        --color-input: var(--input);
+        --color-ring: var(--ring);
+        --color-chart-1: var(--chart-1);
+        --color-chart-2: var(--chart-2);
+        --color-chart-3: var(--chart-3);
+        --color-chart-4: var(--chart-4);
+        --color-chart-5: var(--chart-5);
 
-<div id="toast"></div>
-<div id="card-container"></div>
-<div class="history-section">
-  <div class="history-title">📋 History (90 Days)</div>
-  <div id="history-container"></div>
-  <div class="history-meta" id="history-meta"></div>
-</div>
-<div class="version-info">Version 3.4 — 2026-09-04 (Dynamic Tier & Correct Cap)</div>
-
-<script>
-// ============================================================
-// 全局函数 - 确保所有按钮可以访问
-// ============================================================
-
-// ---------- 卡片定义 ----------
-const CARDS_DEF = [
-  {
-    name: "RHB Shell 2498",
-    barClass: "bar-rhb",
-    borderClass: "rhb-border",
-    resetDay: 13,
-    cats: ["Petrol", "Utilities", "Online"],
-    caps: { Petrol: 30, Utilities: 10, Online: 10 },
-    minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
-    rates: {
-      Petrol:    [0.01, 0.03, 0.05, 0.12],   // tier 0,1,2,3
-      Utilities: [0.002, 0.01, 0.02, 0.05],
-      Online:    [0.002, 0.01, 0.02, 0.05]
-    }
-  },
-  {
-    name: "RHB Shell 8652",
-    barClass: "bar-rhb",
-    borderClass: "rhb-border",
-    resetDay: 23,
-    cats: ["Petrol", "Utilities", "Online"],
-    caps: { Petrol: 30, Utilities: 10, Online: 10 },
-    minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
-    rates: {
-      Petrol:    [0.01, 0.03, 0.05, 0.12],
-      Utilities: [0.002, 0.01, 0.02, 0.05],
-      Online:    [0.002, 0.01, 0.02, 0.05]
-    }
-  },
-  {
-    name: "Affin Duo Visa 3322",
-    barClass: "bar-affin",
-    borderClass: "affin-border",
-    resetDay: 23,
-    cap: 30,
-    cats: ["Auto-Billing", "E-Commerce", "E-Wallet"],
-    rates: { "Auto-Billing": 0.03, "E-Commerce": 0.03, "E-Wallet": 0.03 },
-    autoDebit: { amount: 700, category: "Auto-Billing", note: "Insurance Auto-Debit" }
-  },
-  {
-    name: "Ikhwan Platinum 6157",
-    barClass: "bar-ikhwan",
-    borderClass: "ikhwan-border",
-    resetDay: 1,
-    cap: 50,
-    fixedCategory: "Online (8%)",
-    cats: ["Online (8%)"],
-    rates: { "Online (8%)": 0.08 },
-    progressTargets: { "Online (8%)": 625 }   // 固定目标
-  },
-  {
-    name: "Maybank 2 Gold 8943",
-    barClass: "bar-maybank",
-    borderClass: "maybank-border",
-    resetDay: 1,
-    cap: 50,
-    fixedCategory: "Weekend (5%)",
-    cats: ["Weekend (5%)"],
-    rates: { "Weekend (5%)": 0.05 },
-    progressTargets: { "Weekend (5%)": 1000 }
-  }
-];
-
-const MAX_CYCLES = 3;
-const FILL_COLORS = ['fill-cyan', 'fill-lime', 'fill-violet', 'fill-coral', 'fill-amber'];
-
-// ---------- 工具函数 ----------
-function formatDateDMY(d) {
-  const date = new Date(d + 'T00:00:00');
-  return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
-}
-function getTodayStr() {
-  const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
-}
-function getCycleStart(day) {
-  const now = new Date();
-  let start = new Date(now.getFullYear(), now.getMonth(), day);
-  if (now.getDate() < day) start.setMonth(start.getMonth() - 1);
-  return `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
-}
-function getCycleEnd(startStr) {
-  const [y, m, d] = startStr.split('-').map(Number);
-  const end = new Date(y, m - 1, d);
-  end.setMonth(end.getMonth() + 1);
-  end.setDate(end.getDate() - 1);
-  return `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
-}
-function getRateTier(totalSpend) {
-  if (totalSpend >= 3000) return 3;
-  if (totalSpend >= 2000) return 2;
-  if (totalSpend >= 1000) return 1;
-  return 0;
-}
-function getProgressPct(used, target) {
-  if (target <= 0) return 0;
-  return Math.min(100, Math.max(0, (used / target) * 100));
-}
-function clamp(v, min, max) { return Math.min(Math.max(v, min), max); }
-
-// ---------- Toast 提示 ----------
-function showToast(msg, isError) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.className = isError ? 'error' : '';
-  t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 2500);
-}
-
-// ---------- 数据管理 ----------
-function getDefaultState() {
-  const cards = CARDS_DEF.map(c => ({
-    ...c,
-    totalSpend: 0,
-    cashback: 0,
-    categoryCashback: {},
-    categorySpend: {},
-    lastCycleStart: getCycleStart(c.resetDay),
-    autoDebitCycle: null
-  }));
-  return { version: 11, cards, transactions: [] };
-}
-
-function loadState() {
-  let raw = localStorage.getItem('finoryData');
-  let state = null;
-  if (raw) {
-    try { state = JSON.parse(raw); } catch(e) { state = null; }
-  }
-  if (!state || state.version !== 11) {
-    state = getDefaultState();
-    saveState(state);
-  }
-  state.cards.forEach((c, i) => {
-    if (!c.categorySpend) c.categorySpend = {};
-    if (!c.categoryCashback) c.categoryCashback = {};
-  });
-  return state;
-}
-
-function saveState(state) {
-  localStorage.setItem('finoryData', JSON.stringify(state));
-}
-
-// ---------- 核心业务 ----------
-function checkAndReset(state) {
-  state.cards.forEach(c => {
-    const currentStart = getCycleStart(c.resetDay);
-    if (c.lastCycleStart !== currentStart) {
-      c.totalSpend = 0;
-      c.cashback = 0;
-      c.categoryCashback = {};
-      c.categorySpend = {};
-      c.lastCycleStart = currentStart;
-    }
-  });
-}
-
-function applyAutoDebits(state) {
-  let changed = false;
-  state.cards.forEach((c, i) => {
-    const def = CARDS_DEF[i];
-    if (def.autoDebit) {
-      if (c.lastCycleStart !== c.autoDebitCycle) {
-        const rate = def.rates[def.autoDebit.category];
-        const rawEarned = def.autoDebit.amount * rate;
-        const cap = def.cap || 999;
-        const remaining = cap - c.cashback;
-        const earned = Math.max(0, Math.min(rawEarned, remaining));
-        c.totalSpend += def.autoDebit.amount;
-        c.cashback += earned;
-        c.categorySpend[def.autoDebit.category] = (c.categorySpend[def.autoDebit.category] || 0) + def.autoDebit.amount;
-        c.autoDebitCycle = c.lastCycleStart;
-        state.transactions.push({
-          id: Date.now() + '-auto-' + i,
-          cardIndex: i,
-          cardName: def.name,
-          amount: def.autoDebit.amount,
-          category: def.autoDebit.category,
-          note: def.autoDebit.note,
-          date: getTodayStr(),
-          timestamp: Date.now(),
-          cycleStart: c.lastCycleStart
-        });
-        changed = true;
+        --font-font-sans: var(--font-sans);
+        --font-font-heading: var(--font-heading);
+        --font-font-serif: var(--font-serif);
+        --font-font-mono: var(--font-mono);
       }
-    }
-  });
-  if (changed) saveState(state);
-}
 
-// 获取某个类别在给定tier下的返现率
-function getRateForCategory(cardDef, cat, tier) {
-  if (cardDef.name.includes("RHB")) {
-    const ratesArr = cardDef.rates[cat];
-    if (ratesArr && ratesArr.length > tier) return ratesArr[tier];
-    return 0;
-  }
-  // 非RHB固定卡
-  return cardDef.rates?.[cat] || 0;
-}
+      @theme {
+        --radius-xs: calc(var(--radius) - 8px);
+        --radius-sm: calc(var(--radius) - 4px);
+        --radius-md: calc(var(--radius) - 2px);
+        --radius-lg: var(--radius);
+        --radius-xl: calc(var(--radius) + 4px);
+        --radius-2xl: calc(var(--radius) + 8px);
+        --radius-3xl: calc(var(--radius) + 16px);
+        --radius-4xl: calc(var(--radius) + 24px);
+      }
 
-// 计算某个类别的进度目标（动态基于当前总消费）
-function computeCategoryTarget(cardDef, cardState, cat) {
-  if (!cardDef.name.includes("RHB")) return null; // 非RHB不适用动态目标
-  const tier = getRateTier(cardState.totalSpend);
-  const rate = getRateForCategory(cardDef, cat, tier);
-  if (rate === 0) return Infinity;
-  const cap = cardDef.caps[cat] || 0;
-  const minSpend = cardDef.minSpend[cat] || 0;
-  // 理论目标 = cap / rate，但必须至少达到 minSpend
-  let target = cap / rate;
-  if (target < minSpend) target = minSpend;
-  return target;
-}
+      * {
+        corner-shape: var(--shape, round);
+      }
 
-function getRate(cardDef, cardState, cat, amount) {
-  if (cardDef.name.includes("RHB")) {
-    const min = cardDef.minSpend?.[cat] || 0;
-    // 注意：这里计算 tier 时，需要用当前总消费 + 本次金额，因为返现率取决于消费后的总消费
-    const tier = getRateTier(cardState.totalSpend + amount);
-    const rates = cardDef.rates[cat];
-    if (rates && rates.length > tier) {
-      // 如果当前类别消费低于最低消费，返现率为0
-      if (cardState.categorySpend[cat] + amount < min) return 0;
-      return rates[tier];
-    }
-    return 0;
-  }
-  return cardDef.rates?.[cat] || 0;
-}
+      .rounded-full, .rounded-none,
+      .rounded-t-full, .rounded-t-none,
+      .rounded-r-full, .rounded-r-none,
+      .rounded-b-full, .rounded-b-none,
+      .rounded-l-full, .rounded-l-none,
+      .rounded-s-full, .rounded-s-none,
+      .rounded-e-full, .rounded-e-none,
+      .rounded-tl-full, .rounded-tl-none,
+      .rounded-tr-full, .rounded-tr-none,
+      .rounded-bl-full, .rounded-bl-none,
+      .rounded-br-full, .rounded-br-none,
+      .rounded-ss-full, .rounded-ss-none,
+      .rounded-se-full, .rounded-se-none,
+      .rounded-es-full, .rounded-es-none,
+      .rounded-ee-full, .rounded-ee-none {
+        corner-shape: round;
+      }
 
-function recalcCard(state, cardIndex) {
-  const def = CARDS_DEF[cardIndex];
-  const cardState = state.cards[cardIndex];
-  cardState.totalSpend = 0;
-  cardState.cashback = 0;
-  cardState.categoryCashback = {};
-  cardState.categorySpend = {};
+      @utility rounded-* {
+        border-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-t-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-r-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-b-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-l-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tl-* {
+        border-top-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-tr-* {
+        border-top-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-bl-* {
+        border-bottom-left-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-br-* {
+        border-bottom-right-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-s-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-e-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ss-* {
+        border-start-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-se-* {
+        border-start-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-es-* {
+        border-end-start-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
+      @utility rounded-ee-* {
+        border-end-end-radius: calc(--value(--radius-*, [length], [percentage]) * var(--shape-multiplier, 1));
+      }
 
-  const txs = state.transactions.filter(t => t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart);
-  txs.sort((a, b) => a.timestamp - b.timestamp);
+      :root {
+        --shape: squircle;
+        --shape-multiplier: 1;
 
-  // 先计算总消费
-  let total = 0;
-  txs.forEach(tx => { total += tx.amount; });
-  cardState.totalSpend = total;
+          --background: #07090C;
+        --foreground: #F4F7FA;
+        --primary: #38BDF8;
+        --primary-foreground: #041018;
+        --secondary: #151A21;
+        --secondary-foreground: #E6EDF3;
+        --muted: #202732;
+        --muted-foreground: #8B98A7;
+        --accent: #A3E635;
+        --accent-foreground: #111807;
+        --destructive: #F0445D;
+        --card: #0F1318;
+        --card-foreground: #F4F7FA;
+        --popover: #131920;
+        --popover-foreground: #F4F7FA;
+        --border: #222A33;
+        --input: #BFEAFF;
+        --ring: #38BDF8;
+        --chart-1: #22D3EE;
+        --chart-2: #A3E635;
+        --chart-3: #C084FC;
+        --chart-4: #FB7185;
+        --chart-5: #FBBF24;
 
-  // 重新计算每个交易的返现
-  // 由于返现率取决于总消费，必须按顺序计算（因为总消费是累积的）
-  let tempTotal = 0;
-  txs.forEach(tx => {
-    const rate = getRate(def, cardState, tx.category, tx.amount);
-    let earned = 0;
-    if (def.name.includes("RHB")) {
-      const cap = def.caps[tx.category] || 999;
-      const currentCatCb = cardState.categoryCashback?.[tx.category] || 0;
-      const remaining = cap - currentCatCb;
-      earned = tx.amount * rate;
-      if (earned > remaining) earned = remaining;
-      if (earned < 0) earned = 0;
-      cardState.cashback += earned;
-      cardState.categoryCashback[tx.category] = (cardState.categoryCashback[tx.category] || 0) + earned;
-    } else {
-      const cap = def.cap || 999;
-      const remaining = cap - cardState.cashback;
-      earned = tx.amount * rate;
-      if (earned > remaining) earned = remaining;
-      if (earned < 0) earned = 0;
-      cardState.cashback += earned;
-    }
-    cardState.categorySpend[tx.category] = (cardState.categorySpend[tx.category] || 0) + tx.amount;
-    tempTotal += tx.amount;
-  });
-}
+        --font-sans: "Inter";
+        --font-heading: "Space Grotesk";
+        --font-serif: "Playfair Display";
+        --font-mono: "JetBrains Mono";
 
-function addTransaction(cardIndex, amount, cat, note) {
-  const state = loadState();
-  checkAndReset(state);
-  const cardState = state.cards[cardIndex];
-  const cardDef = CARDS_DEF[cardIndex];
+        --radius: 0.75rem;
+      }
 
-  // 计算本次交易的返现率（基于加入本次交易后的总消费）
-  const rate = getRate(cardDef, cardState, cat, amount);
-  let earned = 0;
-  if (cardDef.name.includes("RHB")) {
-    const cap = cardDef.caps[cat] || 999;
-    const currentCatCb = cardState.categoryCashback?.[cat] || 0;
-    const remaining = cap - currentCatCb;
-    earned = amount * rate;
-    if (earned > remaining) earned = remaining;
-    if (earned < 0) earned = 0;
-    cardState.cashback += earned;
-    cardState.categoryCashback[cat] = (cardState.categoryCashback[cat] || 0) + earned;
-  } else {
-    const cap = cardDef.cap || 999;
-    const remaining = cap - cardState.cashback;
-    earned = amount * rate;
-    if (earned > remaining) earned = remaining;
-    if (earned < 0) earned = 0;
-    cardState.cashback += earned;
-  }
-  cardState.totalSpend += amount;
-  cardState.categorySpend[cat] = (cardState.categorySpend[cat] || 0) + amount;
+      @supports (corner-shape: squircle) {
+        :root {
+          --shape-multiplier: 2.5;
+        }
+      }
 
-  const tx = {
-    id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-    cardIndex: cardIndex,
-    cardName: cardDef.name,
-    amount: amount,
-    category: cat,
-    note: note || '',
-    date: getTodayStr(),
-    timestamp: Date.now(),
-    cycleStart: cardState.lastCycleStart
-  };
-  state.transactions.push(tx);
+      /* Prevent layout shift for icons without explicit dimensions */
+      iconify-icon:not([width]):not([height]) {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+      }
 
-  cleanupOldCycles(state);
-  saveState(state);
-  renderAll();
-  showToast('✅ 已添加 RM ' + amount.toFixed(2) + ' 到 ' + cat);
-}
-
-function deleteTransaction(txId) {
-  if (!confirm('Delete this transaction?')) return;
-  const state = loadState();
-  const tx = state.transactions.find(t => t.id === txId);
-  if (!tx) return;
-  state.transactions = state.transactions.filter(t => t.id !== txId);
-  recalcCard(state, tx.cardIndex);
-  cleanupOldCycles(state);
-  saveState(state);
-  renderAll();
-}
-
-function cleanupOldCycles(state) {
-  state.cards.forEach((c, i) => {
-    const cycles = [];
-    state.transactions.forEach(tx => {
-      if (tx.cardIndex === i && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
-    });
-    cycles.sort((a, b) => b.localeCompare(a));
-    if (cycles.length > MAX_CYCLES) {
-      const toDelete = cycles.slice(MAX_CYCLES);
-      state.transactions = state.transactions.filter(tx => {
-        if (tx.cardIndex !== i) return true;
-        return !toDelete.includes(tx.cycleStart);
-      });
-    }
-  });
-}
-
-function isCatMaxed(cardState, cardDef, cat) {
-  if (cardDef.name.includes("RHB")) {
-    const cap = cardDef.caps[cat] || 999;
-    const used = cardState.categoryCashback?.[cat] || 0;
-    return used >= cap;
-  }
-  return cardState.cashback >= (cardDef.cap || 999);
-}
-
-// ---------- 渲染 ----------
-function buildProgressHtml(cardState, cardDef) {
-  // 如果是固定目标卡片（Ikhwan, Maybank）
-  if (cardDef.progressTargets) {
-    const cat = cardDef.fixedCategory || cardDef.cats[0];
-    const target = cardDef.progressTargets[cat] || 100;
-    const spent = cardState.categorySpend?.[cat] || 0;
-    const pct = getProgressPct(spent, target);
-    const colorClass = FILL_COLORS[0];
-    const remaining = Math.max(0, target - spent);
-    return `
-      <div class="cat-progress">
-        <div class="cat-label-row">
-          <span class="cat-label-name">${cat}</span>
-          <span class="cat-label-value">RM ${spent.toFixed(2)} / ${target} · ${remaining.toFixed(2)} left</span>
+      /* Hide scrollbars */
+      *,
+      *::before,
+      *::after {
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+      }
+      *::-webkit-scrollbar {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="min-h-screen bg-background text-foreground px-4 pt-5 pb-28 font-sans">
+      <header class="flex items-center justify-between mb-6">
+        <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Finory · September 2026
+          </p>
+          <h1 class="font-heading text-2xl font-bold tracking-tight mt-1">Good morning, AL</h1>
         </div>
-        <div class="cat-track">
-          <div class="cat-fill ${colorClass}" style="width:${pct}%"></div>
+        <button
+          class="size-11 rounded-full bg-secondary border border-border flex items-center justify-center text-muted-foreground"
+          aria-label="Notifications"
+        >
+          <iconify-icon icon="solar:bell-linear" width="20" height="20"></iconify-icon>
+        </button>
+      </header>
+      <section
+        class="rounded-[var(--radius)] bg-card border border-border p-5 relative overflow-hidden mb-5"
+      >
+        <div class="absolute -right-12 -top-14 size-40 rounded-full bg-primary/10 blur-2xl"></div>
+        <div class="relative">
+          <div class="flex items-center justify-between">
+            <p class="text-sm text-muted-foreground">Total cashback this cycle</p>
+            <span
+              class="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1 text-xs font-bold text-accent"
+              ><iconify-icon icon="solar:arrow-up-linear" width="14" height="14"></iconify-icon>
+              12.4%</span
+            >
+          </div>
+          <div class="flex items-end justify-between mt-2">
+            <p class="font-heading text-4xl font-bold tracking-tight">RM 21.00</p>
+            <p class="text-sm text-muted-foreground mb-1">of RM 150 cap</p>
+          </div>
+          <div class="h-2 rounded-full bg-muted overflow-hidden mt-5">
+            <div class="h-full w-[14%] rounded-full bg-primary"></div>
+          </div>
+          <div class="flex justify-between mt-2 text-xs text-muted-foreground">
+            <span>14% used</span><span>RM 129.00 remaining</span>
+          </div>
         </div>
+      </section>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="font-heading text-lg font-bold">Your cards</h2>
+        <button class="text-sm font-semibold text-primary flex items-center gap-1">
+          <iconify-icon icon="solar:settings-linear" width="16" height="16"></iconify-icon> Manage
+        </button>
       </div>
-    `;
-  }
-
-  // RHB 卡片：动态计算目标
-  if (cardDef.name.includes("RHB")) {
-    return cardDef.cats.map((cat, idx) => {
-      const spent = cardState.categorySpend?.[cat] || 0;
-      const target = computeCategoryTarget(cardDef, cardState, cat);
-      if (target === Infinity) {
-        // 返现率为0，无法获得返现，显示特别提示
-        return `
-          <div class="cat-progress">
-            <div class="cat-label-row">
-              <span class="cat-label-name">${cat}</span>
-              <span class="cat-label-value" style="color:#888;">返现率 0% (需达到更高总消费)</span>
+      <section class="space-y-3">
+        <article class="rounded-[var(--radius)] bg-card border border-border overflow-hidden">
+          <div class="h-1 bg-gradient-to-r from-orange-400 to-red-500"></div>
+          <div class="p-4">
+            <div class="flex items-start justify-between">
+              <div class="flex gap-3 items-center">
+                <div
+                  class="size-10 rounded-xl bg-orange-500/15 flex items-center justify-center text-orange-400"
+                >
+                  <iconify-icon icon="solar:card-2-linear" width="20" height="20"></iconify-icon>
+                </div>
+                <div>
+                  <p class="font-semibold">
+                    RHB Shell <span class="text-muted-foreground">••2498</span>
+                  </p>
+                  <p class="text-xs text-muted-foreground mt-0.5">13 Sep — 12 Oct 2026</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-heading text-lg font-bold">RM 0.00</p>
+                <p class="text-[11px] text-primary font-semibold">Spend RM 0.00</p>
+              </div>
             </div>
-            <div class="cat-track" style="background:#333;">
-              <div class="cat-fill" style="width:0%;background:#666;"></div>
+            <div class="mt-4 flex items-center justify-between text-xs">
+              <span class="text-muted-foreground">Best cashback categories</span
+              ><span class="text-muted-foreground">0 / RM 30</span>
             </div>
+            <div class="h-1.5 bg-muted rounded-full mt-2 overflow-hidden">
+              <div class="h-full w-0 rounded-full bg-chart-1"></div>
+            </div>
+            <button
+              class="w-full mt-4 h-10 rounded-lg bg-secondary border border-border text-sm font-semibold flex items-center justify-center gap-2"
+              onclick="window.showToast &amp;&amp; window.showToast(&#39;Open RHB Shell details&#39;)"
+            >
+              <iconify-icon
+                icon="solar:add-circle-linear"
+                class="text-primary"
+                width="16"
+                height="16"
+              ></iconify-icon>
+              Add expense
+            </button>
           </div>
-        `;
-      }
-      const pct = getProgressPct(spent, target);
-      const colorClass = FILL_COLORS[idx % FILL_COLORS.length];
-      const remaining = Math.max(0, target - spent);
-      const minSpend = cardDef.minSpend[cat] || 0;
-      let extraInfo = '';
-      if (spent < minSpend) {
-        extraInfo = ` (需达 RM${minSpend} 才获返现)`;
-      }
-      return `
-        <div class="cat-progress">
-          <div class="cat-label-row">
-            <span class="cat-label-name">${cat}</span>
-            <span class="cat-label-value">RM ${spent.toFixed(2)} / ${target.toFixed(0)} · ${remaining.toFixed(2)} left${extraInfo}</span>
+        </article>
+        <article class="rounded-[var(--radius)] bg-card border border-border overflow-hidden">
+          <div class="h-1 bg-primary"></div>
+          <div class="p-4">
+            <div class="flex items-start justify-between">
+              <div class="flex gap-3 items-center">
+                <div
+                  class="size-10 rounded-xl bg-primary/15 flex items-center justify-center text-primary"
+                >
+                  <iconify-icon icon="solar:card-2-linear" width="20" height="20"></iconify-icon>
+                </div>
+                <div>
+                  <p class="font-semibold">
+                    Affin Duo Visa <span class="text-muted-foreground">••3322</span>
+                  </p>
+                  <p class="text-xs text-muted-foreground mt-0.5">23 Aug — 22 Sep 2026</p>
+                </div>
+              </div>
+              <div class="text-right">
+                <p class="font-heading text-lg font-bold">RM 21.00</p>
+                <p class="text-[11px] text-primary font-semibold">Spend RM 700.00</p>
+              </div>
+            </div>
+            <div class="mt-4 flex items-center justify-between text-xs">
+              <span class="text-muted-foreground">Cashback cap</span
+              ><span class="text-muted-foreground">RM 21 / RM 30</span>
+            </div>
+            <div class="h-1.5 bg-muted rounded-full mt-2 overflow-hidden">
+              <div class="h-full w-[70%] rounded-full bg-primary"></div>
+            </div>
+            <button
+              class="w-full mt-4 h-10 rounded-lg bg-secondary border border-border text-sm font-semibold flex items-center justify-center gap-2"
+              onclick="window.showToast &amp;&amp; window.showToast(&#39;Open Affin Duo details&#39;)"
+            >
+              <iconify-icon
+                icon="solar:add-circle-linear"
+                class="text-primary"
+                width="16"
+                height="16"
+              ></iconify-icon>
+              Add expense
+            </button>
           </div>
-          <div class="cat-track">
-            <div class="cat-fill ${colorClass}" style="width:${pct}%"></div>
-          </div>
-        </div>
-      `;
-    }).join('');
-  }
-
-  // 其他卡片（Affin）使用返现金额进度
-  const cap = cardDef.cap || 999;
-  const used = cardState.cashback;
-  const pct = getProgressPct(used, cap);
-  const colorClass = FILL_COLORS[0];
-  const remaining = Math.max(0, cap - used);
-  const catName = cardDef.fixedCategory || 'Cashback';
-  return `
-    <div class="cat-progress">
-      <div class="cat-label-row">
-        <span class="cat-label-name">${catName}</span>
-        <span class="cat-label-value">RM ${used.toFixed(2)} / ${cap} · ${remaining.toFixed(2)} left</span>
+        </article>
+      </section>
+      <div class="flex items-center justify-between mt-6 mb-3">
+        <h2 class="font-heading text-lg font-bold">Recent activity</h2>
+        <button class="text-sm font-semibold text-primary">See all</button>
       </div>
-      <div class="cat-track">
-        <div class="cat-fill ${colorClass}" style="width:${pct}%"></div>
-      </div>
-    </div>
-  `;
-}
-
-function renderCards() {
-  const state = loadState();
-  checkAndReset(state);
-  applyAutoDebits(state);
-  saveState(state);
-
-  const container = document.getElementById('card-container');
-  if (!container) return;
-
-  container.innerHTML = state.cards.map((c, i) => {
-    const def = CARDS_DEF[i];
-    const start = c.lastCycleStart;
-    const end = getCycleEnd(start);
-    const progressHtml = buildProgressHtml(c, def);
-
-    // 上一周期总额
-    const allPrevTxs = state.transactions
-      .filter(t => t.cardIndex === i && t.cycleStart !== c.lastCycleStart)
-      .sort((a, b) => b.cycleStart.localeCompare(a.cycleStart));
-    let prevTotal = 0, prevCycleLabel = '';
-    if (allPrevTxs.length > 0) {
-      const latestPrevCycle = allPrevTxs[0].cycleStart;
-      const filteredPrev = allPrevTxs.filter(t => t.cycleStart === latestPrevCycle);
-      prevTotal = filteredPrev.reduce((sum, t) => sum + t.amount, 0);
-      const prevEnd = getCycleEnd(latestPrevCycle);
-      prevCycleLabel = `(${formatDateDMY(latestPrevCycle)} - ${formatDateDMY(prevEnd)})`;
-    }
-
-    // 当前交易
-    const currentTxs = state.transactions
-      .filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart)
-      .sort((a, b) => b.timestamp - a.timestamp);
-    const txRows = currentTxs.map(tx => `
-      <div class="tx-row">
-        <div class="tx-left">
-          <div>
-            <span class="tx-date">${tx.date.slice(8,10)}/${tx.date.slice(5,7)}</span>
-            <span class="tx-cat">${tx.category}</span>
+      <section class="rounded-[var(--radius)] bg-card border border-border divide-y divide-border">
+        <div class="p-4 flex items-center gap-3">
+          <div
+            class="size-9 rounded-full bg-accent/10 text-accent flex items-center justify-center"
+          >
+            <iconify-icon icon="solar:shield-check-linear" width="20" height="20"></iconify-icon>
           </div>
-          ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
-        </div>
-        <div class="tx-right">
-          <div class="tx-amt">RM ${tx.amount.toFixed(2)}</div>
-          <button class="tx-del" onclick="window.deleteTransaction('${tx.id}')">Delete</button>
-        </div>
-      </div>
-    `).join('');
-    const txSection = currentTxs.length
-      ? `<div class="card-tx-section"><div class="card-tx-title">This Cycle (${currentTxs.length})</div>${txRows}</div>`
-      : '<div class="card-tx-section card-tx-empty">No transactions this cycle</div>';
-
-    // 按钮
-    let btnHtml;
-    if (def.fixedCategory) {
-      const maxed = isCatMaxed(c, def, def.fixedCategory) ? 'maxed' : '';
-      btnHtml = `<div class="btn-row"><button class="cat-btn ${maxed}" onclick="window.saveTx(${i}, '${def.fixedCategory}')">Add ${def.fixedCategory}</button></div>`;
-    } else {
-      btnHtml = `<div class="btn-row">${def.cats.map(cat => {
-        const maxed = isCatMaxed(c, def, cat) ? 'maxed' : '';
-        return `<button class="cat-btn ${maxed}" onclick="window.saveTx(${i}, '${cat}')">${cat}</button>`;
-      }).join('')}</div>`;
-    }
-
-    const prevRowHtml = prevTotal > 0 ? `
-      <div class="prev-stmt-total-row">
-        <span class="prev-stmt-total-label">📄 上期账单总额 (已结算) <span class="prev-stmt-cycle">${prevCycleLabel}</span></span>
-        <span class="prev-stmt-total-value">RM ${prevTotal.toFixed(2)}</span>
-      </div>
-    ` : '';
-
-    return `
-      <div class="card">
-        <div class="card-bar ${def.barClass}"></div>
-        <div class="card-summary" onclick="window.toggleCard(${i})">
-          <div class="card-summary-left">
-            <div class="card-name">${def.name}</div>
-            <div class="cycle-info">${formatDateDMY(start)} — ${formatDateDMY(end)}</div>
+          <div class="flex-1">
+            <p class="text-sm font-semibold">Insurance Auto-Debit</p>
+            <p class="text-xs text-muted-foreground mt-0.5">Affin Duo Visa · Today</p>
           </div>
-          <div class="card-summary-right">
-            <div class="cb-amount">RM ${c.cashback.toFixed(2)}</div>
-            <div class="spend-amount">Spend RM ${c.totalSpend.toFixed(2)}</div>
-          </div>
-          <div class="card-arrow" id="card-arrow-${i}">▼</div>
+          <p class="font-heading font-bold">RM 700.00</p>
         </div>
-        <div class="card-detail" id="card-detail-${i}">
-          <div class="stmt-total-row">
-            <span class="stmt-total-label">本周期消费总额 (当前)</span>
-            <span class="stmt-total-value">RM ${c.totalSpend.toFixed(2)}</span>
-          </div>
-          <div class="cat-progress-list">${progressHtml}</div>
-          <input type="number" id="amt-${i}" class="amt-input" placeholder="0.00" step="0.01">
-          ${btnHtml}
-          ${prevRowHtml}
-          ${txSection}
+        <div class="p-4 text-center text-sm text-muted-foreground">
+          No other transactions this cycle
         </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function renderHistory() {
-  const state = loadState();
-  const container = document.getElementById('history-container');
-  const meta = document.getElementById('history-meta');
-  if (!container || !meta) return;
-
-  const currentCycleStarts = state.cards.map(c => c.lastCycleStart);
-  const pastTransactions = state.transactions.filter(tx => tx.cycleStart !== currentCycleStarts[tx.cardIndex]);
-
-  if (!pastTransactions.length) {
-    container.innerHTML = '<div class="empty-state">No past transactions.</div>';
-    meta.textContent = '';
-    return;
-  }
-
-  const groups = {};
-  pastTransactions.forEach(tx => {
-    const key = tx.cardIndex + '|' + tx.cycleStart;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(tx);
-  });
-  const sortedKeys = Object.keys(groups).sort((a, b) => {
-    const [ca, sa] = a.split('|');
-    const [cb, sb] = b.split('|');
-    if (sa !== sb) return sb.localeCompare(sa);
-    return parseInt(ca) - parseInt(cb);
-  });
-
-  container.innerHTML = sortedKeys.map(key => {
-    const [cardIdx, cycleStart] = key.split('|');
-    const cidx = parseInt(cardIdx);
-    const def = CARDS_DEF[cidx];
-    const txs = groups[key].sort((a, b) => b.timestamp - a.timestamp);
-    const cycleEnd = getCycleEnd(cycleStart);
-    const total = txs.reduce((s, t) => s + t.amount, 0);
-    const rows = txs.map(tx => `
-      <div class="tx-row">
-        <div class="tx-left">
-          <div>
-            <span class="tx-date">${tx.date.slice(8,10)}/${tx.date.slice(5,7)}</span>
-            <span class="tx-cat">${tx.category}</span>
-          </div>
-          ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
-        </div>
-        <div class="tx-right">
-          <div class="tx-amt">RM ${tx.amount.toFixed(2)}</div>
-          <button class="tx-del" onclick="window.deleteTransaction('${tx.id}')">Delete</button>
-        </div>
-      </div>
-    `).join('');
-    return `
-      <div class="cycle-box ${def.borderClass}">
-        <div class="cycle-header" onclick="window.toggleCycle(this)">
-          <div>
-            <div class="cycle-name">${def.name}</div>
-            <div class="cycle-range">${formatDateDMY(cycleStart)} — ${formatDateDMY(cycleEnd)}</div>
-          </div>
-          <div style="display:flex;align-items:center;">
-            <span class="cycle-count">${txs.length} tx · RM ${total.toFixed(2)}</span>
-            <span class="cycle-arrow">▼</span>
-          </div>
-        </div>
-        <div class="cycle-body">${rows}</div>
-      </div>
-    `;
-  }).join('');
-
-  let cycleCounts = [];
-  state.cards.forEach((c, i) => {
-    const cycles = [];
-    state.transactions.forEach(tx => {
-      if (tx.cardIndex === i && tx.cycleStart !== c.lastCycleStart && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
-    });
-    cycleCounts.push(`${CARDS_DEF[i].name.split(' ').pop()}: ${cycles.length}/${MAX_CYCLES}`);
-  });
-  meta.textContent = `Past cycles kept for 90 days • ${cycleCounts.join(' · ')}`;
-}
-
-function toggleCard(i) {
-  const detail = document.getElementById('card-detail-' + i);
-  const arrow = document.getElementById('card-arrow-' + i);
-  if (!detail) return;
-  const isOpen = detail.classList.contains('open');
-  if (isOpen) {
-    detail.classList.remove('open');
-    if (arrow) arrow.classList.remove('open');
-  } else {
-    detail.classList.add('open');
-    if (arrow) arrow.classList.add('open');
-  }
-}
-
-function toggleCycle(header) {
-  const body = header.nextElementSibling;
-  const arrow = header.querySelector('.cycle-arrow');
-  if (!body) return;
-  const isOpen = body.classList.contains('open');
-  if (isOpen) {
-    body.classList.remove('open');
-    if (arrow) arrow.classList.remove('open');
-    header.classList.remove('active');
-  } else {
-    body.classList.add('open');
-    if (arrow) arrow.classList.add('open');
-    header.classList.add('active');
-  }
-}
-
-function renderAll() {
-  renderCards();
-  renderHistory();
-}
-
-// ---------- 全局暴露函数 ----------
-window.saveTx = function(i, cat) {
-  const amtIn = document.getElementById('amt-' + i);
-  if (!amtIn) {
-    showToast('⚠️ 输入框未找到', true);
-    return;
-  }
-  const amt = parseFloat(amtIn.value);
-  if (!amt || amt <= 0) {
-    showToast('⚠️ 请输入有效金额', true);
-    return;
-  }
-  addTransaction(i, amt, cat, '');
-  amtIn.value = '';
-};
-window.toggleCard = toggleCard;
-window.toggleCycle = toggleCycle;
-window.deleteTransaction = deleteTransaction;
-window.showToast = showToast;
-
-// 初始化渲染
-renderAll();
-</script>
-</body>
+      </section>
+      <nav
+        class="fixed bottom-0 inset-x-0 bg-background/95 backdrop-blur border-t border-border px-4 pt-3 pb-6 flex items-center justify-around z-10"
+      >
+        <button class="flex-1 flex flex-col items-center gap-1 text-primary">
+          <iconify-icon icon="solar:widget-2-bold" width="20" height="20"></iconify-icon
+          ><span class="text-[11px] font-semibold">Overview</span></button
+        ><button class="flex-1 flex flex-col items-center gap-1 text-muted-foreground">
+          <iconify-icon icon="solar:chart-2-linear" width="20" height="20"></iconify-icon
+          ><span class="text-[11px] font-semibold">Insights</span></button
+        ><button class="flex-1 flex flex-col items-center gap-1 text-muted-foreground">
+          <iconify-icon icon="solar:clock-circle-linear" width="20" height="20"></iconify-icon
+          ><span class="text-[11px] font-semibold">History</span></button
+        ><button class="flex-1 flex flex-col items-center gap-1 text-muted-foreground">
+          <iconify-icon icon="solar:user-circle-linear" width="20" height="20"></iconify-icon
+          ><span class="text-[11px] font-semibold">Profile</span>
+        </button>
+      </nav>
+    </main>
+  </body>
 </html>
