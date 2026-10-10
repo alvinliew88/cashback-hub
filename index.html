@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finory v5.0 - S25 Edition</title>
+<title>Finory v7.0 - S25 60Days Edition</title>
 <style>
   :root {
     --bg: #000000;
@@ -19,135 +19,58 @@
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    margin: 0;
-    padding: 0;
-    background: var(--bg);
-    color: var(--text-main);
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 15px;
-    width: 100%;
-    overflow-x: hidden; /* 彻底禁止左右滑动 */
+    font-size: 15px; width: 100%; overflow-x: hidden;
   }
-  body {
-    padding: 10px 10px 60px;
-  }
+  body { padding: 10px 10px 60px; }
 
-  /* 顶部快速记账区 */
   .quick-panel {
     background: var(--surface-card);
     border: 2px solid var(--accent-blue);
-    border-radius: 14px;
-    padding: 12px;
-    margin-bottom: 14px;
-    width: 100%;
+    border-radius: 14px; padding: 12px; margin-bottom: 14px; width: 100%;
   }
-  .panel-title {
-    font-size: 16px;
-    font-weight: 800;
-    color: #60a5fa;
-    margin-bottom: 8px;
-  }
+  .panel-title { font-size: 16px; font-weight: 800; color: #60a5fa; margin-bottom: 8px; }
   .quick-amt-input {
-    width: 100%;
-    background: #0f172a;
-    border: 2px solid #38bdf8;
-    color: #38bdf8;
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 24px;
-    font-family: monospace;
-    font-weight: 900;
-    outline: none;
-    text-align: right;
-    margin-bottom: 10px;
+    width: 100%; background: #0f172a; border: 2px solid #38bdf8;
+    color: #38bdf8; border-radius: 10px; padding: 10px; font-size: 24px;
+    font-family: monospace; font-weight: 900; outline: none; text-align: right; margin-bottom: 10px;
   }
-  
-  .step-label {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 700;
-    margin: 6px 0 4px;
-  }
+  .step-label { font-size: 12px; color: var(--text-muted); font-weight: 700; margin: 6px 0 4px; }
 
-  /* 卡片选择按钮网格 */
-  .card-select-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 6px;
-    margin-bottom: 8px;
-  }
+  .card-select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 8px; }
   .card-opt-btn {
-    background: #0f172a;
-    border: 1px solid var(--border);
-    color: #94a3b8;
-    padding: 8px 4px;
-    border-radius: 8px;
-    font-size: 12px;
-    font-weight: 700;
-    text-align: center;
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    background: #0f172a; border: 1px solid var(--border); color: #94a3b8;
+    padding: 8px 4px; border-radius: 8px; font-size: 12px; font-weight: 700;
+    text-align: center; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   }
-  .card-opt-btn.active {
-    background: var(--accent-blue);
-    color: #ffffff;
-    border-color: #60a5fa;
-  }
+  .card-opt-btn.active { background: var(--accent-blue); color: #ffffff; border-color: #60a5fa; }
 
-  /* 类别选择按钮网格 */
-  .cat-select-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 6px;
-  }
+  .cat-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   .cat-opt-btn {
-    background: #22c55e;
-    border: none;
-    color: #000000;
-    padding: 10px 4px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 900;
-    cursor: pointer;
-    text-align: center;
+    background: #22c55e; border: none; color: #000000; padding: 10px 4px;
+    border-radius: 8px; font-size: 13px; font-weight: 900; cursor: pointer; text-align: center;
   }
   .cat-opt-btn:active { opacity: 0.8; transform: scale(0.97); }
 
-  /* 卡片列表 */
-  .section-header {
-    font-size: 16px;
-    font-weight: 800;
-    margin: 14px 0 8px 2px;
-    color: #f3f4f6;
-  }
+  .section-header { font-size: 16px; font-weight: 800; margin: 16px 0 8px 2px; color: #f3f4f6; }
   .card {
-    background: var(--surface-card);
-    border-radius: 12px;
-    overflow: hidden;
-    margin-bottom: 10px;
-    border: 1px solid var(--border);
-    width: 100%;
+    background: var(--surface-card); border-radius: 12px; overflow: hidden;
+    margin-bottom: 10px; border: 1px solid var(--border); width: 100%;
   }
   .card-bar { height: 4px; width: 100%; }
   .bar-rhb { background: linear-gradient(90deg, #f97316, #ef4444); }
   .bar-affin { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
   .bar-maybank { background: linear-gradient(90deg, #fbbf24, #d97706); }
 
-  .card-summary {
-    padding: 12px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
-  }
+  .card-summary { padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
   .card-name { font-size: 15px; font-weight: 800; color: #fff; }
   .cycle-info { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
   .cb-amount { font-size: 20px; font-weight: 900; color: var(--accent-green); text-align: right; font-family: monospace; }
   .spend-amount { font-size: 11px; color: #7dd3fc; text-align: right; font-weight: 700; }
+  .ewallet-rem { font-size: 12px; color: #facc15; font-weight: 800; margin-top: 2px; text-align: right; }
 
-  /* 卡片展开区域 */
   .card-detail { display: none; padding: 0 12px 12px; border-top: 1px solid var(--border); }
   .card-detail.open { display: block; }
   
@@ -159,12 +82,17 @@
   .fill-amber { background: var(--accent-amber); }
   .fill-red { background: var(--accent-red); }
 
-  /* 交易记录 */
   .tx-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .tx-date { font-size: 11px; color: var(--text-muted); font-family: monospace; }
   .tx-cat { font-size: 13px; font-weight: 700; color: #e2e8f0; }
   .tx-amt { font-size: 14px; font-weight: 800; font-family: monospace; color: #fff; }
   .tx-del { background: #7f1d1d; border: none; color: #fff; padding: 4px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; }
+
+  /* 历史对账区域 */
+  .history-box {
+    background: #0f172a; border: 1px solid var(--border); border-radius: 12px; padding: 12px; margin-top: 16px;
+  }
+  .history-title { font-size: 14px; font-weight: 800; color: #94a3b8; display: flex; justify-content: space-between; cursor: pointer; }
 
   #toast {
     position: fixed; top: 10px; left: 5%; width: 90%;
@@ -179,21 +107,28 @@
 
 <div id="toast"></div>
 
-<!-- 顶部记账面板 -->
 <div class="quick-panel">
-  <div class="panel-title">⚡ 快速记账</div>
-  
+  <div class="panel-title">⚡ 极速记账</div>
   <input type="number" id="quick-amt" class="quick-amt-input" placeholder="0.00" step="0.01">
   
   <div class="step-label">1. 选择使用的信用卡：</div>
   <div class="card-select-grid" id="card-selector"></div>
 
-  <div class="step-label">2. 选择消费类别（按完即保存）：</div>
+  <div class="step-label">2. 选择消费类别（点击即保存）：</div>
   <div class="cat-select-grid" id="cat-selector"></div>
 </div>
 
-<div class="section-header">💳 各卡返现进度</div>
+<div class="section-header">💳 当期返现进度</div>
 <div id="card-container"></div>
+
+<!-- 60天历史记录（核对账单用） -->
+<div class="history-box">
+  <div class="history-title" onclick="toggleHistory()">
+    <span>📋 60天历史记录 (账单核对)</span>
+    <span id="hist-arrow">▼</span>
+  </div>
+  <div id="history-list" style="display:none; margin-top:10px;"></div>
+</div>
 
 <script>
 function round2(n) { return Math.round((n + Number.EPSILON) * 100) / 100; }
@@ -249,7 +184,7 @@ const CARDS_DEF = [
   }
 ];
 
-let selectedCardIndex = 0; // 默认选中第1张卡
+let selectedCardIndex = 0;
 
 function getRHBTier(totalSpend) {
   if (totalSpend >= 5000) return 3;
@@ -289,7 +224,7 @@ function showToast(msg, isError = false) {
 }
 
 function loadState() {
-  let raw = localStorage.getItem('finoryData_v5');
+  let raw = localStorage.getItem('finoryData_v7');
   let state = raw ? JSON.parse(raw) : null;
   if (!state) {
     state = {
@@ -304,11 +239,64 @@ function loadState() {
     };
     saveState(state);
   }
+  checkAndInjectAutoDebit(state);
+  cleanupHistory(state);
   return state;
 }
 
 function saveState(state) {
-  localStorage.setItem('finoryData_v5', JSON.stringify(state));
+  localStorage.setItem('finoryData_v7', JSON.stringify(state));
+}
+
+// 60天历史清理机制
+function cleanupHistory(state) {
+  const sixtyDaysAgo = Date.now() - (60 * 24 * 60 * 60 * 1000);
+  const currentStarts = state.cards.map(c => c.lastCycleStart);
+  state.transactions = state.transactions.filter(t => {
+    return t.timestamp >= sixtyDaysAgo || t.cycleStart === currentStarts[t.cardIndex];
+  });
+}
+
+// 判断当前账单周期是否包含 Great Eastern 季付保费（8月、11月、2月、5月）
+function isGreatEasternCycle(cycleStartStr) {
+  const m = parseInt(cycleStartStr.split('-')[1], 10);
+  return (m === 8 || m === 11 || m === 2 || m === 5);
+}
+
+// 动态计算 Affin 保险 Auto-Debit 金额
+function checkAndInjectAutoDebit(state) {
+  let changed = false;
+  const affinIndex = 2; // Affin Duo
+  const cardState = state.cards[affinIndex];
+  const curCycle = getCycleStart(CARDS_DEF[affinIndex].resetDay);
+  
+  if (cardState.lastCycleStart !== curCycle) {
+    cardState.lastCycleStart = curCycle;
+  }
+
+  const hasAuto = state.transactions.some(t => t.cardIndex === affinIndex && t.cycleStart === curCycle && t.category === "Auto-Billing");
+  
+  if (!hasAuto) {
+    const isGE = isGreatEasternCycle(curCycle);
+    const aiaTotal = 510.00; // AIA 保单总额
+    const geTotal = 464.30;  // Great Eastern 季付保费
+    const autoAmount = isGE ? round2(aiaTotal + geTotal) : aiaTotal;
+    const noteText = isGE ? "AIA + Great Eastern (Quarterly)" : "AIA Insurance Auto-Debit";
+
+    state.transactions.push({
+      id: Date.now() + '-autodebit',
+      cardIndex: affinIndex,
+      amount: autoAmount,
+      category: "Auto-Billing",
+      timestamp: Date.now(),
+      cycleStart: curCycle,
+      note: noteText
+    });
+    recalcCard(state, affinIndex);
+    changed = true;
+  }
+
+  if (changed) saveState(state);
 }
 
 function recalcCard(state, cardIndex) {
@@ -402,6 +390,18 @@ function toggleDetail(i) {
   if (el) el.classList.toggle('open');
 }
 
+function toggleHistory() {
+  const list = document.getElementById('history-list');
+  const arrow = document.getElementById('hist-arrow');
+  if (list.style.display === 'none') {
+    list.style.display = 'block';
+    arrow.textContent = '▲';
+  } else {
+    list.style.display = 'none';
+    arrow.textContent = '▼';
+  }
+}
+
 function renderCardSelector() {
   const el = document.getElementById('card-selector');
   el.innerHTML = CARDS_DEF.map((c, i) => `
@@ -431,6 +431,8 @@ function renderCards() {
     const end = getCycleEnd(start);
 
     let progressHtml = '';
+    let ewalletRemHtml = '';
+
     if (def.name.includes("RHB")) {
       const tier = getRHBTier(c.totalSpend);
       progressHtml = def.cats.map(cat => {
@@ -461,13 +463,19 @@ function renderCards() {
           <div class="cat-track"><div class="cat-fill ${colorClass}" style="width:${pct}%"></div></div>
         </div>
       `;
+
+      if (def.name.includes("Affin")) {
+        const remainingCb = Math.max(0, cap - c.cashback);
+        const remainingSpend = round2(remainingCb / 0.03);
+        ewalletRemHtml = `<div class="ewallet-rem">💡 E-Wallet 剩余可刷额度: RM ${remainingSpend.toFixed(2)}</div>`;
+      }
     }
 
     const currentTxs = state.transactions.filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart);
     const txHtml = currentTxs.map(t => `
       <div class="tx-row">
         <div>
-          <div class="tx-cat">${t.category}</div>
+          <div class="tx-cat">${t.category} ${t.note ? `<span style="font-size:10px;color:#94a3b8;">(${t.note})</span>` : ''}</div>
           <div class="tx-date">${new Date(t.timestamp).toLocaleDateString()}</div>
         </div>
         <div style="display:flex; align-items:center; gap:8px;">
@@ -488,11 +496,12 @@ function renderCards() {
           <div>
             <div class="cb-amount">RM ${c.cashback.toFixed(2)}</div>
             <div class="spend-amount">已刷 RM ${c.totalSpend.toFixed(2)}</div>
+            ${ewalletRemHtml}
           </div>
         </div>
         <div class="card-detail" id="detail-${i}">
           ${progressHtml}
-          <div style="margin-top:10px; font-weight:700; font-size:12px; color:var(--text-muted);">本期交易记录</div>
+          <div style="margin-top:10px; font-weight:700; font-size:12px; color:var(--text-muted);">本期交易明细</div>
           ${txHtml || '<div style="padding:6px 0; color:#64748b; font-size:12px;">暂无交易</div>'}
         </div>
       </div>
@@ -500,10 +509,33 @@ function renderCards() {
   }).join('');
 }
 
+function renderHistory() {
+  const state = loadState();
+  const histContainer = document.getElementById('history-list');
+  const pastTxs = state.transactions.filter(t => t.cycleStart !== state.cards[t.cardIndex].lastCycleStart);
+
+  if (!pastTxs.length) {
+    histContainer.innerHTML = '<div style="color:#64748b; font-size:12px; text-align:center;">暂无往期历史记录</div>';
+    return;
+  }
+
+  pastTxs.sort((a, b) => b.timestamp - a.timestamp);
+  histContainer.innerHTML = pastTxs.map(t => `
+    <div class="tx-row">
+      <div>
+        <div class="tx-cat">${CARDS_DEF[t.cardIndex].name} - ${t.category}</div>
+        <div class="tx-date">${new Date(t.timestamp).toLocaleDateString()} (周期 ${t.cycleStart})</div>
+      </div>
+      <div class="tx-amt">RM ${t.amount.toFixed(2)}</div>
+    </div>
+  `).join('');
+}
+
 function renderAll() {
   renderCardSelector();
   renderCatSelector();
   renderCards();
+  renderHistory();
 }
 
 renderAll();
