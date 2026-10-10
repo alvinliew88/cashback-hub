@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finory v8.1 - Refresh Disabled</title>
+<title>Finory v8.2 - Balance Spend Displayed</title>
 <style>
   :root {
     --bg: #000000;
@@ -23,7 +23,7 @@
     background: var(--bg); color: var(--text-main);
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     font-size: 15px; width: 100%; overflow-x: hidden;
-    overscroll-behavior-y: none; /* 彻底禁用浏览器下拉刷新 */
+    overscroll-behavior-y: none;
   }
   body { padding: 10px 10px 60px; }
 
@@ -427,7 +427,7 @@ function renderCards() {
     const end = getCycleEnd(start);
 
     let progressHtml = '';
-    let ewalletRemHtml = '';
+    let remSpendHtml = '';
 
     if (def.name.includes("RHB")) {
       const tier = getRHBTier(c.totalSpend);
@@ -436,11 +436,17 @@ function renderCards() {
         const cap = def.caps[cat];
         const pct = Math.min(100, (cbUsed / cap) * 100);
         const colorClass = pct >= 100 ? 'fill-red' : (pct > 50 ? 'fill-amber' : 'fill-green');
+        
+        const rate = def.rates[cat][tier];
+        const remCb = Math.max(0, cap - cbUsed);
+        const remSpend = rate > 0 ? round2(remCb / rate) : 0;
+        const remText = remCb <= 0 ? "已满额" : `还需 RM ${remSpend.toFixed(2)}`;
+
         return `
           <div class="cat-progress">
             <div class="cat-label-row">
               <span>${cat} (Tier ${tier})</span>
-              <span>RM ${cbUsed.toFixed(2)} / RM ${cap}</span>
+              <span>RM ${cbUsed.toFixed(2)} / RM ${cap} (${remText})</span>
             </div>
             <div class="cat-track"><div class="cat-fill ${colorClass}" style="width:${pct}%"></div></div>
           </div>
@@ -450,6 +456,11 @@ function renderCards() {
       const cap = def.cap;
       const pct = Math.min(100, (c.cashback / cap) * 100);
       const colorClass = pct >= 100 ? 'fill-red' : 'fill-green';
+      
+      const rate = Object.values(def.rates)[0] || 0.03;
+      const remCb = Math.max(0, cap - c.cashback);
+      const remSpend = round2(remCb / rate);
+
       progressHtml = `
         <div class="cat-progress">
           <div class="cat-label-row">
@@ -460,11 +471,9 @@ function renderCards() {
         </div>
       `;
 
-      if (def.name.includes("Affin")) {
-        const remainingCb = Math.max(0, cap - c.cashback);
-        const remainingSpend = round2(remainingCb / 0.03);
-        ewalletRemHtml = `<div class="ewallet-rem">💡 E-Wallet 剩余可刷额度: RM ${remainingSpend.toFixed(2)}</div>`;
-      }
+      remSpendHtml = remCb <= 0 
+        ? `<div class="ewallet-rem" style="color:#ef4444;">🎉 已达成最高 RM ${cap} 返现封顶！</div>`
+        : `<div class="ewallet-rem">💡 距拿满 RM ${cap} 返现还需刷: RM ${remSpend.toFixed(2)}</div>`;
     }
 
     const currentTxs = state.transactions.filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart);
@@ -492,7 +501,7 @@ function renderCards() {
           <div>
             <div class="cb-amount">RM ${c.cashback.toFixed(2)}</div>
             <div class="spend-amount">已刷 RM ${c.totalSpend.toFixed(2)}</div>
-            ${ewalletRemHtml}
+            ${remSpendHtml}
           </div>
         </div>
         <div class="card-detail" id="detail-${i}">
