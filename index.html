@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finory v8.5 - Form Submit & Glow</title>
+<title>Finory v8.6 - EN & Glow Fix</title>
 <style>
   :root {
     --bg: #000000;
@@ -51,7 +51,6 @@
   }
   .cat-opt-btn:active { opacity: 0.8; transform: scale(0.97); }
 
-  /* Inline Input Area (Form) */
   .inline-input-box {
     display: none; background: #0f172a; padding: 12px; border-radius: 10px;
     border: 1px solid #38bdf8; animation: slideDown 0.2s ease-out;
@@ -80,7 +79,6 @@
     transition: all 0.3s ease;
   }
   
-  /* Edge Glow Animation */
   @keyframes glow-pulse {
     0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); border-color: #38bdf8; }
     40% { box-shadow: 0 0 24px 6px rgba(56, 189, 248, 1); border-color: #7dd3fc; }
@@ -138,38 +136,37 @@
 <div id="toast"></div>
 
 <div class="quick-panel">
-  <div class="panel-title">⚡ 极速记账工作流</div>
-  <div class="step-label">1. 选择使用的信用卡：</div>
+  <div class="panel-title">⚡ Quick Entry</div>
+  <div class="step-label">1. Select Credit Card:</div>
   <div class="card-select-grid" id="card-selector"></div>
   
-  <div class="step-label">2. 录入消费：</div>
+  <div class="step-label">2. Select Category:</div>
   <div class="cat-select-grid" id="cat-selector"></div>
 
-  <!-- Form Wrapper for Android Keyboard Enter Key -->
   <div class="inline-input-box" id="inline-input-box">
-    <div class="inline-header">正在记录: <span id="inline-cat-name" style="color:#fff;"></span></div>
+    <div class="inline-header">Recording: <span id="inline-cat-name" style="color:#fff;"></span></div>
     <form class="inline-form" onsubmit="triggerGlowAndSave(); return false;">
       <input type="number" id="inline-amt" class="inline-amt" placeholder="RM" step="0.01" inputmode="decimal" required>
       <button type="submit" class="btn-inline-save">✓</button>
-      <button type="button" class="btn-inline-cancel" onclick="closeInlineInput()">取消</button>
+      <button type="button" class="btn-inline-cancel" onclick="closeInlineInput()">Cancel</button>
     </form>
   </div>
 </div>
 
-<div class="section-header">💳 当期返现进度</div>
+<div class="section-header">💳 Current Cashback Progress</div>
 <div id="card-container"></div>
 
 <div class="history-box">
   <div class="history-title" onclick="toggleHistory()">
-    <span>📋 60天历史记录 (账单核对)</span>
+    <span>📋 60-Day History (Statement Check)</span>
     <span id="hist-arrow">▼</span>
   </div>
   <div id="history-list" style="display:none; margin-top:14px;"></div>
 </div>
 
 <div class="backup-box">
-  <button class="btn-backup" onclick="exportData()">💾 导出备份(JSON)</button>
-  <button class="btn-backup" onclick="document.getElementById('import-file').click()">📂 导入数据</button>
+  <button class="btn-backup" onclick="exportData()">💾 Export Backup (JSON)</button>
+  <button class="btn-backup" onclick="document.getElementById('import-file').click()">📂 Import Data</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
 </div>
 
@@ -397,8 +394,6 @@ function openInlineInput(cat) {
   
   const amtInput = document.getElementById('inline-amt');
   amtInput.value = '';
-  
-  // 同步请求焦点，消除 setTimeout 拦截问题
   amtInput.focus();
 }
 
@@ -406,7 +401,6 @@ function closeInlineInput() {
   pendingCategory = "";
   document.getElementById('inline-input-box').style.display = 'none';
   document.getElementById('cat-selector').style.display = 'grid';
-  // 隐藏键盘
   document.getElementById('inline-amt').blur();
 }
 
@@ -415,25 +409,24 @@ function triggerGlowAndSave() {
   const amt = parseFloat(amtIn.value);
   
   if (isNaN(amt)) {
-    showToast("⚠️ 请输入有效金额", true);
+    showToast("⚠️ Please enter a valid amount", true);
     amtIn.focus();
     return;
   }
 
+  // 1. Save and render DOM first
+  finalizeTx(amt);
+
+  // 2. Apply glow to the newly created DOM element
   const targetCardWrap = document.getElementById('card-wrap-' + selectedCardIndex);
-  
   if (targetCardWrap) {
     const cardEl = targetCardWrap.querySelector('.card');
-    cardEl.classList.remove('glow-active');
-    void cardEl.offsetWidth; 
     cardEl.classList.add('glow-active');
     
     setTimeout(() => {
       cardEl.classList.remove('glow-active');
     }, 1200);
   }
-
-  finalizeTx(amt);
 }
 
 function finalizeTx(amt) {
@@ -452,8 +445,8 @@ function finalizeTx(amt) {
   saveState(state);
   
   closeInlineInput();
-  renderAll();
-  showToast(`✅ 已记 RM ${amt.toFixed(2)} 到 ${CARDS_DEF[selectedCardIndex].name}`);
+  renderAll(); // Rebuilds the HTML
+  showToast(`✅ Saved RM ${amt.toFixed(2)} to ${CARDS_DEF[selectedCardIndex].name}`);
 }
 
 function deleteTx(id) {
@@ -464,7 +457,7 @@ function deleteTx(id) {
   recalcCard(state, tx.cardIndex);
   saveState(state);
   renderAll();
-  showToast("🗑️ 已删除交易");
+  showToast("🗑️ Transaction deleted");
 }
 
 function toggleDetail(i) {
@@ -486,7 +479,7 @@ function toggleHistory() {
 
 function exportData() {
   const data = localStorage.getItem('finoryData_v8');
-  if(!data) { showToast("暂无数据可导出", true); return; }
+  if(!data) { showToast("No data to export", true); return; }
   const blob = new Blob([data], {type: "application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -504,10 +497,10 @@ function importData(e) {
     try {
       JSON.parse(evt.target.result);
       localStorage.setItem('finoryData_v8', evt.target.result);
-      showToast("✅ 恢复成功，正在刷新...");
+      showToast("✅ Restore successful, refreshing...");
       setTimeout(() => location.reload(), 1000);
     } catch(err) {
-      showToast("❌ 数据格式错误", true);
+      showToast("❌ Invalid data format", true);
     }
   };
   reader.readAsText(file);
@@ -553,7 +546,7 @@ function renderCards() {
         const rate = def.rates[cat][tier];
         const remCb = Math.max(0, cap - cbUsed);
         const remSpend = rate > 0 ? round2(remCb / rate) : 0;
-        const remText = remCb <= 0 ? "已满额" : `需 RM ${remSpend.toFixed(2)}`;
+        const remText = remCb <= 0 ? "Maxed Out" : `Need RM ${remSpend.toFixed(2)}`;
 
         return `
           <div class="cat-progress">
@@ -577,15 +570,15 @@ function renderCards() {
       progressHtml = `
         <div class="cat-progress">
           <div class="cat-label-row">
-            <span>返现进度</span>
+            <span>Cashback Progress</span>
             <span>RM ${c.cashback.toFixed(2)} / RM ${cap}</span>
           </div>
           <div class="cat-track"><div class="cat-fill ${colorClass}" style="width:${pct}%"></div></div>
         </div>
       `;
       remSpendHtml = remCb <= 0 
-        ? `<div class="ewallet-rem" style="color:#ef4444;">🎉 已达成最高 RM ${cap} 返现！</div>`
-        : `<div class="ewallet-rem">💡 距拿满还需刷: RM ${remSpend.toFixed(2)}</div>`;
+        ? `<div class="ewallet-rem" style="color:#ef4444;">🎉 Reached Max RM ${cap} Cashback!</div>`
+        : `<div class="ewallet-rem">💡 Spend RM ${remSpend.toFixed(2)} more to max out</div>`;
     }
 
     const currentTxs = state.transactions.filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart);
@@ -597,7 +590,7 @@ function renderCards() {
         </div>
         <div style="display:flex; align-items:center;">
           <div class="tx-amt">RM ${t.amount.toFixed(2)}</div>
-          <button class="tx-del" onclick="deleteTx('${t.id}')">删除</button>
+          <button class="tx-del" onclick="deleteTx('${t.id}')">Delete</button>
         </div>
       </div>
     `).join('');
@@ -609,18 +602,18 @@ function renderCards() {
           <div class="card-summary" onclick="toggleDetail(${i})">
             <div>
               <div class="card-name">${def.name}</div>
-              <div class="cycle-info">${start.slice(5)} 至 ${end.slice(5)}</div>
+              <div class="cycle-info">${start.slice(5)} to ${end.slice(5)}</div>
             </div>
             <div>
               <div class="cb-amount">RM ${c.cashback.toFixed(2)}</div>
-              <div class="spend-amount">已刷 RM ${c.totalSpend.toFixed(2)}</div>
+              <div class="spend-amount">Spent RM ${c.totalSpend.toFixed(2)}</div>
               ${remSpendHtml}
             </div>
           </div>
           <div class="card-detail" id="detail-${i}">
             ${progressHtml}
-            <div style="margin-top:14px; font-weight:700; font-size:13px; color:var(--text-muted);">本期交易明细</div>
-            ${txHtml || '<div style="padding:10px 0; color:#64748b; font-size:12px;">暂无交易</div>'}
+            <div style="margin-top:14px; font-weight:700; font-size:13px; color:var(--text-muted);">Current Cycle Transactions</div>
+            ${txHtml || '<div style="padding:10px 0; color:#64748b; font-size:12px;">No transactions</div>'}
           </div>
         </div>
       </div>
@@ -634,7 +627,7 @@ function renderHistory() {
   const pastTxs = state.transactions.filter(t => t.cycleStart !== state.cards[t.cardIndex].lastCycleStart);
 
   if (!pastTxs.length) {
-    histContainer.innerHTML = '<div style="color:#64748b; font-size:12px; text-align:center;">暂无往期历史记录</div>';
+    histContainer.innerHTML = '<div style="color:#64748b; font-size:12px; text-align:center;">No past history records</div>';
     return;
   }
 
@@ -643,7 +636,7 @@ function renderHistory() {
     <div class="tx-row">
       <div>
         <div class="tx-cat">${CARDS_DEF[t.cardIndex].name} - ${t.category}</div>
-        <div class="tx-date">${new Date(t.timestamp).toLocaleDateString()} (周期 ${t.cycleStart})</div>
+        <div class="tx-date">${new Date(t.timestamp).toLocaleDateString()} (Cycle ${t.cycleStart})</div>
       </div>
       <div class="tx-amt">RM ${t.amount.toFixed(2)}</div>
     </div>
