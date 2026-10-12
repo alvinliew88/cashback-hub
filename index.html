@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finory v8.4 - Inline Input & Glow</title>
+<title>Finory v8.5 - Form Submit & Glow</title>
 <style>
   :root {
     --bg: #000000;
@@ -51,13 +51,13 @@
   }
   .cat-opt-btn:active { opacity: 0.8; transform: scale(0.97); }
 
-  /* Inline Input Area */
+  /* Inline Input Area (Form) */
   .inline-input-box {
     display: none; background: #0f172a; padding: 12px; border-radius: 10px;
     border: 1px solid #38bdf8; animation: slideDown 0.2s ease-out;
   }
   .inline-header { font-size: 13px; color: #94a3b8; margin-bottom: 10px; font-weight: 700;}
-  .inline-row { display: flex; gap: 8px; }
+  .inline-form { display: flex; gap: 8px; width: 100%; margin: 0; padding: 0; }
   .inline-amt {
     flex: 1; background: #1e293b; color: #fff; border: 1px solid var(--border);
     padding: 12px; border-radius: 8px; font-size: 20px; font-family: monospace;
@@ -145,14 +145,14 @@
   <div class="step-label">2. 录入消费：</div>
   <div class="cat-select-grid" id="cat-selector"></div>
 
-  <!-- Hidden Inline Input -->
+  <!-- Form Wrapper for Android Keyboard Enter Key -->
   <div class="inline-input-box" id="inline-input-box">
     <div class="inline-header">正在记录: <span id="inline-cat-name" style="color:#fff;"></span></div>
-    <div class="inline-row">
-      <input type="number" id="inline-amt" class="inline-amt" placeholder="RM" step="0.01" inputmode="decimal">
-      <button class="btn-inline-save" onclick="triggerGlowAndSave()">✓</button>
-      <button class="btn-inline-cancel" onclick="closeInlineInput()">取消</button>
-    </div>
+    <form class="inline-form" onsubmit="triggerGlowAndSave(); return false;">
+      <input type="number" id="inline-amt" class="inline-amt" placeholder="RM" step="0.01" inputmode="decimal" required>
+      <button type="submit" class="btn-inline-save">✓</button>
+      <button type="button" class="btn-inline-cancel" onclick="closeInlineInput()">取消</button>
+    </form>
   </div>
 </div>
 
@@ -397,13 +397,17 @@ function openInlineInput(cat) {
   
   const amtInput = document.getElementById('inline-amt');
   amtInput.value = '';
-  setTimeout(() => amtInput.focus(), 50);
+  
+  // 同步请求焦点，消除 setTimeout 拦截问题
+  amtInput.focus();
 }
 
 function closeInlineInput() {
   pendingCategory = "";
   document.getElementById('inline-input-box').style.display = 'none';
   document.getElementById('cat-selector').style.display = 'grid';
+  // 隐藏键盘
+  document.getElementById('inline-amt').blur();
 }
 
 function triggerGlowAndSave() {
@@ -421,7 +425,7 @@ function triggerGlowAndSave() {
   if (targetCardWrap) {
     const cardEl = targetCardWrap.querySelector('.card');
     cardEl.classList.remove('glow-active');
-    void cardEl.offsetWidth; // Trigger reflow to restart animation
+    void cardEl.offsetWidth; 
     cardEl.classList.add('glow-active');
     
     setTimeout(() => {
