@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finory v8.3 - Laser & Backup Editon</title>
+<title>Finory v8.4 - Inline Input & Glow</title>
 <style>
   :root {
     --bg: #000000;
@@ -51,13 +51,43 @@
   }
   .cat-opt-btn:active { opacity: 0.8; transform: scale(0.97); }
 
+  /* Inline Input Area */
+  .inline-input-box {
+    display: none; background: #0f172a; padding: 12px; border-radius: 10px;
+    border: 1px solid #38bdf8; animation: slideDown 0.2s ease-out;
+  }
+  .inline-header { font-size: 13px; color: #94a3b8; margin-bottom: 10px; font-weight: 700;}
+  .inline-row { display: flex; gap: 8px; }
+  .inline-amt {
+    flex: 1; background: #1e293b; color: #fff; border: 1px solid var(--border);
+    padding: 12px; border-radius: 8px; font-size: 20px; font-family: monospace;
+    font-weight: 900; outline: none; text-align: left;
+  }
+  .inline-amt:focus { border-color: #38bdf8; }
+  .btn-inline-save { background: var(--accent-green); color: #000; border: none; font-weight: 900; border-radius: 8px; padding: 0 20px; font-size: 18px; cursor: pointer;}
+  .btn-inline-cancel { background: #334155; color: #fff; border: none; font-weight: 700; border-radius: 8px; padding: 0 16px; font-size: 13px; cursor: pointer;}
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
   .section-header { font-size: 16px; font-weight: 800; margin: 20px 0 10px 4px; color: #f3f4f6; }
   .card-wrap { margin-bottom: 14px; }
   .card {
     background: var(--surface-card); border-radius: 12px; overflow: hidden;
     border: 1px solid var(--border); width: 100%; position: relative;
+    transition: all 0.3s ease;
   }
-  .card.highlight { border-color: #38bdf8; box-shadow: 0 0 12px rgba(56, 189, 248, 0.3); }
+  
+  /* Edge Glow Animation */
+  @keyframes glow-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); border-color: #38bdf8; }
+    40% { box-shadow: 0 0 24px 6px rgba(56, 189, 248, 1); border-color: #7dd3fc; }
+    100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); border-color: var(--border); }
+  }
+  .card.glow-active { animation: glow-pulse 1.2s ease-out; }
+
   .card-bar { height: 4px; width: 100%; }
   .bar-rhb { background: linear-gradient(90deg, #f97316, #ef4444); }
   .bar-affin { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
@@ -94,35 +124,6 @@
   .btn-backup { flex: 1; background: #334155; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;}
   .btn-backup:active { background: #475569; }
 
-  /* Modal Styles */
-  .modal-overlay {
-    position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.8); backdrop-filter: blur(4px);
-    display: none; justify-content: center; align-items: center; z-index: 1000;
-  }
-  .modal-content {
-    background: var(--surface-card); width: 90%; max-width: 360px;
-    padding: 20px; border-radius: 16px; border: 2px solid #38bdf8;
-    text-align: center;
-  }
-  .modal-title { font-size: 16px; font-weight: 800; color: #fff; margin-bottom: 16px; }
-  .modal-input {
-    width: 100%; background: #0f172a; border: 2px solid #3b82f6;
-    color: #38bdf8; border-radius: 12px; padding: 14px; font-size: 28px;
-    font-family: monospace; font-weight: 900; outline: none; text-align: center; margin-bottom: 16px;
-  }
-  .modal-actions { display: flex; gap: 10px; }
-  .btn-cancel { flex: 1; background: #334155; border: none; color: #fff; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 15px;}
-  .btn-confirm { flex: 2; background: var(--accent-blue); border: none; color: #fff; padding: 14px; border-radius: 10px; font-weight: 800; font-size: 15px;}
-
-  /* Laser Animation */
-  .laser-beam {
-    position: fixed; height: 4px; background: #38bdf8;
-    box-shadow: 0 0 12px 2px #38bdf8, 0 0 6px 1px #fff;
-    z-index: 9999; transform-origin: left center; pointer-events: none;
-    border-radius: 4px; transition: width 0.25s ease-out, opacity 0.15s ease-in;
-  }
-
   #toast {
     position: fixed; top: 15px; left: 5%; width: 90%;
     background: #15803d; color: #fff; padding: 12px; border-radius: 20px;
@@ -140,8 +141,19 @@
   <div class="panel-title">⚡ 极速记账工作流</div>
   <div class="step-label">1. 选择使用的信用卡：</div>
   <div class="card-select-grid" id="card-selector"></div>
-  <div class="step-label">2. 点击类别呼出键盘：</div>
+  
+  <div class="step-label">2. 录入消费：</div>
   <div class="cat-select-grid" id="cat-selector"></div>
+
+  <!-- Hidden Inline Input -->
+  <div class="inline-input-box" id="inline-input-box">
+    <div class="inline-header">正在记录: <span id="inline-cat-name" style="color:#fff;"></span></div>
+    <div class="inline-row">
+      <input type="number" id="inline-amt" class="inline-amt" placeholder="RM" step="0.01" inputmode="decimal">
+      <button class="btn-inline-save" onclick="triggerGlowAndSave()">✓</button>
+      <button class="btn-inline-cancel" onclick="closeInlineInput()">取消</button>
+    </div>
+  </div>
 </div>
 
 <div class="section-header">💳 当期返现进度</div>
@@ -159,18 +171,6 @@
   <button class="btn-backup" onclick="exportData()">💾 导出备份(JSON)</button>
   <button class="btn-backup" onclick="document.getElementById('import-file').click()">📂 导入数据</button>
   <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
-</div>
-
-<!-- Input Modal -->
-<div class="modal-overlay" id="input-modal">
-  <div class="modal-content" id="modal-box">
-    <div class="modal-title" id="modal-title">输入金额</div>
-    <input type="number" id="modal-amt" class="modal-input" placeholder="0.00" step="0.01" inputmode="decimal">
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeModal()">取消</button>
-      <button class="btn-confirm" onclick="triggerLaserAndSave()">确认记录</button>
-    </div>
-  </div>
 </div>
 
 <script>
@@ -281,7 +281,6 @@ function loadState() {
   }
 
   let changed = false;
-  // Global check for cycle changes
   state.cards.forEach((c, i) => {
     const currentStart = getCycleStart(CARDS_DEF[i].resetDay);
     if (c.lastCycleStart !== currentStart) {
@@ -369,7 +368,6 @@ function recalcCard(state, cardIndex) {
       
       if (currentCb + earned > cap) earned = round2(cap - currentCb);
       
-      // Removed limitation to allow negative earned for refunds deduction
       cardState.cashback = Math.max(0, round2(cardState.cashback + earned));
       cardState.categoryCashback[tx.category] = Math.max(0, round2(currentCb + earned));
     } else {
@@ -386,70 +384,52 @@ function recalcCard(state, cardIndex) {
 
 function selectCard(index) {
   selectedCardIndex = index;
+  closeInlineInput();
   renderCardSelector();
   renderCatSelector();
 }
 
-function openInputModal(cat) {
+function openInlineInput(cat) {
   pendingCategory = cat;
-  const cName = CARDS_DEF[selectedCardIndex].name;
-  document.getElementById('modal-title').textContent = `${cName} - ${cat}`;
-  document.getElementById('modal-amt').value = '';
-  document.getElementById('input-modal').style.display = 'flex';
-  setTimeout(() => document.getElementById('modal-amt').focus(), 100);
-}
-
-function closeModal() {
-  document.getElementById('input-modal').style.display = 'none';
-  pendingCategory = "";
-}
-
-function triggerLaserAndSave() {
-  const amtIn = document.getElementById('modal-amt');
-  const amt = parseFloat(amtIn.value);
-  if (!amt && amt !== 0) { showToast("⚠️ 请输入金额 (支持负数退款)", true); return; }
-
-  const modalBox = document.getElementById('modal-box');
-  const targetCard = document.getElementById('card-wrap-' + selectedCardIndex);
+  document.getElementById('cat-selector').style.display = 'none';
+  document.getElementById('inline-input-box').style.display = 'block';
+  document.getElementById('inline-cat-name').textContent = cat;
   
-  if (!targetCard) {
-    finalizeTx(amt);
+  const amtInput = document.getElementById('inline-amt');
+  amtInput.value = '';
+  setTimeout(() => amtInput.focus(), 50);
+}
+
+function closeInlineInput() {
+  pendingCategory = "";
+  document.getElementById('inline-input-box').style.display = 'none';
+  document.getElementById('cat-selector').style.display = 'grid';
+}
+
+function triggerGlowAndSave() {
+  const amtIn = document.getElementById('inline-amt');
+  const amt = parseFloat(amtIn.value);
+  
+  if (isNaN(amt)) {
+    showToast("⚠️ 请输入有效金额", true);
+    amtIn.focus();
     return;
   }
 
-  // Laser Animation Math
-  const startRect = modalBox.getBoundingClientRect();
-  const endRect = targetCard.getBoundingClientRect();
+  const targetCardWrap = document.getElementById('card-wrap-' + selectedCardIndex);
   
-  const startX = startRect.left + startRect.width / 2;
-  const startY = startRect.top + startRect.height / 2;
-  const endX = endRect.left + endRect.width / 2;
-  const endY = endRect.top + 40; // Point to header of card
+  if (targetCardWrap) {
+    const cardEl = targetCardWrap.querySelector('.card');
+    cardEl.classList.remove('glow-active');
+    void cardEl.offsetWidth; // Trigger reflow to restart animation
+    cardEl.classList.add('glow-active');
+    
+    setTimeout(() => {
+      cardEl.classList.remove('glow-active');
+    }, 1200);
+  }
 
-  const length = Math.hypot(endX - startX, endY - startY);
-  const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
-
-  const laser = document.createElement('div');
-  laser.className = 'laser-beam';
-  laser.style.left = startX + 'px';
-  laser.style.top = startY + 'px';
-  laser.style.width = '0px';
-  laser.style.transform = `rotate(${angle}deg)`;
-  document.body.appendChild(laser);
-
-  closeModal();
-
-  // Highlight Card target
-  targetCard.querySelector('.card').classList.add('highlight');
-
-  setTimeout(() => { laser.style.width = length + 'px'; }, 10);
-  setTimeout(() => { laser.style.opacity = '0'; }, 250);
-  
-  setTimeout(() => {
-    laser.remove();
-    targetCard.querySelector('.card').classList.remove('highlight');
-    finalizeTx(amt);
-  }, 400);
+  finalizeTx(amt);
 }
 
 function finalizeTx(amt) {
@@ -466,6 +446,8 @@ function finalizeTx(amt) {
   state.transactions.push(tx);
   recalcCard(state, selectedCardIndex);
   saveState(state);
+  
+  closeInlineInput();
   renderAll();
   showToast(`✅ 已记 RM ${amt.toFixed(2)} 到 ${CARDS_DEF[selectedCardIndex].name}`);
 }
@@ -516,7 +498,7 @@ function importData(e) {
   const reader = new FileReader();
   reader.onload = function(evt) {
     try {
-      JSON.parse(evt.target.result); // test parse
+      JSON.parse(evt.target.result);
       localStorage.setItem('finoryData_v8', evt.target.result);
       showToast("✅ 恢复成功，正在刷新...");
       setTimeout(() => location.reload(), 1000);
@@ -540,7 +522,7 @@ function renderCatSelector() {
   const el = document.getElementById('cat-selector');
   const currentCard = CARDS_DEF[selectedCardIndex];
   el.innerHTML = currentCard.cats.map(cat => `
-    <button class="cat-opt-btn" onclick="openInputModal('${cat}')">${cat}</button>
+    <button class="cat-opt-btn" onclick="openInlineInput('${cat}')">${cat}</button>
   `).join('');
 }
 
@@ -567,7 +549,7 @@ function renderCards() {
         const rate = def.rates[cat][tier];
         const remCb = Math.max(0, cap - cbUsed);
         const remSpend = rate > 0 ? round2(remCb / rate) : 0;
-        const remText = remCb <= 0 ? "已满额" : `还需 RM ${remSpend.toFixed(2)}`;
+        const remText = remCb <= 0 ? "已满额" : `需 RM ${remSpend.toFixed(2)}`;
 
         return `
           <div class="cat-progress">
@@ -670,11 +652,6 @@ function renderAll() {
   renderCards();
   renderHistory();
 }
-
-// 绑定回车键触发
-document.getElementById('modal-amt').addEventListener('keypress', function(e) {
-  if(e.key === 'Enter') triggerLaserAndSave();
-});
 
 renderAll();
 </script>
