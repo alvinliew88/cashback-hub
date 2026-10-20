@@ -3,251 +3,197 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Finory v8.6 - EN & Glow Fix</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Finory</title>
 <style>
   :root {
     --bg: #000000;
-    --surface: #121826;
-    --surface-card: #1e293b;
-    --border: #334155;
-    --text-main: #ffffff;
-    --text-muted: #94a3b8;
-    --accent-blue: #3b82f6;
-    --accent-green: #22c55e;
-    --accent-red: #ef4444;
-    --accent-amber: #f59e0b;
+    --surface: #0a0a0a;
+    --border: #1a1a1a;
+    --text: #ffffff;
+    --text-secondary: #a0a0a0;
+    --text-muted: #555555;
+    --input-bg: #7dd3fc;
+    --input-border: #38bdf8;
+    --input-shadow: rgba(56, 189, 248, 0.4);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body {
-    margin: 0; padding: 0;
-    background: var(--bg); color: var(--text-main);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    font-size: 15px; width: 100%; overflow-x: hidden;
-    overscroll-behavior-y: none;
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 15px;
+    line-height: 1.4;
+    overscroll-behavior-y: auto;
+    padding: 10px 10px 60px;
+    -webkit-font-smoothing: antialiased;
   }
-  body { padding: 10px 10px 80px; }
-
-  .quick-panel {
-    background: var(--surface-card);
-    border: 2px solid var(--accent-blue);
-    border-radius: 14px; padding: 16px 12px; margin-bottom: 16px; width: 100%;
-  }
-  .panel-title { font-size: 16px; font-weight: 800; color: #60a5fa; margin-bottom: 12px; }
-  .step-label { font-size: 13px; color: var(--text-muted); font-weight: 700; margin: 8px 0 6px; }
-
-  .card-select-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 12px; }
-  .card-opt-btn {
-    background: #0f172a; border: 1px solid var(--border); color: #94a3b8;
-    padding: 12px 6px; border-radius: 10px; font-size: 13px; font-weight: 700;
-    text-align: center; cursor: pointer; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    transition: all 0.2s;
-  }
-  .card-opt-btn.active { background: var(--accent-blue); color: #ffffff; border-color: #60a5fa; box-shadow: 0 0 8px rgba(59, 130, 246, 0.4); }
-
-  .cat-select-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .cat-opt-btn {
-    background: #22c55e; border: none; color: #000000; padding: 12px 4px;
-    border-radius: 10px; font-size: 14px; font-weight: 900; cursor: pointer; text-align: center;
-  }
-  .cat-opt-btn:active { opacity: 0.8; transform: scale(0.97); }
-
-  .inline-input-box {
-    display: none; background: #0f172a; padding: 12px; border-radius: 10px;
-    border: 1px solid #38bdf8; animation: slideDown 0.2s ease-out;
-  }
-  .inline-header { font-size: 13px; color: #94a3b8; margin-bottom: 10px; font-weight: 700;}
-  .inline-form { display: flex; gap: 8px; width: 100%; margin: 0; padding: 0; }
-  .inline-amt {
-    flex: 1; background: #1e293b; color: #fff; border: 1px solid var(--border);
-    padding: 12px; border-radius: 8px; font-size: 20px; font-family: monospace;
-    font-weight: 900; outline: none; text-align: left;
-  }
-  .inline-amt:focus { border-color: #38bdf8; }
-  .btn-inline-save { background: var(--accent-green); color: #000; border: none; font-weight: 900; border-radius: 8px; padding: 0 20px; font-size: 18px; cursor: pointer;}
-  .btn-inline-cancel { background: #334155; color: #fff; border: none; font-weight: 700; border-radius: 8px; padding: 0 16px; font-size: 13px; cursor: pointer;}
-
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-5px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .section-header { font-size: 16px; font-weight: 800; margin: 20px 0 10px 4px; color: #f3f4f6; }
-  .card-wrap { margin-bottom: 14px; }
-  .card {
-    background: var(--surface-card); border-radius: 12px; overflow: hidden;
-    border: 1px solid var(--border); width: 100%; position: relative;
-    transition: all 0.3s ease;
-  }
-  
-  @keyframes glow-pulse {
-    0% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7); border-color: #38bdf8; }
-    40% { box-shadow: 0 0 24px 6px rgba(56, 189, 248, 1); border-color: #7dd3fc; }
-    100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0); border-color: var(--border); }
-  }
-  .card.glow-active { animation: glow-pulse 1.2s ease-out; }
-
+  .card { background: var(--surface); border-radius: 14px; overflow: hidden; margin-bottom: 10px; border: 1px solid var(--border); }
   .card-bar { height: 4px; width: 100%; }
   .bar-rhb { background: linear-gradient(90deg, #f97316, #ef4444); }
-  .bar-affin { background: linear-gradient(90deg, #3b82f6, #1d4ed8); }
+  .bar-affin { background: linear-gradient(90deg, #3b82f6, #2563eb); }
+  .bar-ikhwan { background: linear-gradient(90deg, #9ca3af, #4b5563); }
   .bar-maybank { background: linear-gradient(90deg, #fbbf24, #d97706); }
-
-  .card-summary { padding: 14px 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
-  .card-name { font-size: 16px; font-weight: 800; color: #fff; }
-  .cycle-info { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 4px; }
-  .cb-amount { font-size: 22px; font-weight: 900; color: var(--accent-green); text-align: right; font-family: monospace; }
-  .spend-amount { font-size: 12px; color: #7dd3fc; text-align: right; font-weight: 700; margin-top: 2px;}
-  .ewallet-rem { font-size: 12px; color: #facc15; font-weight: 800; margin-top: 4px; text-align: right; }
-
-  .card-detail { display: none; padding: 0 12px 14px; border-top: 1px solid var(--border); }
+  .card-summary { display: flex; justify-content: space-between; align-items: center; padding: 14px; position: relative; cursor: pointer; user-select: none; }
+  .card-summary-left { flex: 1; min-width: 0; padding-right: 8px; }
+  .card-summary-right { text-align: right; margin-right: 18px; }
+  .card-arrow { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-muted); transition: transform 0.2s; }
+  .card-arrow.open { transform: translateY(-50%) rotate(180deg); }
+  .card-name { font-weight: 800; font-size: 15px; letter-spacing: -0.3px; color: #fff; line-height: 1.2; }
+  .cycle-info { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 4px; font-weight: 600; }
+  .cb-amount { font-family: 'SF Mono', monospace; font-size: 22px; font-weight: 900; line-height: 1; color: #fff; }
+  .spend-amount { font-family: 'SF Mono', monospace; font-size: 11px; color: #7dd3fc; margin-top: 3px; font-weight: 700; }
+  .card-detail { display: none; padding: 0 14px 14px; border-top: 1px solid var(--border); }
   .card-detail.open { display: block; }
-  
-  .cat-progress { margin-top: 10px; }
-  .cat-label-row { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; margin-bottom: 4px; }
-  .cat-track { height: 8px; background: #0f172a; border-radius: 4px; overflow: hidden; border: 1px solid #334155; }
-  .cat-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
-  .fill-green { background: var(--accent-green); }
-  .fill-amber { background: var(--accent-amber); }
-  .fill-red { background: var(--accent-red); }
-
-  .tx-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); }
-  .tx-date { font-size: 11px; color: var(--text-muted); font-family: monospace; margin-top: 4px;}
-  .tx-cat { font-size: 14px; font-weight: 700; color: #e2e8f0; }
-  .tx-amt { font-size: 15px; font-weight: 800; font-family: monospace; color: #fff; }
-  .tx-del { background: #7f1d1d; border: none; color: #fff; padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-left: 12px; cursor: pointer;}
-
-  .history-box { background: #0f172a; border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-top: 20px; }
-  .history-title { font-size: 14px; font-weight: 800; color: #94a3b8; display: flex; justify-content: space-between; cursor: pointer; }
-
-  .backup-box { display: flex; gap: 10px; margin-top: 20px; }
-  .btn-backup { flex: 1; background: #334155; color: #fff; border: none; padding: 12px; border-radius: 10px; font-weight: 700; font-size: 13px; cursor: pointer;}
-  .btn-backup:active { background: #475569; }
-
-  #toast {
-    position: fixed; top: 15px; left: 5%; width: 90%;
-    background: #15803d; color: #fff; padding: 12px; border-radius: 20px;
-    font-size: 14px; font-weight: 800; display: none; z-index: 9999;
-    text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-  }
+  .cat-progress-list { margin-top: 12px; margin-bottom: 0; }
+  .cat-progress { margin-bottom: 10px; }
+  .cat-progress:last-child { margin-bottom: 0; }
+  .cat-label-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 5px; }
+  .cat-label-name { font-size: 14px; font-weight: 700; color: #e5e5e5; }
+  .cat-label-value { font-family: 'SF Mono', monospace; font-size: 12px; color: var(--text-secondary); font-weight: 600; }
+  .cat-track { width: 100%; height: 8px; background: #111; border-radius: 4px; overflow: hidden; border: 1px solid #222; }
+  .cat-fill { height: 100%; border-radius: 4px; transition: width 0.3s ease; min-width: 2px; }
+  .fill-cyan { background: linear-gradient(90deg, #22d3ee, #06b6d4); box-shadow: 0 0 6px rgba(34,211,238,0.25); }
+  .fill-lime { background: linear-gradient(90deg, #a3e635, #65a30d); box-shadow: 0 0 6px rgba(163,230,53,0.25); }
+  .fill-violet { background: linear-gradient(90deg, #c084fc, #7c3aed); box-shadow: 0 0 6px rgba(192,132,252,0.25); }
+  .fill-coral { background: linear-gradient(90deg, #fb7185, #e11d48); box-shadow: 0 0 6px rgba(251,113,133,0.25); }
+  .fill-amber { background: linear-gradient(90deg, #fbbf24, #d97706); box-shadow: 0 0 6px rgba(251,191,36,0.25); }
+  .amt-input { width: 100%; background: var(--input-bg); border: 2px solid var(--input-border); color: #000; border-radius: 12px; padding: 14px; font-size: 20px; outline: none; font-family: 'SF Mono', monospace; font-weight: 900; height: 52px; margin-top: 8px; margin-bottom: 8px; box-shadow: 0 0 12px var(--input-shadow); }
+  .amt-input::placeholder { color: #0369a1; font-weight: 700; }
+  .amt-input:focus { border-color: #fff; box-shadow: 0 0 0 4px rgba(56,189,248,0.5), 0 0 20px rgba(56,189,248,0.6); }
+  .date-row { display: flex; align-items: center; gap: 8px; margin-top: 12px; margin-bottom: 4px; }
+  .date-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
+  .date-input { background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 8px; padding: 6px 10px; font-size: 14px; font-weight: 600; outline: none; }
+  .date-input:focus { border-color: #38bdf8; }
+  .btn-row { display: flex; flex-direction: column; gap: 6px; }
+  .cat-btn { width: 100%; background: #141414; border: 1px solid var(--border); color: #fff; border-radius: 12px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; text-align: center; min-height: 44px; display: flex; align-items: center; justify-content: center; letter-spacing: 0.02em; }
+  .cat-btn:active { background: #222; transform: scale(0.98); }
+  .cat-btn.maxed { background: #7f1d1d; border-color: #dc2626; color: #fff; }
+  .cat-btn.maxed:active { background: #991b1b; }
+  .card-tx-section { margin-top: 12px; border-top: 1px solid var(--border); padding-top: 10px; }
+  .card-tx-title { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
+  .card-tx-empty { text-align: center; color: #333; font-size: 13px; padding: 8px 0; font-weight: 600; }
+  .stmt-total-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+  .stmt-total-label { font-size: 13px; font-weight: 700; color: #7dd3fc; text-transform: uppercase; letter-spacing: 0.04em; }
+  .stmt-total-value { font-family: 'SF Mono', monospace; font-size: 16px; font-weight: 900; color: #7dd3fc; }
+  .prev-stmt-total-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0 6px 0; margin-top: 10px; border-top: 1px solid #2a2a2a; }
+  .prev-stmt-total-label { font-size: 13px; font-weight: 700; color: #facc15; letter-spacing: 0.04em; }
+  .prev-stmt-total-value { font-family: 'SF Mono', monospace; font-size: 16px; font-weight: 900; color: #facc15; }
+  .prev-stmt-cycle { font-size: 10px; color: #777; font-weight: 600; margin-left: 6px; }
+  .history-section { margin-top: 28px; }
+  .history-title { font-size: 18px; font-weight: 800; margin-bottom: 12px; color: #fff; }
+  .cycle-box { background: var(--surface); border-radius: 14px; margin-bottom: 10px; overflow: hidden; border-left: 4px solid; }
+  .cycle-box.rhb-border { border-left-color: #f97316; }
+  .cycle-box.affin-border { border-left-color: #3b82f6; }
+  .cycle-box.ikhwan-border { border-left-color: #9ca3af; }
+  .cycle-box.maybank-border { border-left-color: #fbbf24; }
+  .cycle-header { padding: 14px; background: #0f0f0f; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; border-bottom: 1px solid transparent; }
+  .cycle-header.active { border-bottom-color: var(--border); }
+  .cycle-name { font-weight: 800; font-size: 14px; color: #fff; }
+  .cycle-range { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+  .cycle-count { font-size: 11px; color: var(--text-muted); background: #1a1a1a; padding: 3px 8px; border-radius: 10px; font-weight: 700; }
+  .cycle-arrow { font-size: 11px; color: var(--text-muted); margin-left: 6px; transition: transform 0.2s; display: inline-block; }
+  .cycle-arrow.open { transform: rotate(180deg); }
+  .cycle-body { display: none; padding: 12px 14px; }
+  .cycle-body.open { display: block; }
+  .tx-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #1a1a1a; gap: 10px; }
+  .tx-row:last-child { border-bottom: none; }
+  .tx-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .tx-date { font-family: 'SF Mono', monospace; font-size: 11px; color: var(--text-muted); }
+  .tx-cat { font-size: 13px; color: var(--text-secondary); font-weight: 700; }
+  .tx-note { font-size: 11px; color: #444; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .tx-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; white-space: nowrap; }
+  .tx-amt { font-family: 'SF Mono', monospace; font-size: 13px; font-weight: 800; color: #fff; }
+  .tx-del { font-size: 11px; color: #666; background: #1a1a1a; border: 1px solid #222; border-radius: 6px; padding: 3px 10px; cursor: pointer; font-weight: 700; }
+  .tx-del:active { background: #222; }
+  .history-meta { text-align: center; color: #333; font-size: 11px; margin-top: 16px; font-weight: 600; }
+  .empty-state { text-align: center; color: #333; font-size: 14px; padding: 24px; font-weight: 600; }
+  ::-webkit-scrollbar { width: 0; height: 0; }
+  .version-info { text-align: center; color: #333; font-size: 11px; margin-top: 20px; font-weight: 600; }
+  #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1e7e34; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 14px; display: none; z-index: 999; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
   #toast.error { background: #b91c1c; }
 </style>
 </head>
 <body>
-
 <div id="toast"></div>
-
-<div class="quick-panel">
-  <div class="panel-title">⚡ Quick Entry</div>
-  <div class="step-label">1. Select Credit Card:</div>
-  <div class="card-select-grid" id="card-selector"></div>
-  
-  <div class="step-label">2. Select Category:</div>
-  <div class="cat-select-grid" id="cat-selector"></div>
-
-  <div class="inline-input-box" id="inline-input-box">
-    <div class="inline-header">Recording: <span id="inline-cat-name" style="color:#fff;"></span></div>
-    <form class="inline-form" onsubmit="triggerGlowAndSave(); return false;">
-      <input type="number" id="inline-amt" class="inline-amt" placeholder="RM" step="0.01" inputmode="decimal" required>
-      <button type="submit" class="btn-inline-save">✓</button>
-      <button type="button" class="btn-inline-cancel" onclick="closeInlineInput()">Cancel</button>
-    </form>
-  </div>
-</div>
-
-<div class="section-header">💳 Current Cashback Progress</div>
 <div id="card-container"></div>
-
-<div class="history-box">
-  <div class="history-title" onclick="toggleHistory()">
-    <span>📋 60-Day History (Statement Check)</span>
-    <span id="hist-arrow">▼</span>
-  </div>
-  <div id="history-list" style="display:none; margin-top:14px;"></div>
+<div class="history-section">
+  <div class="history-title">📋 History (90 Days)</div>
+  <div id="history-container"></div>
+  <div class="history-meta" id="history-meta"></div>
 </div>
-
-<div class="backup-box">
-  <button class="btn-backup" onclick="exportData()">💾 Export Backup (JSON)</button>
-  <button class="btn-backup" onclick="document.getElementById('import-file').click()">📂 Import Data</button>
-  <input type="file" id="import-file" style="display:none" accept=".json" onchange="importData(event)">
-</div>
+<div class="version-info">Version 3.6 — 2026-10-20 (Transaction Date)</div>
 
 <script>
-function round2(n) { return Math.round((n + Number.EPSILON) * 100) / 100; }
-
 const CARDS_DEF = [
   {
     name: "RHB Shell 2498",
-    barClass: "bar-rhb",
-    resetDay: 13,
+    barClass: "bar-rhb", borderClass: "rhb-border", resetDay: 13,
     cats: ["Petrol", "Utilities", "Online"],
     caps: { Petrol: 30, Utilities: 10, Online: 10 },
+    minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
     rates: {
-      Petrol:    [0.01, 0.03, 0.05, 0.12],
+      Petrol: [0.01, 0.03, 0.05, 0.12],
       Utilities: [0.002, 0.01, 0.02, 0.05],
-      Online:    [0.002, 0.01, 0.02, 0.05]
+      Online: [0.002, 0.01, 0.02, 0.05]
     }
   },
   {
     name: "RHB Shell 8652",
-    barClass: "bar-rhb",
-    resetDay: 23,
+    barClass: "bar-rhb", borderClass: "rhb-border", resetDay: 23,
     cats: ["Petrol", "Utilities", "Online"],
     caps: { Petrol: 30, Utilities: 10, Online: 10 },
+    minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
     rates: {
-      Petrol:    [0.01, 0.03, 0.05, 0.12],
+      Petrol: [0.01, 0.03, 0.05, 0.12],
       Utilities: [0.002, 0.01, 0.02, 0.05],
-      Online:    [0.002, 0.01, 0.02, 0.05]
+      Online: [0.002, 0.01, 0.02, 0.05]
     }
   },
   {
-    name: "Affin Duo 3322",
-    barClass: "bar-affin",
-    resetDay: 23,
+    name: "Affin Duo Visa 3322",
+    barClass: "bar-affin", borderClass: "affin-border", resetDay: 23,
     cap: 30,
     cats: ["Auto-Billing", "E-Commerce", "E-Wallet"],
-    rates: { "Auto-Billing": 0.03, "E-Commerce": 0.03, "E-Wallet": 0.03 }
+    rates: { "Auto-Billing": 0.03, "E-Commerce": 0.03, "E-Wallet": 0.03 },
+    autoDebit: { amount: 700, category: "Auto-Billing", note: "Insurance Auto-Debit" }
   },
   {
-    name: "MBB Ikhwan 6157",
-    barClass: "bar-maybank",
-    resetDay: 1,
-    cap: 50,
-    cats: ["Online (8%)"],
-    rates: { "Online (8%)": 0.08 }
+    name: "Ikhwan Platinum 6157",
+    barClass: "bar-ikhwan", borderClass: "ikhwan-border", resetDay: 1,
+    cap: 50, fixedCategory: "Online (8%)", cats: ["Online (8%)"],
+    rates: { "Online (8%)": 0.08 },
+    progressTargets: { "Online (8%)": 625 }
   },
   {
-    name: "MBB Gold 8943",
-    barClass: "bar-maybank",
-    resetDay: 1,
-    cap: 50,
-    cats: ["Weekend (5%)"],
-    rates: { "Weekend (5%)": 0.05 }
+    name: "Maybank 2 Gold 8943",
+    barClass: "bar-maybank", borderClass: "maybank-border", resetDay: 1,
+    cap: 50, fixedCategory: "Weekend (5%)", cats: ["Weekend (5%)"],
+    rates: { "Weekend (5%)": 0.05 },
+    progressTargets: { "Weekend (5%)": 1000 }
   }
 ];
 
-let selectedCardIndex = 0;
-let pendingCategory = "";
+const MAX_CYCLES = 3;
+const FILL_COLORS = ['fill-cyan', 'fill-lime', 'fill-violet', 'fill-coral', 'fill-amber'];
 
-function getRHBTier(totalSpend) {
-  if (totalSpend >= 3000) return 3;
-  if (totalSpend >= 2000) return 2;
-  if (totalSpend >= 1000) return 1;
-  return 0;
+function formatDateDMY(d) {
+  const date = new Date(d + 'T00:00:00');
+  return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
 }
-
+function getTodayStr() {
+  const n = new Date();
+  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+}
 function getCycleStart(day) {
   const now = new Date();
-  let y = now.getFullYear();
-  let m = now.getMonth();
-  if (now.getDate() < day) {
-    m -= 1;
-    if (m < 0) { m = 11; y -= 1; }
-  }
-  const maxDaysInMonth = new Date(y, m + 1, 0).getDate();
-  const actualDay = Math.min(day, maxDaysInMonth);
-  const start = new Date(y, m, actualDay);
+  let start = new Date(now.getFullYear(), now.getMonth(), day);
+  if (now.getDate() < day) start.setMonth(start.getMonth() - 1);
   return `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
 }
-
 function getCycleEnd(startStr) {
   const [y, m, d] = startStr.split('-').map(Number);
   const end = new Date(y, m - 1, d);
@@ -255,400 +201,504 @@ function getCycleEnd(startStr) {
   end.setDate(end.getDate() - 1);
   return `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
 }
-
-function showToast(msg, isError = false) {
+function getRateTier(totalSpend) {
+  if (totalSpend >= 3000) return 3;
+  if (totalSpend >= 2000) return 2;
+  if (totalSpend >= 1000) return 1;
+  return 0;
+}
+function getProgressPct(used, target) {
+  if (target <= 0) return 0;
+  return Math.min(100, Math.max(0, (used / target) * 100));
+}
+function showToast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = isError ? 'error' : '';
   t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 2200);
+  setTimeout(() => { t.style.display = 'none'; }, 2500);
 }
 
+function getDefaultState() {
+  const cards = CARDS_DEF.map(c => ({
+    ...c, totalSpend: 0, cashback: 0,
+    categoryCashback: {}, categorySpend: {},
+    lastCycleStart: getCycleStart(c.resetDay),
+    autoDebitCycle: null
+  }));
+  return { version: 13, cards, transactions: [] };
+}
 function loadState() {
-  let raw = localStorage.getItem('finoryData_v8');
-  let state = raw ? JSON.parse(raw) : null;
-  if (!state) {
-    state = {
-      cards: CARDS_DEF.map(c => ({
-        totalSpend: 0, cashback: 0, categorySpend: {}, categoryCashback: {},
-        lastCycleStart: getCycleStart(c.resetDay)
-      })),
-      transactions: []
-    };
-  }
+  let raw = localStorage.getItem('finoryData');
+  let state = null;
+  if (raw) { try { state = JSON.parse(raw); } catch(e) { state = null; } }
+  if (!state || state.version !== 13) { state = getDefaultState(); saveState(state); }
+  state.cards.forEach(c => {
+    if (!c.categorySpend) c.categorySpend = {};
+    if (!c.categoryCashback) c.categoryCashback = {};
+  });
+  return state;
+}
+function saveState(state) { localStorage.setItem('finoryData', JSON.stringify(state)); }
 
+function checkAndReset(state) {
+  state.cards.forEach(c => {
+    const currentStart = getCycleStart(c.resetDay);
+    if (c.lastCycleStart !== currentStart) {
+      c.totalSpend = 0; c.cashback = 0;
+      c.categoryCashback = {}; c.categorySpend = {};
+      c.lastCycleStart = currentStart;
+    }
+  });
+}
+
+function applyAutoDebits(state) {
   let changed = false;
   state.cards.forEach((c, i) => {
-    const currentStart = getCycleStart(CARDS_DEF[i].resetDay);
-    if (c.lastCycleStart !== currentStart) {
-      c.lastCycleStart = currentStart;
+    const def = CARDS_DEF[i];
+    if (def.autoDebit && c.lastCycleStart !== c.autoDebitCycle) {
+      const rate = def.rates[def.autoDebit.category];
+      const rawEarned = def.autoDebit.amount * rate;
+      const cap = def.cap || 999;
+      const remaining = cap - c.cashback;
+      const earned = Math.max(0, Math.min(rawEarned, remaining));
+      c.totalSpend += def.autoDebit.amount;
+      c.cashback += earned;
+      c.categorySpend[def.autoDebit.category] = (c.categorySpend[def.autoDebit.category] || 0) + def.autoDebit.amount;
+      c.autoDebitCycle = c.lastCycleStart;
+      state.transactions.push({
+        id: Date.now() + '-auto-' + i, cardIndex: i, cardName: def.name,
+        amount: def.autoDebit.amount, category: def.autoDebit.category,
+        note: def.autoDebit.note, date: getTodayStr(),
+        timestamp: Date.now(), cycleStart: c.lastCycleStart
+      });
       changed = true;
     }
   });
+  if (changed) saveState(state);
+}
 
-  if(checkAndInjectAutoDebit(state)) changed = true;
-  
-  if (changed) {
-    state.cards.forEach((_, i) => recalcCard(state, i));
-    saveState(state);
+function getRateForCategory(cardDef, cat, tier) {
+  if (cardDef.name.includes("RHB")) {
+    const arr = cardDef.rates[cat];
+    return (arr && arr.length > tier) ? arr[tier] : 0;
   }
-  cleanupHistory(state);
-  return state;
+  return cardDef.rates?.[cat] || 0;
 }
-
-function saveState(state) {
-  localStorage.setItem('finoryData_v8', JSON.stringify(state));
+function computeCategoryTarget(cardDef, cardState, cat) {
+  if (!cardDef.name.includes("RHB")) return null;
+  const tier = getRateTier(cardState.totalSpend);
+  const rate = getRateForCategory(cardDef, cat, tier);
+  if (rate === 0) return Infinity;
+  const cap = cardDef.caps[cat] || 0;
+  const minSpend = cardDef.minSpend[cat] || 0;
+  let target = cap / rate;
+  if (target < minSpend) target = minSpend;
+  return target;
 }
-
-function cleanupHistory(state) {
-  const sixtyDaysAgo = Date.now() - (60 * 24 * 60 * 60 * 1000);
-  const currentStarts = state.cards.map(c => c.lastCycleStart);
-  state.transactions = state.transactions.filter(t => {
-    return t.timestamp >= sixtyDaysAgo || t.cycleStart === currentStarts[t.cardIndex];
-  });
-}
-
-function isGreatEasternCycle(cycleStartStr) {
-  const m = parseInt(cycleStartStr.split('-')[1], 10);
-  return (m === 8 || m === 11 || m === 2 || m === 5);
-}
-
-function checkAndInjectAutoDebit(state) {
-  let changed = false;
-  const affinIndex = 2;
-  const curCycle = getCycleStart(CARDS_DEF[affinIndex].resetDay);
-  
-  const hasAuto = state.transactions.some(t => t.cardIndex === affinIndex && t.cycleStart === curCycle && t.category === "Auto-Billing");
-  
-  if (!hasAuto) {
-    const isGE = isGreatEasternCycle(curCycle);
-    const aiaTotal = 510.00;
-    const geTotal = 464.30;
-    const autoAmount = isGE ? round2(aiaTotal + geTotal) : aiaTotal;
-    
-    state.transactions.push({
-      id: Date.now() + '-autodebit',
-      cardIndex: affinIndex,
-      amount: autoAmount,
-      category: "Auto-Billing",
-      timestamp: Date.now(),
-      cycleStart: curCycle,
-      note: isGE ? "AIA + Great Eastern" : "AIA Auto-Debit"
-    });
-    changed = true;
+function getRate(cardDef, cardState, cat, amount) {
+  if (cardDef.name.includes("RHB")) {
+    const min = cardDef.minSpend?.[cat] || 0;
+    if (cardState.categorySpend[cat] + amount < min) return 0;
+    const tier = getRateTier(cardState.totalSpend + amount);
+    const arr = cardDef.rates[cat];
+    return (arr && arr.length > tier) ? arr[tier] : 0;
   }
-  return changed;
+  return cardDef.rates?.[cat] || 0;
 }
 
 function recalcCard(state, cardIndex) {
   const def = CARDS_DEF[cardIndex];
   const cardState = state.cards[cardIndex];
-  cardState.totalSpend = 0;
-  cardState.cashback = 0;
-  cardState.categorySpend = {};
-  cardState.categoryCashback = {};
-
-  const txs = state.transactions.filter(t => t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart);
-  txs.sort((a, b) => a.timestamp - b.timestamp);
-
-  txs.forEach(t => cardState.totalSpend += t.amount);
-  cardState.totalSpend = round2(cardState.totalSpend);
-
+  cardState.totalSpend = 0; cardState.cashback = 0;
+  cardState.categoryCashback = {}; cardState.categorySpend = {};
+  const txs = state.transactions
+    .filter(t => t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart)
+    .sort((a, b) => a.timestamp - b.timestamp);
   txs.forEach(tx => {
-    let rate = 0;
+    const rate = getRate(def, cardState, tx.category, tx.amount);
+    let earned = 0;
     if (def.name.includes("RHB")) {
-      const tier = getRHBTier(cardState.totalSpend);
-      rate = def.rates[tx.category][tier];
-      const cap = def.caps[tx.category];
-      const currentCb = cardState.categoryCashback[tx.category] || 0;
-      let earned = round2(tx.amount * rate);
-      
-      if (currentCb + earned > cap) earned = round2(cap - currentCb);
-      
-      cardState.cashback = Math.max(0, round2(cardState.cashback + earned));
-      cardState.categoryCashback[tx.category] = Math.max(0, round2(currentCb + earned));
+      const cap = def.caps[tx.category] || 999;
+      const cur = cardState.categoryCashback[tx.category] || 0;
+      earned = Math.min(tx.amount * rate, cap - cur);
+      if (earned < 0) earned = 0;
+      cardState.cashback += earned;
+      cardState.categoryCashback[tx.category] = cur + earned;
     } else {
-      rate = def.rates[tx.category] || 0;
-      const cap = def.cap;
-      let earned = round2(tx.amount * rate);
-      if (cardState.cashback + earned > cap) earned = round2(cap - cardState.cashback);
-      
-      cardState.cashback = Math.max(0, round2(cardState.cashback + earned));
+      const cap = def.cap || 999;
+      const cur = cardState.cashback;
+      earned = Math.min(tx.amount * rate, cap - cur);
+      if (earned < 0) earned = 0;
+      cardState.cashback += earned;
     }
-    cardState.categorySpend[tx.category] = round2((cardState.categorySpend[tx.category] || 0) + tx.amount);
+    cardState.totalSpend += tx.amount;
+    cardState.categorySpend[tx.category] = (cardState.categorySpend[tx.category] || 0) + tx.amount;
   });
 }
 
-function selectCard(index) {
-  selectedCardIndex = index;
-  closeInlineInput();
-  renderCardSelector();
-  renderCatSelector();
-}
-
-function openInlineInput(cat) {
-  pendingCategory = cat;
-  document.getElementById('cat-selector').style.display = 'none';
-  document.getElementById('inline-input-box').style.display = 'block';
-  document.getElementById('inline-cat-name').textContent = cat;
-  
-  const amtInput = document.getElementById('inline-amt');
-  amtInput.value = '';
-  amtInput.focus();
-}
-
-function closeInlineInput() {
-  pendingCategory = "";
-  document.getElementById('inline-input-box').style.display = 'none';
-  document.getElementById('cat-selector').style.display = 'grid';
-  document.getElementById('inline-amt').blur();
-}
-
-function triggerGlowAndSave() {
-  const amtIn = document.getElementById('inline-amt');
-  const amt = parseFloat(amtIn.value);
-  
-  if (isNaN(amt)) {
-    showToast("⚠️ Please enter a valid amount", true);
-    amtIn.focus();
-    return;
-  }
-
-  // 1. Save and render DOM first
-  finalizeTx(amt);
-
-  // 2. Apply glow to the newly created DOM element
-  const targetCardWrap = document.getElementById('card-wrap-' + selectedCardIndex);
-  if (targetCardWrap) {
-    const cardEl = targetCardWrap.querySelector('.card');
-    cardEl.classList.add('glow-active');
-    
-    setTimeout(() => {
-      cardEl.classList.remove('glow-active');
-    }, 1200);
-  }
-}
-
-function finalizeTx(amt) {
+function addTransaction(cardIndex, amount, cat, note, txDate) {
   const state = loadState();
+  checkAndReset(state);
+  const cardState = state.cards[cardIndex];
+  const cardDef = CARDS_DEF[cardIndex];
+  const rate = getRate(cardDef, cardState, cat, amount);
+  let earned = 0;
+  if (cardDef.name.includes("RHB")) {
+    const cap = cardDef.caps[cat] || 999;
+    const cur = cardState.categoryCashback[cat] || 0;
+    earned = Math.min(amount * rate, cap - cur);
+    if (earned < 0) earned = 0;
+    cardState.cashback += earned;
+    cardState.categoryCashback[cat] = cur + earned;
+  } else {
+    const cap = cardDef.cap || 999;
+    const cur = cardState.cashback;
+    earned = Math.min(amount * rate, cap - cur);
+    if (earned < 0) earned = 0;
+    cardState.cashback += earned;
+  }
+  cardState.totalSpend += amount;
+  cardState.categorySpend[cat] = (cardState.categorySpend[cat] || 0) + amount;
+
   const tx = {
-    id: Date.now() + '-' + Math.random().toString(36).slice(2, 5),
-    cardIndex: selectedCardIndex,
-    amount: round2(amt),
-    category: pendingCategory,
-    timestamp: Date.now(),
-    cycleStart: state.cards[selectedCardIndex].lastCycleStart
+    id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+    cardIndex, cardName: cardDef.name, amount, category: cat,
+    note: note || '', date: txDate || getTodayStr(),
+    timestamp: Date.now(), cycleStart: cardState.lastCycleStart
   };
-
   state.transactions.push(tx);
-  recalcCard(state, selectedCardIndex);
-  saveState(state);
-  
-  closeInlineInput();
-  renderAll(); // Rebuilds the HTML
-  showToast(`✅ Saved RM ${amt.toFixed(2)} to ${CARDS_DEF[selectedCardIndex].name}`);
-}
-
-function deleteTx(id) {
-  const state = loadState();
-  const tx = state.transactions.find(t => t.id === id);
-  if (!tx) return;
-  state.transactions = state.transactions.filter(t => t.id !== id);
-  recalcCard(state, tx.cardIndex);
+  cleanupOldCycles(state);
   saveState(state);
   renderAll();
-  showToast("🗑️ Transaction deleted");
+  showToast('✅ 已添加 RM ' + amount.toFixed(2) + ' 到 ' + cat);
 }
 
-function toggleDetail(i) {
-  const el = document.getElementById(`detail-${i}`);
-  if (el) el.classList.toggle('open');
+function deleteTransaction(txId) {
+  if (!confirm('Delete this transaction?')) return;
+  const state = loadState();
+  const tx = state.transactions.find(t => t.id === txId);
+  if (!tx) return;
+  state.transactions = state.transactions.filter(t => t.id !== txId);
+  recalcCard(state, tx.cardIndex);
+  cleanupOldCycles(state);
+  saveState(state);
+  renderAll();
 }
 
-function toggleHistory() {
-  const list = document.getElementById('history-list');
-  const arrow = document.getElementById('hist-arrow');
-  if (list.style.display === 'none') {
-    list.style.display = 'block';
-    arrow.textContent = '▲';
-  } else {
-    list.style.display = 'none';
-    arrow.textContent = '▼';
-  }
-}
-
-function exportData() {
-  const data = localStorage.getItem('finoryData_v8');
-  if(!data) { showToast("No data to export", true); return; }
-  const blob = new Blob([data], {type: "application/json"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `finory_backup_${new Date().toISOString().split('T')[0]}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-
-function importData(e) {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = function(evt) {
-    try {
-      JSON.parse(evt.target.result);
-      localStorage.setItem('finoryData_v8', evt.target.result);
-      showToast("✅ Restore successful, refreshing...");
-      setTimeout(() => location.reload(), 1000);
-    } catch(err) {
-      showToast("❌ Invalid data format", true);
+function cleanupOldCycles(state) {
+  state.cards.forEach((c, i) => {
+    const cycles = [];
+    state.transactions.forEach(tx => {
+      if (tx.cardIndex === i && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
+    });
+    cycles.sort((a, b) => b.localeCompare(a));
+    if (cycles.length > MAX_CYCLES) {
+      const toDelete = cycles.slice(MAX_CYCLES);
+      state.transactions = state.transactions.filter(tx => {
+        if (tx.cardIndex !== i) return true;
+        return !toDelete.includes(tx.cycleStart);
+      });
     }
-  };
-  reader.readAsText(file);
+  });
 }
 
-function renderCardSelector() {
-  const el = document.getElementById('card-selector');
-  el.innerHTML = CARDS_DEF.map((c, i) => `
-    <button class="card-opt-btn ${i === selectedCardIndex ? 'active' : ''}" onclick="selectCard(${i})">
-      ${c.name}
-    </button>
-  `).join('');
+function isCatMaxed(cardState, cardDef, cat) {
+  if (cardDef.name.includes("RHB")) {
+    const cap = cardDef.caps[cat] || 999;
+    return (cardState.categoryCashback[cat] || 0) >= cap;
+  }
+  return cardState.cashback >= (cardDef.cap || 999);
 }
 
-function renderCatSelector() {
-  const el = document.getElementById('cat-selector');
-  const currentCard = CARDS_DEF[selectedCardIndex];
-  el.innerHTML = currentCard.cats.map(cat => `
-    <button class="cat-opt-btn" onclick="openInlineInput('${cat}')">${cat}</button>
-  `).join('');
+function buildProgressHtml(cardState, cardDef) {
+  if (cardDef.progressTargets) {
+    const cat = cardDef.fixedCategory || cardDef.cats[0];
+    const target = cardDef.progressTargets[cat] || 100;
+    const spent = cardState.categorySpend[cat] || 0;
+    const pct = getProgressPct(spent, target);
+    const remaining = Math.max(0, target - spent);
+    return `
+      <div class="cat-progress">
+        <div class="cat-label-row">
+          <span class="cat-label-name">${cat}</span>
+          <span class="cat-label-value">RM ${spent.toFixed(2)} / ${target} · ${remaining.toFixed(2)} left</span>
+        </div>
+        <div class="cat-track"><div class="cat-fill ${FILL_COLORS[0]}" style="width:${pct}%"></div></div>
+      </div>`;
+  }
+  if (cardDef.name.includes("RHB")) {
+    return cardDef.cats.map((cat, idx) => {
+      const spent = cardState.categorySpend[cat] || 0;
+      const target = computeCategoryTarget(cardDef, cardState, cat);
+      if (target === Infinity) {
+        return `
+          <div class="cat-progress">
+            <div class="cat-label-row">
+              <span class="cat-label-name">${cat}</span>
+              <span class="cat-label-value" style="color:#888;">返现率 0% (需更高总消费)</span>
+            </div>
+            <div class="cat-track" style="background:#333;"><div class="cat-fill" style="width:0%;background:#666;"></div></div>
+          </div>`;
+      }
+      const pct = getProgressPct(spent, target);
+      const remaining = Math.max(0, target - spent);
+      const minSpend = cardDef.minSpend[cat] || 0;
+      const extra = spent < minSpend ? ` (需达 RM${minSpend})` : '';
+      return `
+        <div class="cat-progress">
+          <div class="cat-label-row">
+            <span class="cat-label-name">${cat}</span>
+            <span class="cat-label-value">RM ${spent.toFixed(2)} / ${target.toFixed(0)} · ${remaining.toFixed(2)} left${extra}</span>
+          </div>
+          <div class="cat-track"><div class="cat-fill ${FILL_COLORS[idx % FILL_COLORS.length]}" style="width:${pct}%"></div></div>
+        </div>`;
+    }).join('');
+  }
+  const cap = cardDef.cap || 999;
+  const used = cardState.cashback;
+  const pct = getProgressPct(used, cap);
+  const remaining = Math.max(0, cap - used);
+  const name = cardDef.fixedCategory || 'Cashback';
+  return `
+    <div class="cat-progress">
+      <div class="cat-label-row">
+        <span class="cat-label-name">${name}</span>
+        <span class="cat-label-value">RM ${used.toFixed(2)} / ${cap} · ${remaining.toFixed(2)} left</span>
+      </div>
+      <div class="cat-track"><div class="cat-fill ${FILL_COLORS[0]}" style="width:${pct}%"></div></div>
+    </div>`;
 }
 
 function renderCards() {
   const state = loadState();
+  checkAndReset(state);
+  applyAutoDebits(state);
+  saveState(state);
+
   const container = document.getElementById('card-container');
+  if (!container) return;
 
   container.innerHTML = state.cards.map((c, i) => {
     const def = CARDS_DEF[i];
     const start = c.lastCycleStart;
     const end = getCycleEnd(start);
+    const progressHtml = buildProgressHtml(c, def);
 
-    let progressHtml = '';
-    let remSpendHtml = '';
-
-    if (def.name.includes("RHB")) {
-      const tier = getRHBTier(c.totalSpend);
-      progressHtml = def.cats.map(cat => {
-        const cbUsed = c.categoryCashback[cat] || 0;
-        const cap = def.caps[cat];
-        const pct = Math.min(100, (cbUsed / cap) * 100);
-        const colorClass = pct >= 100 ? 'fill-red' : (pct > 50 ? 'fill-amber' : 'fill-green');
-        
-        const rate = def.rates[cat][tier];
-        const remCb = Math.max(0, cap - cbUsed);
-        const remSpend = rate > 0 ? round2(remCb / rate) : 0;
-        const remText = remCb <= 0 ? "Maxed Out" : `Need RM ${remSpend.toFixed(2)}`;
-
-        return `
-          <div class="cat-progress">
-            <div class="cat-label-row">
-              <span>${cat} (Tier ${tier})</span>
-              <span>RM ${cbUsed.toFixed(2)} / RM ${cap} (${remText})</span>
-            </div>
-            <div class="cat-track"><div class="cat-fill ${colorClass}" style="width:${pct}%"></div></div>
-          </div>
-        `;
-      }).join('');
-    } else {
-      const cap = def.cap;
-      const pct = Math.min(100, (c.cashback / cap) * 100);
-      const colorClass = pct >= 100 ? 'fill-red' : 'fill-green';
-      
-      const rate = Object.values(def.rates)[0] || 0.03;
-      const remCb = Math.max(0, cap - c.cashback);
-      const remSpend = round2(remCb / rate);
-
-      progressHtml = `
-        <div class="cat-progress">
-          <div class="cat-label-row">
-            <span>Cashback Progress</span>
-            <span>RM ${c.cashback.toFixed(2)} / RM ${cap}</span>
-          </div>
-          <div class="cat-track"><div class="cat-fill ${colorClass}" style="width:${pct}%"></div></div>
-        </div>
-      `;
-      remSpendHtml = remCb <= 0 
-        ? `<div class="ewallet-rem" style="color:#ef4444;">🎉 Reached Max RM ${cap} Cashback!</div>`
-        : `<div class="ewallet-rem">💡 Spend RM ${remSpend.toFixed(2)} more to max out</div>`;
+    const prevTxs = state.transactions
+      .filter(t => t.cardIndex === i && t.cycleStart !== c.lastCycleStart)
+      .sort((a, b) => b.cycleStart.localeCompare(a.cycleStart));
+    let prevTotal = 0, prevLabel = '';
+    if (prevTxs.length > 0) {
+      const latest = prevTxs[0].cycleStart;
+      const filtered = prevTxs.filter(t => t.cycleStart === latest);
+      prevTotal = filtered.reduce((s, t) => s + t.amount, 0);
+      prevLabel = `(${formatDateDMY(latest)} - ${formatDateDMY(getCycleEnd(latest))})`;
     }
 
-    const currentTxs = state.transactions.filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart);
-    const txHtml = currentTxs.map(t => `
+    const currentTxs = state.transactions
+      .filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart)
+      .sort((a, b) => b.timestamp - a.timestamp);
+
+    // 最后使用日期（当前周期内交易的最大 date）
+    let lastUse = '';
+    if (currentTxs.length > 0) {
+      const maxDate = currentTxs.reduce((m, tx) => tx.date > m ? tx.date : m, currentTxs[0].date);
+      lastUse = ` · 上次使用: ${formatDateDMY(maxDate)}`;
+    }
+
+    const txRows = currentTxs.map(tx => `
       <div class="tx-row">
-        <div>
-          <div class="tx-cat">${t.category} ${t.note ? `<span style="font-size:10px;color:#94a3b8;">(${t.note})</span>` : ''}</div>
-          <div class="tx-date">${new Date(t.timestamp).toLocaleDateString()}</div>
+        <div class="tx-left">
+          <div>
+            <span class="tx-date">${formatDateDMY(tx.date)}</span>
+            <span class="tx-cat">${tx.category}</span>
+          </div>
+          ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
         </div>
-        <div style="display:flex; align-items:center;">
-          <div class="tx-amt">RM ${t.amount.toFixed(2)}</div>
-          <button class="tx-del" onclick="deleteTx('${t.id}')">Delete</button>
+        <div class="tx-right">
+          <div class="tx-amt">RM ${tx.amount.toFixed(2)}</div>
+          <button class="tx-del" onclick="window.deleteTransaction('${tx.id}')">Delete</button>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
+
+    const txSection = currentTxs.length
+      ? `<div class="card-tx-section"><div class="card-tx-title">This Cycle (${currentTxs.length})</div>${txRows}</div>`
+      : '<div class="card-tx-section card-tx-empty">No transactions this cycle</div>';
+
+    let btnHtml;
+    if (def.fixedCategory) {
+      const maxed = isCatMaxed(c, def, def.fixedCategory) ? 'maxed' : '';
+      btnHtml = `<div class="btn-row"><button class="cat-btn ${maxed}" onclick="window.saveTx(${i}, '${def.fixedCategory}')">Add ${def.fixedCategory}</button></div>`;
+    } else {
+      btnHtml = `<div class="btn-row">${def.cats.map(cat => {
+        const maxed = isCatMaxed(c, def, cat) ? 'maxed' : '';
+        return `<button class="cat-btn ${maxed}" onclick="window.saveTx(${i}, '${cat}')">${cat}</button>`;
+      }).join('')}</div>`;
+    }
+
+    const prevRowHtml = prevTotal > 0 ? `
+      <div class="prev-stmt-total-row">
+        <span class="prev-stmt-total-label">📄 上期账单总额 <span class="prev-stmt-cycle">${prevLabel}</span></span>
+        <span class="prev-stmt-total-value">RM ${prevTotal.toFixed(2)}</span>
+      </div>` : '';
 
     return `
-      <div class="card-wrap" id="card-wrap-${i}">
-        <div class="card">
-          <div class="card-bar ${def.barClass}"></div>
-          <div class="card-summary" onclick="toggleDetail(${i})">
-            <div>
-              <div class="card-name">${def.name}</div>
-              <div class="cycle-info">${start.slice(5)} to ${end.slice(5)}</div>
-            </div>
-            <div>
-              <div class="cb-amount">RM ${c.cashback.toFixed(2)}</div>
-              <div class="spend-amount">Spent RM ${c.totalSpend.toFixed(2)}</div>
-              ${remSpendHtml}
-            </div>
+      <div class="card">
+        <div class="card-bar ${def.barClass}"></div>
+        <div class="card-summary" onclick="window.toggleCard(${i})">
+          <div class="card-summary-left">
+            <div class="card-name">${def.name}</div>
+            <div class="cycle-info">${formatDateDMY(start)} — ${formatDateDMY(end)}${lastUse}</div>
           </div>
-          <div class="card-detail" id="detail-${i}">
-            ${progressHtml}
-            <div style="margin-top:14px; font-weight:700; font-size:13px; color:var(--text-muted);">Current Cycle Transactions</div>
-            ${txHtml || '<div style="padding:10px 0; color:#64748b; font-size:12px;">No transactions</div>'}
+          <div class="card-summary-right">
+            <div class="cb-amount">RM ${c.cashback.toFixed(2)}</div>
+            <div class="spend-amount">Spend RM ${c.totalSpend.toFixed(2)}</div>
           </div>
+          <div class="card-arrow" id="card-arrow-${i}">▼</div>
         </div>
-      </div>
-    `;
+        <div class="card-detail" id="card-detail-${i}">
+          <div class="stmt-total-row">
+            <span class="stmt-total-label">本周期消费总额</span>
+            <span class="stmt-total-value">RM ${c.totalSpend.toFixed(2)}</span>
+          </div>
+          <div class="cat-progress-list">${progressHtml}</div>
+          
+          <div class="date-row">
+            <span class="date-label">交易日期</span>
+            <input type="date" id="date-${i}" class="date-input" value="${getTodayStr()}">
+          </div>
+          
+          <input type="number" id="amt-${i}" class="amt-input" placeholder="0.00" step="0.01">
+          ${btnHtml}
+          ${prevRowHtml}
+          ${txSection}
+        </div>
+      </div>`;
   }).join('');
 }
 
 function renderHistory() {
   const state = loadState();
-  const histContainer = document.getElementById('history-list');
-  const pastTxs = state.transactions.filter(t => t.cycleStart !== state.cards[t.cardIndex].lastCycleStart);
+  const container = document.getElementById('history-container');
+  const meta = document.getElementById('history-meta');
+  if (!container || !meta) return;
 
-  if (!pastTxs.length) {
-    histContainer.innerHTML = '<div style="color:#64748b; font-size:12px; text-align:center;">No past history records</div>';
+  const currentStarts = state.cards.map(c => c.lastCycleStart);
+  const past = state.transactions.filter(tx => tx.cycleStart !== currentStarts[tx.cardIndex]);
+
+  if (!past.length) {
+    container.innerHTML = '<div class="empty-state">No past transactions.</div>';
+    meta.textContent = '';
     return;
   }
 
-  pastTxs.sort((a, b) => b.timestamp - a.timestamp);
-  histContainer.innerHTML = pastTxs.map(t => `
-    <div class="tx-row">
-      <div>
-        <div class="tx-cat">${CARDS_DEF[t.cardIndex].name} - ${t.category}</div>
-        <div class="tx-date">${new Date(t.timestamp).toLocaleDateString()} (Cycle ${t.cycleStart})</div>
-      </div>
-      <div class="tx-amt">RM ${t.amount.toFixed(2)}</div>
-    </div>
-  `).join('');
+  const groups = {};
+  past.forEach(tx => {
+    const key = tx.cardIndex + '|' + tx.cycleStart;
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(tx);
+  });
+  const keys = Object.keys(groups).sort((a, b) => {
+    const [ca, sa] = a.split('|');
+    const [cb, sb] = b.split('|');
+    if (sa !== sb) return sb.localeCompare(sa);
+    return parseInt(ca) - parseInt(cb);
+  });
+
+  container.innerHTML = keys.map(key => {
+    const [ci, cs] = key.split('|');
+    const idx = parseInt(ci);
+    const def = CARDS_DEF[idx];
+    const txs = groups[key].sort((a, b) => b.timestamp - a.timestamp);
+    const ce = getCycleEnd(cs);
+    const total = txs.reduce((s, t) => s + t.amount, 0);
+    const rows = txs.map(tx => `
+      <div class="tx-row">
+        <div class="tx-left">
+          <div>
+            <span class="tx-date">${formatDateDMY(tx.date)}</span>
+            <span class="tx-cat">${tx.category}</span>
+          </div>
+          ${tx.note ? `<div class="tx-note">${tx.note}</div>` : ''}
+        </div>
+        <div class="tx-right">
+          <div class="tx-amt">RM ${tx.amount.toFixed(2)}</div>
+          <button class="tx-del" onclick="window.deleteTransaction('${tx.id}')">Delete</button>
+        </div>
+      </div>`).join('');
+    return `
+      <div class="cycle-box ${def.borderClass}">
+        <div class="cycle-header" onclick="window.toggleCycle(this)">
+          <div>
+            <div class="cycle-name">${def.name}</div>
+            <div class="cycle-range">${formatDateDMY(cs)} — ${formatDateDMY(ce)}</div>
+          </div>
+          <div style="display:flex;align-items:center;">
+            <span class="cycle-count">${txs.length} tx · RM ${total.toFixed(2)}</span>
+            <span class="cycle-arrow">▼</span>
+          </div>
+        </div>
+        <div class="cycle-body">${rows}</div>
+      </div>`;
+  }).join('');
+
+  let counts = [];
+  state.cards.forEach((c, i) => {
+    const cycles = [];
+    state.transactions.forEach(tx => {
+      if (tx.cardIndex === i && tx.cycleStart !== c.lastCycleStart && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
+    });
+    counts.push(`${CARDS_DEF[i].name.split(' ').pop()}: ${cycles.length}/${MAX_CYCLES}`);
+  });
+  meta.textContent = `Past cycles kept for 90 days • ${counts.join(' · ')}`;
 }
 
+function toggleCard(i) {
+  const d = document.getElementById('card-detail-' + i);
+  const a = document.getElementById('card-arrow-' + i);
+  if (!d) return;
+  if (d.classList.contains('open')) {
+    d.classList.remove('open');
+    if (a) a.classList.remove('open');
+  } else {
+    d.classList.add('open');
+    if (a) a.classList.add('open');
+  }
+}
+function toggleCycle(h) {
+  const b = h.nextElementSibling;
+  const a = h.querySelector('.cycle-arrow');
+  if (!b) return;
+  if (b.classList.contains('open')) {
+    b.classList.remove('open');
+    if (a) a.classList.remove('open');
+    h.classList.remove('active');
+  } else {
+    b.classList.add('open');
+    if (a) a.classList.add('open');
+    h.classList.add('active');
+  }
+}
 function renderAll() {
-  renderCardSelector();
-  renderCatSelector();
   renderCards();
   renderHistory();
 }
+
+window.saveTx = function(i, cat) {
+  const amtIn = document.getElementById('amt-' + i);
+  const dateIn = document.getElementById('date-' + i);
+  if (!amtIn) { showToast('⚠️ 输入框未找到', true); return; }
+  const amt = parseFloat(amtIn.value);
+  if (!amt || amt <= 0) { showToast('⚠️ 请输入有效金额', true); return; }
+  const txDate = dateIn ? dateIn.value : getTodayStr();
+  addTransaction(i, amt, cat, '', txDate);
+  amtIn.value = '';
+};
+window.toggleCard = toggleCard;
+window.toggleCycle = toggleCycle;
+window.deleteTransaction = deleteTransaction;
+window.showToast = showToast;
 
 renderAll();
 </script>
