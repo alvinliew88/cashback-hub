@@ -202,7 +202,7 @@
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<div class="version-info">Version 7.0 · Apple Style · 2026-10-22</div>
+<div class="version-info">Version 7.3 · 2026-10-22</div>
 
 <div id="appModal" class="hidden">
   <div class="modal-sheet">
@@ -270,7 +270,7 @@ var CARDS_DEF = [
 ];
 
 var MAX_CYCLES = 3;
-var DATA_VERSION = 25;
+var DATA_VERSION = 26;
 
 function formatDateDMY(d) { var date = new Date(d + 'T00:00:00'); return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear(); }
 function getTodayStr() { var n = new Date(); return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0'); }
@@ -481,13 +481,21 @@ var appModal = { cardIndex: null, category: null };
 function openModal(i) {
   appModal.cardIndex = i;
   var def = CARDS_DEF[i];
-  appModal.category = def.fixedCategory || null;
+  if (def.fixedCategory) {
+    appModal.category = def.fixedCategory;
+  } else if (def.name.indexOf('RHB') !== -1) {
+    appModal.category = "Online"; // Default to Online for RHB
+  } else {
+    appModal.category = def.cats[0];
+  }
+  
   document.getElementById('appModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
   renderModal();
+  
   setTimeout(function() {
     var inp = document.getElementById('amt-input');
-    if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+    if (inp) inp.focus();
   }, 320);
 }
 
@@ -579,15 +587,9 @@ function confirmAmount() {
   if (!appModal.category) { showToast('请先选分类', true); return; }
   if (!amt || amt <= 0) { showToast('请输入金额', true); inp.focus(); return; }
   var txDate = dateIn ? dateIn.value : getTodayStr();
+  
   addTransaction(appModal.cardIndex, amt, appModal.category, '', txDate);
-  inp.value = '';
-  var btn = document.getElementById('amt-confirm');
-  if (btn) { btn.disabled = true; btn.textContent = '输入金额'; }
-  var state = loadState();
-  var last = getLastRecordDate(state, appModal.cardIndex);
-  document.getElementById('modal-hint').textContent = last ? ('上次记录 ' + formatDateDMY(last)) : '本周期尚未记录';
-  if (last && dateIn) dateIn.value = addDays(last, 1);
-  inp.focus();
+  closeModal(); // 记录后直接关闭返回主页
 }
 
 document.getElementById('appModal').addEventListener('click', function(e) {
