@@ -2,11 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="Finory - Offline Credit Card Cashback Tracker">
 <title>Finory</title>
+<link rel="manifest" id="manifest-link">
 <style>
   :root {
     --bg: #000000;
@@ -18,18 +21,24 @@
     --input-bg: #7dd3fc;
     --input-border: #38bdf8;
     --input-shadow: rgba(56, 189, 248, 0.4);
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  body {
-    margin: 0;
+  html, body {
+    margin: 0; padding: 0;
     background: var(--bg);
     color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     font-size: 15px;
     line-height: 1.4;
-    overscroll-behavior-y: auto;
-    padding: 10px 10px 60px;
+    overscroll-behavior-y: none;
     -webkit-font-smoothing: antialiased;
+  }
+  body {
+    padding: calc(10px + var(--safe-top)) 10px calc(60px + var(--safe-bottom));
+    min-height: 100vh;
+    min-height: 100dvh;
   }
   .card { background: var(--surface); border-radius: 14px; overflow: hidden; margin-bottom: 10px; border: 1px solid var(--border); }
   .card-bar { height: 4px; width: 100%; }
@@ -113,21 +122,106 @@
   .empty-state { text-align: center; color: #333; font-size: 14px; padding: 24px; font-weight: 600; }
   ::-webkit-scrollbar { width: 0; height: 0; }
   .version-info { text-align: center; color: #333; font-size: 11px; margin-top: 20px; font-weight: 600; }
-  #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1e7e34; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 14px; display: none; z-index: 999; box-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+  #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1e7e34; color: #fff; padding: 8px 20px; border-radius: 20px; font-size: 14px; display: none; z-index: 999; box-shadow: 0 2px 10px rgba(0,0,0,0.5); max-width: 90%; text-align: center; }
   #toast.error { background: #b91c1c; }
+  #install-banner { position: fixed; bottom: 20px; left: 10px; right: 10px; background: #1e40af; color: #fff; padding: 12px 16px; border-radius: 12px; display: none; z-index: 998; box-shadow: 0 4px 20px rgba(0,0,0,0.6); align-items: center; gap: 10px; }
+  #install-banner button { background: #fff; color: #1e40af; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 700; font-size: 14px; cursor: pointer; }
+  #install-banner .close-btn { background: transparent; color: #fff; font-size: 20px; padding: 0 8px; }
 </style>
 </head>
 <body>
 <div id="toast"></div>
+<div id="install-banner">
+  <div style="flex:1;font-size:13px;">安装 Finory 到主屏幕，全屏离线使用</div>
+  <button id="install-btn">安装</button>
+  <button class="close-btn" id="install-close">✕</button>
+</div>
+
 <div id="card-container"></div>
+
 <div class="history-section">
   <div class="history-title">📋 History (90 Days)</div>
   <div id="history-container"></div>
   <div class="history-meta" id="history-meta"></div>
 </div>
-<div class="version-info">Version 3.6 — 2026-10-20 (Transaction Date)</div>
+
+<div class="version-info">Version 3.8 — PWA — 2026-10-22</div>
 
 <script>
+// ============================================================
+// PWA：动态 Manifest + Service Worker 注册
+// ============================================================
+(function() {
+  const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#000000"/><rect x="88" y="88" width="336" height="336" rx="60" fill="none" stroke="#7dd3fc" stroke-width="28"/><text x="256" y="352" font-size="220" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#7dd3fc" text-anchor="middle">F</text></svg>';
+  let iconUri;
+  try { iconUri = 'data:image/svg+xml;base64,' + btoa(iconSvg); }
+  catch(e) { iconUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg); }
+
+  const manifestData = {
+    name: "Finory",
+    short_name: "Finory",
+    description: "Offline Credit Card Cashback Tracker",
+    start_url: ".",
+    scope: ".",
+    display: "standalone",
+    orientation: "portrait",
+    background_color: "#000000",
+    theme_color: "#000000",
+    icons: [
+      { src: iconUri, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" },
+      { src: iconUri, sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" }
+    ]
+  };
+
+  try {
+    const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
+    document.getElementById('manifest-link').href = URL.createObjectURL(blob);
+  } catch(e) { console.warn('Manifest failed:', e); }
+
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js', { scope: './' })
+        .then(reg => console.log('✅ SW registered:', reg.scope))
+        .catch(err => console.warn('❌ SW failed:', err));
+    });
+  }
+
+  // 安装横幅
+  let deferredPrompt = null;
+  const banner = document.getElementById('install-banner');
+  const installBtn = document.getElementById('install-btn');
+  const closeBtn = document.getElementById('install-close');
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (!localStorage.getItem('installDismissed')) {
+      banner.style.display = 'flex';
+    }
+  });
+
+  installBtn.addEventListener('click', async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt = null;
+    banner.style.display = 'none';
+  });
+
+  closeBtn.addEventListener('click', () => {
+    banner.style.display = 'none';
+    localStorage.setItem('installDismissed', '1');
+  });
+
+  window.addEventListener('appinstalled', () => {
+    banner.style.display = 'none';
+    console.log('✅ PWA installed');
+  });
+})();
+
+// ============================================================
+// 卡片定义
+// ============================================================
 const CARDS_DEF = [
   {
     name: "RHB Shell 2498",
@@ -180,6 +274,9 @@ const CARDS_DEF = [
 const MAX_CYCLES = 3;
 const FILL_COLORS = ['fill-cyan', 'fill-lime', 'fill-violet', 'fill-coral', 'fill-amber'];
 
+// ============================================================
+// 工具函数
+// ============================================================
 function formatDateDMY(d) {
   const date = new Date(d + 'T00:00:00');
   return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
@@ -219,6 +316,11 @@ function showToast(msg, isError) {
   setTimeout(() => { t.style.display = 'none'; }, 2500);
 }
 
+// ============================================================
+// 数据管理（带迁移，不丢数据）
+// ============================================================
+const DATA_VERSION = 15;
+
 function getDefaultState() {
   const cards = CARDS_DEF.map(c => ({
     ...c, totalSpend: 0, cashback: 0,
@@ -226,21 +328,47 @@ function getDefaultState() {
     lastCycleStart: getCycleStart(c.resetDay),
     autoDebitCycle: null
   }));
-  return { version: 13, cards, transactions: [] };
+  return { version: DATA_VERSION, cards, transactions: [] };
 }
+
 function loadState() {
   let raw = localStorage.getItem('finoryData');
   let state = null;
-  if (raw) { try { state = JSON.parse(raw); } catch(e) { state = null; } }
-  if (!state || state.version !== 13) { state = getDefaultState(); saveState(state); }
+  if (raw) {
+    try { state = JSON.parse(raw); } catch(e) { state = null; }
+  }
+  if (!state || !state.cards) {
+    state = getDefaultState();
+    saveState(state);
+  } else if (state.version !== DATA_VERSION) {
+    // 迁移：保留所有旧数据，只补充缺失字段
+    state.version = DATA_VERSION;
+    if (!state.transactions) state.transactions = [];
+    state.cards.forEach(c => {
+      if (!c.categorySpend) c.categorySpend = {};
+      if (!c.categoryCashback) c.categoryCashback = {};
+    });
+    saveState(state);
+  }
   state.cards.forEach(c => {
     if (!c.categorySpend) c.categorySpend = {};
     if (!c.categoryCashback) c.categoryCashback = {};
   });
   return state;
 }
-function saveState(state) { localStorage.setItem('finoryData', JSON.stringify(state)); }
 
+function saveState(state) {
+  try {
+    localStorage.setItem('finoryData', JSON.stringify(state));
+  } catch(e) {
+    console.error('保存失败:', e);
+    showToast('⚠️ 保存失败，存储空间不足', true);
+  }
+}
+
+// ============================================================
+// 核心业务
+// ============================================================
 function checkAndReset(state) {
   state.cards.forEach(c => {
     const currentStart = getCycleStart(c.resetDay);
@@ -285,6 +413,7 @@ function getRateForCategory(cardDef, cat, tier) {
   }
   return cardDef.rates?.[cat] || 0;
 }
+
 function computeCategoryTarget(cardDef, cardState, cat) {
   if (!cardDef.name.includes("RHB")) return null;
   const tier = getRateTier(cardState.totalSpend);
@@ -296,10 +425,11 @@ function computeCategoryTarget(cardDef, cardState, cat) {
   if (target < minSpend) target = minSpend;
   return target;
 }
+
 function getRate(cardDef, cardState, cat, amount) {
   if (cardDef.name.includes("RHB")) {
     const min = cardDef.minSpend?.[cat] || 0;
-    if (cardState.categorySpend[cat] + amount < min) return 0;
+    if ((cardState.categorySpend[cat] || 0) + amount < min) return 0;
     const tier = getRateTier(cardState.totalSpend + amount);
     const arr = cardDef.rates[cat];
     return (arr && arr.length > tier) ? arr[tier] : 0;
@@ -411,6 +541,9 @@ function isCatMaxed(cardState, cardDef, cat) {
   return cardState.cashback >= (cardDef.cap || 999);
 }
 
+// ============================================================
+// 渲染
+// ============================================================
 function buildProgressHtml(cardState, cardDef) {
   if (cardDef.progressTargets) {
     const cat = cardDef.fixedCategory || cardDef.cats[0];
@@ -500,7 +633,6 @@ function renderCards() {
       .filter(t => t.cardIndex === i && t.cycleStart === c.lastCycleStart)
       .sort((a, b) => b.timestamp - a.timestamp);
 
-    // 最后使用日期（当前周期内交易的最大 date）
     let lastUse = '';
     if (currentTxs.length > 0) {
       const maxDate = currentTxs.reduce((m, tx) => tx.date > m ? tx.date : m, currentTxs[0].date);
@@ -563,13 +695,13 @@ function renderCards() {
             <span class="stmt-total-value">RM ${c.totalSpend.toFixed(2)}</span>
           </div>
           <div class="cat-progress-list">${progressHtml}</div>
-          
+
           <div class="date-row">
             <span class="date-label">交易日期</span>
             <input type="date" id="date-${i}" class="date-input" value="${getTodayStr()}">
           </div>
-          
-          <input type="number" id="amt-${i}" class="amt-input" placeholder="0.00" step="0.01">
+
+          <input type="number" id="amt-${i}" class="amt-input" placeholder="0.00" step="0.01" inputmode="decimal">
           ${btnHtml}
           ${prevRowHtml}
           ${txSection}
@@ -651,7 +783,7 @@ function renderHistory() {
     });
     counts.push(`${CARDS_DEF[i].name.split(' ').pop()}: ${cycles.length}/${MAX_CYCLES}`);
   });
-  meta.textContent = `Past cycles kept for 90 days • ${counts.join(' · ')}`;
+  meta.textContent = `Past cycles kept for 90 days · ${counts.join(' · ')}`;
 }
 
 function toggleCard(i) {
@@ -666,6 +798,7 @@ function toggleCard(i) {
     if (a) a.classList.add('open');
   }
 }
+
 function toggleCycle(h) {
   const b = h.nextElementSibling;
   const a = h.querySelector('.cycle-arrow');
@@ -680,9 +813,11 @@ function toggleCycle(h) {
     h.classList.add('active');
   }
 }
+
 function renderAll() {
   renderCards();
   renderHistory();
+  window.scrollTo(0, 0);
 }
 
 window.saveTx = function(i, cat) {
@@ -700,6 +835,7 @@ window.toggleCycle = toggleCycle;
 window.deleteTransaction = deleteTransaction;
 window.showToast = showToast;
 
+// 初始化
 renderAll();
 </script>
 </body>
