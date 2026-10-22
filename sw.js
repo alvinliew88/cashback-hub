@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finory-v7.3';
+const CACHE_NAME = 'finory-v7.4';
 const ASSETS = ['./', './index.html'];
 
 const MANIFEST = JSON.stringify({
