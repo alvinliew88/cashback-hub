@@ -8,42 +8,48 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
 <title>Finory</title>
-<link rel="manifest" id="manifest-link">
+<link rel="manifest" href="manifest.json">
 <style>
   :root {
-    --bg: #000;
-    --surface: #0a0a0a;
-    --surface2: #141414;
-    --border: #1f1f1f;
-    --text: #fff;
-    --text-secondary: #a0a0a0;
-    --text-muted: #666;
-    --accent: #7dd3fc;
+    --bg: #000; --surface: #0a0a0a; --surface2: #141414; --border: #1f1f1f;
+    --text: #fff; --text-secondary: #a0a0a0; --text-muted: #666; --accent: #7dd3fc;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
-    margin: 0; padding: 0;
-    background: var(--bg);
-    color: var(--text);
+    margin: 0; padding: 0; background: var(--bg); color: var(--text);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    font-size: 15px;
-    line-height: 1.4;
-    overscroll-behavior-y: none;
+    font-size: 15px; line-height: 1.4; overscroll-behavior-y: none;
     -webkit-font-smoothing: antialiased;
   }
   body { padding: calc(10px + var(--safe-top)) 10px calc(40px + var(--safe-bottom)); min-height: 100dvh; }
 
-  .big-card {
-    background: var(--surface);
-    border-radius: 18px;
-    border: 1px solid var(--border);
+  #install-bar {
+    display: none;
+    background: linear-gradient(90deg, #1e40af, #1d4ed8);
+    border-radius: 12px;
+    padding: 14px 16px;
     margin-bottom: 12px;
-    overflow: hidden;
-    cursor: pointer;
-    transition: transform 0.12s ease, background 0.12s ease;
-    user-select: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    box-shadow: 0 2px 12px rgba(29,78,216,0.4);
+  }
+  #install-bar.show { display: flex; }
+  #install-bar button {
+    background: #fff; color: #1e40af; border: none; border-radius: 8px;
+    padding: 8px 16px; font-weight: 800; font-size: 14px; cursor: pointer;
+  }
+  #install-bar button:active { background: #e5e7eb; }
+
+  .big-card {
+    background: var(--surface); border-radius: 18px; border: 1px solid var(--border);
+    margin-bottom: 12px; overflow: hidden; cursor: pointer;
+    transition: transform 0.12s, background 0.12s; user-select: none;
   }
   .big-card:active { transform: scale(0.98); background: #111; }
   .big-card-bar { height: 5px; }
@@ -52,83 +58,30 @@
   .bar-ikhwan { background: linear-gradient(90deg, #9ca3af, #4b5563); }
   .bar-maybank { background: linear-gradient(90deg, #fbbf24, #d97706); }
   .big-card-body { padding: 16px 18px; }
-  .big-card-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; }
+  .big-card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+  .big-card-left { flex: 1; min-width: 0; }
+  .big-card-right { flex-shrink: 0; text-align: right; }
   .big-card-name { font-size: 18px; font-weight: 800; color: #fff; letter-spacing: -0.3px; }
   .big-card-cycle { font-size: 11px; color: var(--text-muted); margin-top: 3px; font-weight: 600; }
-  .big-card-cashback {
-    font-family: 'SF Mono', monospace;
-    font-size: 28px;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1;
-    text-align: right;
-  }
-  .big-card-spend {
-    font-family: 'SF Mono', monospace;
-    font-size: 12px;
-    color: var(--accent);
-    font-weight: 700;
-    text-align: right;
-    margin-top: 4px;
-  }
+  .big-card-cashback { font-family: 'SF Mono', monospace; font-size: 26px; font-weight: 900; color: #fff; line-height: 1; }
+  .big-card-spend { font-family: 'SF Mono', monospace; font-size: 12px; color: var(--accent); font-weight: 700; margin-top: 4px; }
 
-  /* 上次记录 / 下次开始 —— 醒目提示 */
   .record-status {
-    border-radius: 10px;
-    padding: 12px 14px;
-    margin-top: 12px;
-    font-size: 13px;
-    font-weight: 700;
-    line-height: 1.5;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 10px;
+    border-radius: 10px; padding: 12px 14px; margin-top: 12px;
+    font-size: 13px; font-weight: 700; display: flex;
+    justify-content: space-between; align-items: center; gap: 10px;
   }
-  .record-status.has-record {
-    background: rgba(34, 197, 94, 0.12);
-    border: 1px solid rgba(34, 197, 94, 0.35);
-    color: #86efac;
-  }
-  .record-status.no-record {
-    background: rgba(234, 179, 8, 0.12);
-    border: 1px solid rgba(234, 179, 8, 0.35);
-    color: #fde047;
-  }
-  .record-status .rs-label {
-    font-size: 10px;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.75;
-    display: block;
-    margin-bottom: 2px;
-  }
-  .record-status .rs-value {
-    font-family: 'SF Mono', monospace;
-    font-size: 16px;
-    font-weight: 900;
-    letter-spacing: -0.3px;
-  }
-  .record-status .rs-right {
-    text-align: right;
-    flex-shrink: 0;
-  }
-  .record-status .rs-arrow {
-    font-size: 20px;
-    opacity: 0.5;
-    flex-shrink: 0;
-  }
+  .record-status.has-record { background: rgba(34,197,94,0.12); border: 1px solid rgba(34,197,94,0.35); color: #86efac; }
+  .record-status.no-record { background: rgba(234,179,8,0.12); border: 1px solid rgba(234,179,8,0.35); color: #fde047; }
+  .rs-label { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; opacity: 0.75; display: block; margin-bottom: 2px; }
+  .rs-value { font-family: 'SF Mono', monospace; font-size: 16px; font-weight: 900; }
+  .rs-arrow { font-size: 20px; opacity: 0.5; }
+  .rs-right { text-align: right; }
 
   .big-card-prev {
-    font-size: 11px;
-    color: #facc15;
-    font-weight: 600;
-    padding-top: 10px;
-    margin-top: 10px;
-    border-top: 1px solid #2a2a2a;
-    display: flex;
-    justify-content: space-between;
+    font-size: 11px; color: #facc15; font-weight: 600;
+    padding-top: 10px; margin-top: 10px; border-top: 1px solid #2a2a2a;
+    display: flex; justify-content: space-between;
   }
 
   .history-section { margin-top: 28px; }
@@ -148,7 +101,7 @@
   .cycle-body.open { display: block; }
   .tx-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #1a1a1a; gap: 10px; }
   .tx-row:last-child { border-bottom: none; }
-  .tx-left { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+  .tx-left { flex: 1; min-width: 0; }
   .tx-date { font-family: 'SF Mono', monospace; font-size: 11px; color: var(--text-muted); }
   .tx-cat { font-size: 13px; color: var(--text-secondary); font-weight: 700; }
   .tx-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; white-space: nowrap; }
@@ -158,122 +111,57 @@
   .history-meta { text-align: center; color: #333; font-size: 11px; margin-top: 16px; font-weight: 600; }
   .empty-state { text-align: center; color: #333; font-size: 14px; padding: 24px; font-weight: 600; }
 
-  #modal {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.75);
-    z-index: 1000;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  }
+  #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; }
   #modal.hidden { display: none; }
   .modal-sheet {
-    background: #0f0f0f;
-    border-radius: 22px 22px 0 0;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 12px 18px calc(24px + var(--safe-bottom));
-    animation: slideUp 0.25s ease;
-    border-top: 1px solid #222;
+    background: #0f0f0f; border-radius: 22px 22px 0 0; width: 100%;
+    max-height: 90vh; overflow-y: auto; padding: 12px 18px calc(24px + var(--safe-bottom));
+    animation: slideUp 0.25s ease; border-top: 1px solid #222;
   }
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
   .modal-handle { width: 40px; height: 4px; background: #333; border-radius: 2px; margin: 0 auto 16px; }
   .modal-title { font-size: 18px; font-weight: 800; color: #fff; margin-bottom: 6px; }
   .modal-subtitle { font-size: 13px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 16px 0 10px; }
   .cat-grid { display: flex; flex-direction: column; gap: 10px; }
   .cat-big-btn {
-    width: 100%;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: #fff;
-    border-radius: 14px;
-    padding: 18px;
-    font-size: 16px;
-    font-weight: 800;
-    cursor: pointer;
-    text-align: left;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    color: #fff; border-radius: 14px; padding: 18px; font-size: 16px; font-weight: 800;
+    cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center;
   }
   .cat-big-btn:active { background: #1f1f1f; transform: scale(0.99); }
   .cat-big-btn.maxed { background: #7f1d1d; border-color: #dc2626; }
   .cat-big-name { font-size: 16px; font-weight: 800; }
   .cat-big-info { font-family: 'SF Mono', monospace; font-size: 12px; color: #999; font-weight: 600; }
   .cat-big-btn.maxed .cat-big-info { color: #fca5a5; }
-
   .modal-progress-info { font-family: 'SF Mono', monospace; font-size: 13px; color: var(--text-secondary); margin-bottom: 14px; font-weight: 600; }
   .date-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .date-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
   .date-input { background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 600; outline: none; flex: 1; }
   .date-input:focus { border-color: var(--accent); }
-
   .modal-amount-input {
-    width: 100%;
-    background: var(--accent);
-    border: 2px solid #38bdf8;
-    color: #000;
-    border-radius: 14px;
-    padding: 18px;
-    font-size: 28px;
-    outline: none;
-    font-family: 'SF Mono', monospace;
-    font-weight: 900;
-    height: 70px;
-    margin-bottom: 12px;
-    text-align: center;
+    width: 100%; background: var(--accent); border: 2px solid #38bdf8; color: #000;
+    border-radius: 14px; padding: 18px; font-size: 28px; outline: none;
+    font-family: 'SF Mono', monospace; font-weight: 900; height: 70px;
+    margin-bottom: 12px; text-align: center;
   }
   .modal-amount-input::placeholder { color: #0369a1; font-weight: 700; }
   .modal-amount-input:focus { border-color: #fff; box-shadow: 0 0 0 4px rgba(56,189,248,0.4); }
-
   .modal-confirm {
-    width: 100%;
-    background: #22c55e;
-    border: none;
-    color: #fff;
-    border-radius: 14px;
-    padding: 18px;
-    font-size: 17px;
-    font-weight: 800;
-    cursor: pointer;
-    margin-bottom: 10px;
-    letter-spacing: 0.02em;
+    width: 100%; background: #22c55e; border: none; color: #fff; border-radius: 14px;
+    padding: 18px; font-size: 17px; font-weight: 800; cursor: pointer; margin-bottom: 10px;
   }
   .modal-confirm:active { background: #16a34a; transform: scale(0.98); }
-
   .modal-back {
-    width: 100%;
-    background: transparent;
-    border: 1px solid #333;
-    color: #999;
-    border-radius: 14px;
-    padding: 14px;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
+    width: 100%; background: transparent; border: 1px solid #333; color: #999;
+    border-radius: 14px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer;
   }
   .modal-back:active { background: #1a1a1a; }
 
   #toast {
-    position: fixed;
-    bottom: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #1e7e34;
-    color: #fff;
-    padding: 10px 24px;
-    border-radius: 20px;
-    font-size: 14px;
-    display: none;
-    z-index: 2000;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    max-width: 90%;
-    text-align: center;
+    position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+    background: #1e7e34; color: #fff; padding: 10px 24px; border-radius: 20px;
+    font-size: 14px; display: none; z-index: 2000; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    max-width: 90%; text-align: center;
   }
   #toast.error { background: #b91c1c; }
 
@@ -283,6 +171,11 @@
 </head>
 <body>
 
+<div id="install-bar">
+  <span>📲 安装 Finory 到主屏幕，全屏离线使用</span>
+  <button onclick="window.installApp()">安装</button>
+</div>
+
 <div id="card-grid"></div>
 
 <div class="history-section">
@@ -291,7 +184,7 @@
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<div class="version-info">Version 4.1 — Record Status — 2026-10-22</div>
+<div class="version-info">Version 5.0 — PWA — 2026-10-22</div>
 
 <div id="modal" class="hidden">
   <div class="modal-sheet">
@@ -305,35 +198,38 @@
 
 <script>
 (function() {
-  const iconSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#000"/><rect x="88" y="88" width="336" height="336" rx="60" fill="none" stroke="#7dd3fc" stroke-width="28"/><text x="256" y="352" font-size="220" font-family="Arial" font-weight="900" fill="#7dd3fc" text-anchor="middle">F</text></svg>';
-  let iconUri;
-  try { iconUri = 'data:image/svg+xml;base64,' + btoa(iconSvg); }
-  catch(e) { iconUri = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(iconSvg); }
-  const manifestData = {
-    name: "Finory", short_name: "Finory",
-    description: "Offline Credit Card Cashback Tracker",
-    start_url: ".", scope: ".",
-    display: "standalone", orientation: "portrait",
-    background_color: "#000000", theme_color: "#000000",
-    icons: [
-      { src: iconUri, sizes: "512x512", type: "image/svg+xml", purpose: "any maskable" },
-      { src: iconUri, sizes: "192x192", type: "image/svg+xml", purpose: "any maskable" }
-    ]
-  };
-  try {
-    const blob = new Blob([JSON.stringify(manifestData)], { type: 'application/manifest+json' });
-    document.getElementById('manifest-link').href = URL.createObjectURL(blob);
-  } catch(e) {}
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('sw.js', { scope: './' }).catch(()=>{});
+    window.addEventListener('load', function() {
+      navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function(e) {
+        console.warn('SW register failed:', e);
+      });
     });
   }
+
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    document.getElementById('install-bar').classList.add('show');
+  });
+
+  window.installApp = function() {
+    if (!deferredPrompt) {
+      alert('如果顶部没有安装按钮：请用 Chrome 打开，等待 5 秒后刷新一次；或点浏览器菜单 → 添加到主屏幕。');
+      return;
+    }
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(function() {
+      deferredPrompt = null;
+      document.getElementById('install-bar').classList.remove('show');
+    });
+  };
+
+  window.addEventListener('appinstalled', function() {
+    document.getElementById('install-bar').classList.remove('show');
+  });
 })();
 
-// ============================================================
-// 卡片定义
-// ============================================================
 const CARDS_DEF = [
   {
     name: "RHB Shell 2498",
@@ -384,36 +280,33 @@ const CARDS_DEF = [
 ];
 
 const MAX_CYCLES = 3;
-const DATA_VERSION = 17;
+const DATA_VERSION = 19;
 
-// ============================================================
-// 工具
-// ============================================================
 function formatDateDMY(d) {
   const date = new Date(d + 'T00:00:00');
-  return `${String(date.getDate()).padStart(2,'0')}/${String(date.getMonth()+1).padStart(2,'0')}/${date.getFullYear()}`;
+  return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear();
 }
 function getTodayStr() {
   const n = new Date();
-  return `${n.getFullYear()}-${String(n.getMonth()+1).padStart(2,'0')}-${String(n.getDate()).padStart(2,'0')}`;
+  return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
 }
 function addDays(dateStr, days) {
   const d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + days);
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 function getCycleStart(day) {
   const now = new Date();
   let start = new Date(now.getFullYear(), now.getMonth(), day);
   if (now.getDate() < day) start.setMonth(start.getMonth() - 1);
-  return `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+  return start.getFullYear() + '-' + String(start.getMonth()+1).padStart(2,'0') + '-' + String(start.getDate()).padStart(2,'0');
 }
 function getCycleEnd(startStr) {
-  const [y, m, d] = startStr.split('-').map(Number);
-  const end = new Date(y, m - 1, d);
+  const p = startStr.split('-').map(Number);
+  const end = new Date(p[0], p[1] - 1, p[2]);
   end.setMonth(end.getMonth() + 1);
   end.setDate(end.getDate() - 1);
-  return `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
+  return end.getFullYear() + '-' + String(end.getMonth()+1).padStart(2,'0') + '-' + String(end.getDate()).padStart(2,'0');
 }
 function getRateTier(totalSpend) {
   if (totalSpend >= 3000) return 3;
@@ -426,59 +319,70 @@ function showToast(msg, isError) {
   t.textContent = msg;
   t.className = isError ? 'error' : '';
   t.style.display = 'block';
-  setTimeout(() => { t.style.display = 'none'; }, 2200);
+  setTimeout(function() { t.style.display = 'none'; }, 2200);
 }
 
-// ============================================================
-// 数据
-// ============================================================
+function normalizeCard(raw, i) {
+  const def = CARDS_DEF[i];
+  const c = raw || {};
+  return {
+    name: def.name,
+    barClass: def.barClass,
+    borderClass: def.borderClass,
+    resetDay: def.resetDay,
+    cats: def.cats,
+    caps: def.caps,
+    minSpend: def.minSpend,
+    rates: def.rates,
+    cap: def.cap,
+    fixedCategory: def.fixedCategory,
+    progressTargets: def.progressTargets,
+    autoDebit: def.autoDebit,
+    totalSpend: typeof c.totalSpend === 'number' ? c.totalSpend : 0,
+    cashback: typeof c.cashback === 'number' ? c.cashback : 0,
+    categoryCashback: c.categoryCashback || {},
+    categorySpend: c.categorySpend || {},
+    lastCycleStart: c.lastCycleStart || getCycleStart(def.resetDay),
+    autoDebitCycle: c.autoDebitCycle || null
+  };
+}
+
 function getDefaultState() {
-  const cards = CARDS_DEF.map(c => ({
-    ...c, totalSpend: 0, cashback: 0,
-    categoryCashback: {}, categorySpend: {},
-    lastCycleStart: getCycleStart(c.resetDay),
-    autoDebitCycle: null
-  }));
-  return { version: DATA_VERSION, cards, transactions: [] };
+  const cards = CARDS_DEF.map(function(def, i) { return normalizeCard({}, i); });
+  return { version: DATA_VERSION, cards: cards, transactions: [] };
 }
 
 function loadState() {
-  let raw = localStorage.getItem('finoryData');
+  const raw = localStorage.getItem('finoryData');
   let state = null;
-  if (raw) { try { state = JSON.parse(raw); } catch(e) { state = null; } }
-  if (!state || !state.cards) {
+  if (raw) {
+    try { state = JSON.parse(raw); } catch(e) { state = null; }
+  }
+  if (!state || !Array.isArray(state.cards)) {
     state = getDefaultState();
     saveState(state);
-  } else if (state.version !== DATA_VERSION) {
-    state.version = DATA_VERSION;
-    if (!state.transactions) state.transactions = [];
-    state.cards.forEach(c => {
-      if (!c.categorySpend) c.categorySpend = {};
-      if (!c.categoryCashback) c.categoryCashback = {};
-    });
-    saveState(state);
+    return state;
   }
-  state.cards.forEach(c => {
-    if (!c.categorySpend) c.categorySpend = {};
-    if (!c.categoryCashback) c.categoryCashback = {};
-  });
+  state.cards = CARDS_DEF.map(function(def, i) { return normalizeCard(state.cards[i], i); });
+  if (!Array.isArray(state.transactions)) state.transactions = [];
+  state.version = DATA_VERSION;
+  saveState(state);
   return state;
 }
 
 function saveState(state) {
   try { localStorage.setItem('finoryData', JSON.stringify(state)); }
-  catch(e) { showToast('⚠️ 保存失败', true); }
+  catch(e) { showToast('保存失败', true); }
 }
 
-// ============================================================
-// 业务
-// ============================================================
 function checkAndReset(state) {
-  state.cards.forEach(c => {
+  state.cards.forEach(function(c) {
     const currentStart = getCycleStart(c.resetDay);
     if (c.lastCycleStart !== currentStart) {
-      c.totalSpend = 0; c.cashback = 0;
-      c.categoryCashback = {}; c.categorySpend = {};
+      c.totalSpend = 0;
+      c.cashback = 0;
+      c.categoryCashback = {};
+      c.categorySpend = {};
       c.lastCycleStart = currentStart;
     }
   });
@@ -486,7 +390,7 @@ function checkAndReset(state) {
 
 function applyAutoDebits(state) {
   let changed = false;
-  state.cards.forEach((c, i) => {
+  state.cards.forEach(function(c, i) {
     const def = CARDS_DEF[i];
     if (def.autoDebit && c.lastCycleStart !== c.autoDebitCycle) {
       const rate = def.rates[def.autoDebit.category];
@@ -499,10 +403,15 @@ function applyAutoDebits(state) {
       c.categorySpend[def.autoDebit.category] = (c.categorySpend[def.autoDebit.category] || 0) + def.autoDebit.amount;
       c.autoDebitCycle = c.lastCycleStart;
       state.transactions.push({
-        id: Date.now() + '-auto-' + i, cardIndex: i, cardName: def.name,
-        amount: def.autoDebit.amount, category: def.autoDebit.category,
-        note: def.autoDebit.note, date: getTodayStr(),
-        timestamp: Date.now(), cycleStart: c.lastCycleStart
+        id: Date.now() + '-auto-' + i,
+        cardIndex: i,
+        cardName: def.name,
+        amount: def.autoDebit.amount,
+        category: def.autoDebit.category,
+        note: def.autoDebit.note,
+        date: getTodayStr(),
+        timestamp: Date.now(),
+        cycleStart: c.lastCycleStart
       });
       changed = true;
     }
@@ -511,49 +420,51 @@ function applyAutoDebits(state) {
 }
 
 function getRateForCategory(cardDef, cat, tier) {
-  if (cardDef.name.includes("RHB")) {
+  if (cardDef.name.indexOf('RHB') !== -1) {
     const arr = cardDef.rates[cat];
-    return (arr && arr.length > tier) ? arr[tier] : 0;
+    return arr && arr.length > tier ? arr[tier] : 0;
   }
-  return cardDef.rates?.[cat] || 0;
+  return cardDef.rates && cardDef.rates[cat] ? cardDef.rates[cat] : 0;
 }
 
 function computeCategoryTarget(cardDef, cardState, cat) {
-  if (!cardDef.name.includes("RHB")) return null;
+  if (cardDef.name.indexOf('RHB') === -1) return null;
   const tier = getRateTier(cardState.totalSpend);
   const rate = getRateForCategory(cardDef, cat, tier);
   if (rate === 0) return Infinity;
-  const cap = cardDef.caps[cat] || 0;
-  const minSpend = cardDef.minSpend[cat] || 0;
+  const cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 0;
+  const minSpend = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
   let target = cap / rate;
   if (target < minSpend) target = minSpend;
   return target;
 }
 
 function getRate(cardDef, cardState, cat, amount) {
-  if (cardDef.name.includes("RHB")) {
-    const min = cardDef.minSpend?.[cat] || 0;
+  if (cardDef.name.indexOf('RHB') !== -1) {
+    const min = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
     if ((cardState.categorySpend[cat] || 0) + amount < min) return 0;
     const tier = getRateTier(cardState.totalSpend + amount);
     const arr = cardDef.rates[cat];
-    return (arr && arr.length > tier) ? arr[tier] : 0;
+    return arr && arr.length > tier ? arr[tier] : 0;
   }
-  return cardDef.rates?.[cat] || 0;
+  return cardDef.rates && cardDef.rates[cat] ? cardDef.rates[cat] : 0;
 }
 
 function recalcCard(state, cardIndex) {
   const def = CARDS_DEF[cardIndex];
   const cardState = state.cards[cardIndex];
-  cardState.totalSpend = 0; cardState.cashback = 0;
-  cardState.categoryCashback = {}; cardState.categorySpend = {};
+  cardState.totalSpend = 0;
+  cardState.cashback = 0;
+  cardState.categoryCashback = {};
+  cardState.categorySpend = {};
   const txs = state.transactions
-    .filter(t => t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart)
-    .sort((a, b) => a.timestamp - b.timestamp);
-  txs.forEach(tx => {
+    .filter(function(t) { return t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart; })
+    .sort(function(a, b) { return a.timestamp - b.timestamp; });
+  txs.forEach(function(tx) {
     const rate = getRate(def, cardState, tx.category, tx.amount);
     let earned = 0;
-    if (def.name.includes("RHB")) {
-      const cap = def.caps[tx.category] || 999;
+    if (def.name.indexOf('RHB') !== -1) {
+      const cap = def.caps && def.caps[tx.category] ? def.caps[tx.category] : 999;
       const cur = cardState.categoryCashback[tx.category] || 0;
       earned = Math.min(tx.amount * rate, cap - cur);
       if (earned < 0) earned = 0;
@@ -578,8 +489,8 @@ function addTransaction(cardIndex, amount, cat, note, txDate) {
   const cardDef = CARDS_DEF[cardIndex];
   const rate = getRate(cardDef, cardState, cat, amount);
   let earned = 0;
-  if (cardDef.name.includes("RHB")) {
-    const cap = cardDef.caps[cat] || 999;
+  if (cardDef.name.indexOf('RHB') !== -1) {
+    const cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 999;
     const cur = cardState.categoryCashback[cat] || 0;
     earned = Math.min(amount * rate, cap - cur);
     if (earned < 0) earned = 0;
@@ -595,25 +506,29 @@ function addTransaction(cardIndex, amount, cat, note, txDate) {
   cardState.totalSpend += amount;
   cardState.categorySpend[cat] = (cardState.categorySpend[cat] || 0) + amount;
 
-  const tx = {
+  state.transactions.push({
     id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-    cardIndex, cardName: cardDef.name, amount, category: cat,
-    note: note || '', date: txDate || getTodayStr(),
-    timestamp: Date.now(), cycleStart: cardState.lastCycleStart
-  };
-  state.transactions.push(tx);
+    cardIndex: cardIndex,
+    cardName: cardDef.name,
+    amount: amount,
+    category: cat,
+    note: note || '',
+    date: txDate || getTodayStr(),
+    timestamp: Date.now(),
+    cycleStart: cardState.lastCycleStart
+  });
   cleanupOldCycles(state);
   saveState(state);
   renderAll();
-  showToast('✅ 已记录 RM ' + amount.toFixed(2) + ' · ' + cat);
+  showToast('已记录 RM ' + amount.toFixed(2) + ' · ' + cat);
 }
 
 function deleteTransaction(txId) {
   if (!confirm('Delete this transaction?')) return;
   const state = loadState();
-  const tx = state.transactions.find(t => t.id === txId);
+  const tx = state.transactions.find(function(t) { return t.id === txId; });
   if (!tx) return;
-  state.transactions = state.transactions.filter(t => t.id !== txId);
+  state.transactions = state.transactions.filter(function(t) { return t.id !== txId; });
   recalcCard(state, tx.cardIndex);
   cleanupOldCycles(state);
   saveState(state);
@@ -621,69 +536,45 @@ function deleteTransaction(txId) {
 }
 
 function cleanupOldCycles(state) {
-  state.cards.forEach((c, i) => {
+  state.cards.forEach(function(c, i) {
     const cycles = [];
-    state.transactions.forEach(tx => {
-      if (tx.cardIndex === i && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
+    state.transactions.forEach(function(tx) {
+      if (tx.cardIndex === i && cycles.indexOf(tx.cycleStart) === -1) cycles.push(tx.cycleStart);
     });
-    cycles.sort((a, b) => b.localeCompare(a));
+    cycles.sort(function(a, b) { return b.localeCompare(a); });
     if (cycles.length > MAX_CYCLES) {
       const toDelete = cycles.slice(MAX_CYCLES);
-      state.transactions = state.transactions.filter(tx => {
+      state.transactions = state.transactions.filter(function(tx) {
         if (tx.cardIndex !== i) return true;
-        return !toDelete.includes(tx.cycleStart);
+        return toDelete.indexOf(tx.cycleStart) === -1;
       });
     }
   });
 }
 
 function isCatMaxed(cardState, cardDef, cat) {
-  if (cardDef.name.includes("RHB")) {
-    const cap = cardDef.caps[cat] || 999;
+  if (cardDef.name.indexOf('RHB') !== -1) {
+    const cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 999;
     return (cardState.categoryCashback[cat] || 0) >= cap;
   }
   return cardState.cashback >= (cardDef.cap || 999);
 }
 
-// ============================================================
-// 计算「上次记录」和「下次开始」
-// ============================================================
 function computeRecordStatus(state, i) {
   const cardState = state.cards[i];
   const cycleStart = cardState.lastCycleStart;
   const cycleEnd = getCycleEnd(cycleStart);
-
-  // 当前周期内所有交易
-  const currentTxs = state.transactions.filter(
-    t => t.cardIndex === i && t.cycleStart === cycleStart
-  );
-
+  const currentTxs = state.transactions.filter(function(t) {
+    return t.cardIndex === i && t.cycleStart === cycleStart;
+  });
   if (currentTxs.length === 0) {
-    return {
-      hasRecord: false,
-      lastDate: null,
-      nextStart: cycleStart,   // 从周期开始日算起
-      cycleStart,
-      cycleEnd
-    };
+    return { hasRecord: false, lastDate: null, nextStart: cycleStart, cycleStart: cycleStart, cycleEnd: cycleEnd };
   }
-
-  // 最大交易日期
-  const lastDate = currentTxs.reduce((m, tx) => tx.date > m ? tx.date : m, currentTxs[0].date);
-  const nextStart = addDays(lastDate, 1);
-
-  return {
-    hasRecord: true,
-    lastDate,
-    nextStart,
-    cycleStart,
-    cycleEnd
-  };
+  let lastDate = currentTxs[0].date;
+  currentTxs.forEach(function(tx) { if (tx.date > lastDate) lastDate = tx.date; });
+  return { hasRecord: true, lastDate: lastDate, nextStart: addDays(lastDate, 1), cycleStart: cycleStart, cycleEnd: cycleEnd };
 }
 
-// ============================================================
-// 首页渲染
-// ============================================================
 function renderHome() {
   const state = loadState();
   checkAndReset(state);
@@ -691,70 +582,55 @@ function renderHome() {
   saveState(state);
 
   const grid = document.getElementById('card-grid');
-  grid.innerHTML = state.cards.map((c, i) => {
-    const def = CARDS_DEF[i];
-    const status = computeRecordStatus(state, i);
+  if (!grid) return;
 
-    // 上期总额
-    const prevTxs = state.transactions
-      .filter(t => t.cardIndex === i && t.cycleStart !== c.lastCycleStart)
-      .sort((a, b) => b.cycleStart.localeCompare(a.cycleStart));
-    let prevHtml = '';
-    if (prevTxs.length > 0) {
-      const latest = prevTxs[0].cycleStart;
-      const filtered = prevTxs.filter(t => t.cycleStart === latest);
-      const prevTotal = filtered.reduce((s, t) => s + t.amount, 0);
-      prevHtml = `
-        <div class="big-card-prev">
-          <span>📄 上期账单 (${formatDateDMY(latest)} — ${formatDateDMY(getCycleEnd(latest))})</span>
-          <span>RM ${prevTotal.toFixed(2)}</span>
-        </div>`;
-    }
+  try {
+    grid.innerHTML = state.cards.map(function(c, i) {
+      const def = CARDS_DEF[i];
+      const status = computeRecordStatus(state, i);
+      const cashback = typeof c.cashback === 'number' ? c.cashback : 0;
+      const totalSpend = typeof c.totalSpend === 'number' ? c.totalSpend : 0;
 
-    // 记录状态提示（核心）
-    let statusHtml = '';
-    if (status.hasRecord) {
-      statusHtml = `
-        <div class="record-status has-record">
-          <div>
-            <span class="rs-label">上次记录</span>
-            <span class="rs-value">${formatDateDMY(status.lastDate)}</span>
-          </div>
-          <div class="rs-arrow">→</div>
-          <div class="rs-right">
-            <span class="rs-label">下次从这天开始</span>
-            <span class="rs-value">${formatDateDMY(status.nextStart)}</span>
-          </div>
-        </div>`;
-    } else {
-      statusHtml = `
-        <div class="record-status no-record">
-          <div>
-            <span class="rs-label">尚未记录</span>
-            <span class="rs-value">从 ${formatDateDMY(status.cycleStart)} 算起</span>
-          </div>
-        </div>`;
-    }
+      const prevTxs = state.transactions
+        .filter(function(t) { return t.cardIndex === i && t.cycleStart !== c.lastCycleStart; })
+        .sort(function(a, b) { return b.cycleStart.localeCompare(a.cycleStart); });
+      let prevHtml = '';
+      if (prevTxs.length > 0) {
+        const latest = prevTxs[0].cycleStart;
+        const filtered = prevTxs.filter(function(t) { return t.cycleStart === latest; });
+        const prevTotal = filtered.reduce(function(s, t) { return s + t.amount; }, 0);
+        prevHtml = '<div class="big-card-prev"><span>上期账单 (' + formatDateDMY(latest) + ' — ' + formatDateDMY(getCycleEnd(latest)) + ')</span><span>RM ' + prevTotal.toFixed(2) + '</span></div>';
+      }
 
-    return `
-      <div class="big-card" onclick="window.openModal(${i})">
-        <div class="big-card-bar ${def.barClass}"></div>
-        <div class="big-card-body">
-          <div class="big-card-top">
-            <div>
-              <div class="big-card-name">${def.name}</div>
-              <div class="big-card-cycle">周期 ${formatDateDMY(status.cycleStart)} — ${formatDateDMY(status.cycleEnd)}</div>
-            </div>
-            <div>
-              <div class="big-card-cashback">RM ${c.cashback.toFixed(2)}</div>
-              <div class="big-card-spend">Spend ${c.totalSpend.toFixed(2)}</div>
-            </div>
-          </div>
-          ${statusHtml}
-          ${prevHtml}
-        </div>
-      </div>`;
-  }).join('');
+      let statusHtml = '';
+      if (status.hasRecord) {
+        statusHtml = '<div class="record-status has-record"><div><span class="rs-label">上次记录</span><span class="rs-value">' + formatDateDMY(status.lastDate) + '</span></div><div class="rs-arrow">→</div><div class="rs-right"><span class="rs-label">下次从这天开始</span><span class="rs-value">' + formatDateDMY(status.nextStart) + '</span></div></div>';
+      } else {
+        statusHtml = '<div class="record-status no-record"><div><span class="rs-label">尚未记录</span><span class="rs-value">从 ' + formatDateDMY(status.cycleStart) + ' 算起</span></div></div>';
+      }
+
+      return '<div class="big-card" onclick="window.openModal(' + i + ')">' +
+        '<div class="big-card-bar ' + def.barClass + '"></div>' +
+        '<div class="big-card-body">' +
+          '<div class="big-card-top">' +
+            '<div class="big-card-left">' +
+              '<div class="big-card-name">' + def.name + '</div>' +
+              '<div class="big-card-cycle">周期 ' + formatDateDMY(status.cycleStart) + ' — ' + formatDateDMY(status.cycleEnd) + '</div>' +
+            '</div>' +
+            '<div class="big-card-right">' +
+              '<div class="big-card-cashback">RM ' + cashback.toFixed(2) + '</div>' +
+              '<div class="big-card-spend">Spend ' + totalSpend.toFixed(2) + '</div>' +
+            '</div>' +
+          '</div>' +
+          statusHtml +
+          prevHtml +
+        '</div>' +
+      '</div>';
+    }).join('');
+  } catch(e) {
+    console.error('Render error:', e);
+    grid.innerHTML = '<div style="color:#ef4444;padding:20px;background:#1a1a1a;border-radius:12px;">渲染出错：' + e.message + '<br>请刷新页面或清除缓存重试。</div>';
+  }
 
   renderHistory();
 }
@@ -763,74 +639,62 @@ function renderHistory() {
   const state = loadState();
   const container = document.getElementById('history-container');
   const meta = document.getElementById('history-meta');
+  if (!container) return;
 
-  const currentStarts = state.cards.map(c => c.lastCycleStart);
-  const past = state.transactions.filter(tx => tx.cycleStart !== currentStarts[tx.cardIndex]);
+  const currentStarts = state.cards.map(function(c) { return c.lastCycleStart; });
+  const past = state.transactions.filter(function(tx) { return tx.cycleStart !== currentStarts[tx.cardIndex]; });
 
   if (!past.length) {
     container.innerHTML = '<div class="empty-state">No past transactions.</div>';
-    meta.textContent = '';
+    if (meta) meta.textContent = '';
     return;
   }
 
   const groups = {};
-  past.forEach(tx => {
+  past.forEach(function(tx) {
     const key = tx.cardIndex + '|' + tx.cycleStart;
     if (!groups[key]) groups[key] = [];
     groups[key].push(tx);
   });
-  const keys = Object.keys(groups).sort((a, b) => {
-    const [ca, sa] = a.split('|');
-    const [cb, sb] = b.split('|');
-    if (sa !== sb) return sb.localeCompare(sa);
-    return parseInt(ca) - parseInt(cb);
+  const keys = Object.keys(groups).sort(function(a, b) {
+    const pa = a.split('|');
+    const pb = b.split('|');
+    if (pa[1] !== pb[1]) return pb[1].localeCompare(pa[1]);
+    return parseInt(pa[0]) - parseInt(pb[0]);
   });
 
-  container.innerHTML = keys.map(key => {
-    const [ci, cs] = key.split('|');
-    const idx = parseInt(ci);
+  container.innerHTML = keys.map(function(key) {
+    const parts = key.split('|');
+    const idx = parseInt(parts[0]);
+    const cs = parts[1];
     const def = CARDS_DEF[idx];
-    const txs = groups[key].sort((a, b) => b.timestamp - a.timestamp);
+    const txs = groups[key].sort(function(a, b) { return b.timestamp - a.timestamp; });
     const ce = getCycleEnd(cs);
-    const total = txs.reduce((s, t) => s + t.amount, 0);
-    const rows = txs.map(tx => `
-      <div class="tx-row">
-        <div class="tx-left">
-          <div>
-            <span class="tx-date">${formatDateDMY(tx.date)}</span>
-            <span class="tx-cat">${tx.category}</span>
-          </div>
-        </div>
-        <div class="tx-right">
-          <div class="tx-amt">RM ${tx.amount.toFixed(2)}</div>
-          <button class="tx-del" onclick="event.stopPropagation();window.deleteTransaction('${tx.id}')">Delete</button>
-        </div>
-      </div>`).join('');
-    return `
-      <div class="cycle-box ${def.borderClass}">
-        <div class="cycle-header" onclick="window.toggleCycle(this)">
-          <div>
-            <div class="cycle-name">${def.name}</div>
-            <div class="cycle-range">${formatDateDMY(cs)} — ${formatDateDMY(ce)}</div>
-          </div>
-          <div style="display:flex;align-items:center;">
-            <span class="cycle-count">${txs.length} tx · RM ${total.toFixed(2)}</span>
-            <span class="cycle-arrow">▼</span>
-          </div>
-        </div>
-        <div class="cycle-body">${rows}</div>
-      </div>`;
+    const total = txs.reduce(function(s, t) { return s + t.amount; }, 0);
+    const rows = txs.map(function(tx) {
+      return '<div class="tx-row">' +
+        '<div class="tx-left"><div><span class="tx-date">' + formatDateDMY(tx.date) + '</span> <span class="tx-cat">' + tx.category + '</span></div></div>' +
+        '<div class="tx-right"><div class="tx-amt">RM ' + tx.amount.toFixed(2) + '</div><button class="tx-del" onclick="event.stopPropagation();window.deleteTransaction(\'' + tx.id + '\')">Delete</button></div>' +
+      '</div>';
+    }).join('');
+    return '<div class="cycle-box ' + def.borderClass + '">' +
+      '<div class="cycle-header" onclick="window.toggleCycle(this)">' +
+        '<div><div class="cycle-name">' + def.name + '</div><div class="cycle-range">' + formatDateDMY(cs) + ' — ' + formatDateDMY(ce) + '</div></div>' +
+        '<div style="display:flex;align-items:center;"><span class="cycle-count">' + txs.length + ' tx · RM ' + total.toFixed(2) + '</span><span class="cycle-arrow">▼</span></div>' +
+      '</div>' +
+      '<div class="cycle-body">' + rows + '</div>' +
+    '</div>';
   }).join('');
 
-  let counts = [];
-  state.cards.forEach((c, i) => {
+  const counts = [];
+  state.cards.forEach(function(c, i) {
     const cycles = [];
-    state.transactions.forEach(tx => {
-      if (tx.cardIndex === i && tx.cycleStart !== c.lastCycleStart && !cycles.includes(tx.cycleStart)) cycles.push(tx.cycleStart);
+    state.transactions.forEach(function(tx) {
+      if (tx.cardIndex === i && tx.cycleStart !== c.lastCycleStart && cycles.indexOf(tx.cycleStart) === -1) cycles.push(tx.cycleStart);
     });
-    counts.push(`${CARDS_DEF[i].name.split(' ').pop()}: ${cycles.length}/${MAX_CYCLES}`);
+    counts.push(CARDS_DEF[i].name.split(' ').pop() + ': ' + cycles.length + '/' + MAX_CYCLES);
   });
-  meta.textContent = `Past cycles kept for 90 days · ${counts.join(' · ')}`;
+  if (meta) meta.textContent = 'Past cycles kept for 90 days · ' + counts.join(' · ');
 }
 
 function toggleCycle(h) {
@@ -848,9 +712,6 @@ function toggleCycle(h) {
   }
 }
 
-// ============================================================
-// Modal
-// ============================================================
 const modal = { cardIndex: null, category: null, step: 'category' };
 
 function openModal(i) {
@@ -887,68 +748,54 @@ function renderModal() {
   document.getElementById('modal-title').textContent = def.name;
   const body = document.getElementById('modal-body');
 
-  // 顶部显示记录状态提示
   const statusBanner = status.hasRecord
-    ? `<div style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#86efac;font-weight:700;">
-        上次记录 ${formatDateDMY(status.lastDate)} · 本次从 ${formatDateDMY(status.nextStart)} 开始汇总
-       </div>`
-    : `<div style="background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#fde047;font-weight:700;">
-        本周期尚未记录 · 从 ${formatDateDMY(status.cycleStart)} 开始汇总
-       </div>`;
+    ? '<div style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#86efac;font-weight:700;">上次记录 ' + formatDateDMY(status.lastDate) + ' · 本次从 ' + formatDateDMY(status.nextStart) + ' 开始汇总</div>'
+    : '<div style="background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#fde047;font-weight:700;">本周期尚未记录 · 从 ' + formatDateDMY(status.cycleStart) + ' 开始汇总</div>';
 
   if (modal.step === 'category') {
-    body.innerHTML = `
-      ${statusBanner}
-      <div class="modal-subtitle">选择分类</div>
-      <div class="cat-grid">
-        ${def.cats.map(cat => {
+    body.innerHTML = statusBanner +
+      '<div class="modal-subtitle">选择分类</div>' +
+      '<div class="cat-grid">' +
+        def.cats.map(function(cat) {
           const maxed = isCatMaxed(c, def, cat) ? 'maxed' : '';
           const spent = c.categorySpend[cat] || 0;
           const target = computeCategoryTarget(def, c, cat);
-          const targetStr = (target === Infinity) ? '—' : target.toFixed(0);
-          const minSpend = def.minSpend[cat] || 0;
-          const minNote = (minSpend > 0 && spent < minSpend) ? ` · 需达 ${minSpend}` : '';
-          return `
-            <button class="cat-big-btn ${maxed}" onclick="window.selectCategory('${cat}')">
-              <span class="cat-big-name">${cat}</span>
-              <span class="cat-big-info">RM ${spent.toFixed(2)} / ${targetStr}${minNote}</span>
-            </button>
-          `;
-        }).join('')}
-      </div>
-      <button class="modal-back" style="margin-top:16px;" onclick="window.closeModal()">取消</button>
-    `;
+          const targetStr = target === Infinity ? '—' : target.toFixed(0);
+          const minSpend = def.minSpend && def.minSpend[cat] ? def.minSpend[cat] : 0;
+          const minNote = minSpend > 0 && spent < minSpend ? ' · 需达 ' + minSpend : '';
+          return '<button class="cat-big-btn ' + maxed + '" onclick="window.selectCategory(\'' + cat + '\')">' +
+            '<span class="cat-big-name">' + cat + '</span>' +
+            '<span class="cat-big-info">RM ' + spent.toFixed(2) + ' / ' + targetStr + minNote + '</span>' +
+          '</button>';
+        }).join('') +
+      '</div>' +
+      '<button class="modal-back" style="margin-top:16px;" onclick="window.closeModal()">取消</button>';
   } else {
     const cat = modal.category;
     const spent = c.categorySpend[cat] || 0;
     const target = computeCategoryTarget(def, c, cat);
-    const targetStr = (target === Infinity) ? '—' : target.toFixed(0);
-    body.innerHTML = `
-      ${statusBanner}
-      <div class="modal-subtitle">${cat}</div>
-      <div class="modal-progress-info">已用 RM ${spent.toFixed(2)} / ${targetStr}</div>
-      <div class="date-row">
-        <span class="date-label">交易日期</span>
-        <input type="date" id="modal-date" class="date-input" value="${status.hasRecord ? status.nextStart : status.cycleStart}">
-      </div>
-      <input type="number" id="modal-amount" class="modal-amount-input" placeholder="0.00" step="0.01" inputmode="decimal" autofocus>
-      <button class="modal-confirm" onclick="window.confirmAmount()">记录</button>
-      ${!def.fixedCategory ? `<button class="modal-back" onclick="window.backToCategory()">← 返回选择分类</button>` : ''}
-      ${def.fixedCategory ? `<button class="modal-back" onclick="window.closeModal()">取消</button>` : ''}
-    `;
+    const targetStr = target === Infinity ? '—' : target.toFixed(0);
+    const defaultDate = status.hasRecord ? status.nextStart : status.cycleStart;
+    body.innerHTML = statusBanner +
+      '<div class="modal-subtitle">' + cat + '</div>' +
+      '<div class="modal-progress-info">已用 RM ' + spent.toFixed(2) + ' / ' + targetStr + '</div>' +
+      '<div class="date-row"><span class="date-label">交易日期</span><input type="date" id="modal-date" class="date-input" value="' + defaultDate + '"></div>' +
+      '<input type="number" id="modal-amount" class="modal-amount-input" placeholder="0.00" step="0.01" inputmode="decimal">' +
+      '<button class="modal-confirm" onclick="window.confirmAmount()">记录</button>' +
+      (!def.fixedCategory ? '<button class="modal-back" onclick="window.backToCategory()">← 返回选择分类</button>' : '<button class="modal-back" onclick="window.closeModal()">取消</button>');
 
-    setTimeout(() => {
+    setTimeout(function() {
       const inp = document.getElementById('modal-amount');
       if (inp) {
         inp.focus();
-        inp.addEventListener('keydown', e => {
+        inp.addEventListener('keydown', function(e) {
           if (e.key === 'Enter') {
             e.preventDefault();
             confirmAmount();
           }
         });
       }
-    }, 120);
+    }, 150);
   }
 }
 
@@ -979,7 +826,7 @@ function confirmAmount() {
   closeModal();
 }
 
-document.getElementById('modal').addEventListener('click', e => {
+document.getElementById('modal').addEventListener('click', function(e) {
   if (e.target.id === 'modal') closeModal();
 });
 
