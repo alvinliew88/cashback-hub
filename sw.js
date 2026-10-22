@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finory-v7.0';
+const CACHE_NAME = 'finory-v7.1';
 const ASSETS = ['./', './index.html'];
 
 const MANIFEST = JSON.stringify({
@@ -18,7 +18,7 @@ const ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
 self.addEventListener('install', function(event) {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(function(cache) { return cache.addAll(ASSETS); })
+      .then(function(cache) { return cache.addAll(ASSETS).catch(function() {}); })
       .then(function() { return self.skipWaiting(); })
   );
 });
@@ -43,15 +43,16 @@ self.addEventListener('fetch', function(event) {
   }
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then(function(cached) {
-      if (cached) return cached;
-      return fetch(event.request).then(function(response) {
-        if (response && response.status === 200 && response.type === 'basic') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, clone); });
-        }
-        return response;
-      }).catch(function() { return caches.match('./index.html'); });
+    fetch(event.request).then(function(response) {
+      if (response && response.status === 200 && response.type === 'basic') {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(function(cache) { cache.put(event.request, clone); });
+      }
+      return response;
+    }).catch(function() {
+      return caches.match(event.request).then(function(cached) {
+        return cached || caches.match('./index.html');
+      });
     })
   );
 });
