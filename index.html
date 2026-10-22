@@ -26,17 +26,10 @@
   body { padding: calc(10px + var(--safe-top)) 10px calc(40px + var(--safe-bottom)); min-height: 100dvh; }
 
   #install-bar {
-    display: none;
-    background: linear-gradient(90deg, #1e40af, #1d4ed8);
-    border-radius: 12px;
-    padding: 14px 16px;
-    margin-bottom: 12px;
-    color: #fff;
-    font-weight: 700;
-    font-size: 14px;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+    display: none; background: linear-gradient(90deg, #1e40af, #1d4ed8);
+    border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;
+    color: #fff; font-weight: 700; font-size: 14px;
+    align-items: center; justify-content: space-between; gap: 10px;
     box-shadow: 0 2px 12px rgba(29,78,216,0.4);
   }
   #install-bar.show { display: flex; }
@@ -44,7 +37,6 @@
     background: #fff; color: #1e40af; border: none; border-radius: 8px;
     padding: 8px 16px; font-weight: 800; font-size: 14px; cursor: pointer;
   }
-  #install-bar button:active { background: #e5e7eb; }
 
   .big-card {
     background: var(--surface); border-radius: 18px; border: 1px solid var(--border);
@@ -107,12 +99,11 @@
   .tx-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; white-space: nowrap; }
   .tx-amt { font-family: 'SF Mono', monospace; font-size: 13px; font-weight: 800; color: #fff; }
   .tx-del { font-size: 11px; color: #666; background: #1a1a1a; border: 1px solid #222; border-radius: 6px; padding: 3px 10px; cursor: pointer; font-weight: 700; }
-  .tx-del:active { background: #222; }
   .history-meta { text-align: center; color: #333; font-size: 11px; margin-top: 16px; font-weight: 600; }
   .empty-state { text-align: center; color: #333; font-size: 14px; padding: 24px; font-weight: 600; }
 
-  #modal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; }
-  #modal.hidden { display: none; }
+  #appModal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; }
+  #appModal.hidden { display: none; }
   .modal-sheet {
     background: #0f0f0f; border-radius: 22px 22px 0 0; width: 100%;
     max-height: 90vh; overflow-y: auto; padding: 12px 18px calc(24px + var(--safe-bottom));
@@ -137,7 +128,6 @@
   .date-row { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
   .date-label { font-size: 12px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
   .date-input { background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 8px; padding: 8px 12px; font-size: 14px; font-weight: 600; outline: none; flex: 1; }
-  .date-input:focus { border-color: var(--accent); }
   .modal-amount-input {
     width: 100%; background: var(--accent); border: 2px solid #38bdf8; color: #000;
     border-radius: 14px; padding: 18px; font-size: 28px; outline: none;
@@ -145,17 +135,14 @@
     margin-bottom: 12px; text-align: center;
   }
   .modal-amount-input::placeholder { color: #0369a1; font-weight: 700; }
-  .modal-amount-input:focus { border-color: #fff; box-shadow: 0 0 0 4px rgba(56,189,248,0.4); }
   .modal-confirm {
     width: 100%; background: #22c55e; border: none; color: #fff; border-radius: 14px;
     padding: 18px; font-size: 17px; font-weight: 800; cursor: pointer; margin-bottom: 10px;
   }
-  .modal-confirm:active { background: #16a34a; transform: scale(0.98); }
   .modal-back {
     width: 100%; background: transparent; border: 1px solid #333; color: #999;
     border-radius: 14px; padding: 14px; font-size: 14px; font-weight: 700; cursor: pointer;
   }
-  .modal-back:active { background: #1a1a1a; }
 
   #toast {
     position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
@@ -166,27 +153,30 @@
   #toast.error { background: #b91c1c; }
 
   .version-info { text-align: center; color: #333; font-size: 11px; margin-top: 20px; font-weight: 600; }
+  #jsErr { display: none; background: #b91c1c; color: #fff; padding: 12px; font-size: 12px; margin-bottom: 10px; border-radius: 8px; word-break: break-all; }
   ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
 </head>
 <body>
 
+<div id="jsErr"></div>
+
 <div id="install-bar">
-  <span>📲 安装 Finory 到主屏幕，全屏离线使用</span>
+  <span>安装 Finory 到主屏幕，全屏离线使用</span>
   <button onclick="window.installApp()">安装</button>
 </div>
 
 <div id="card-grid"></div>
 
 <div class="history-section">
-  <div class="history-title">📋 History (90 Days)</div>
+  <div class="history-title">History (90 Days)</div>
   <div id="history-container"></div>
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<div class="version-info">Version 5.0 — PWA — 2026-10-22</div>
+<div class="version-info">Version 5.1 — 2026-10-22</div>
 
-<div id="modal" class="hidden">
+<div id="appModal" class="hidden">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title" id="modal-title"></div>
@@ -197,40 +187,46 @@
 <div id="toast"></div>
 
 <script>
+window.onerror = function(msg, url, line) {
+  var e = document.getElementById('jsErr');
+  if (e) {
+    e.style.display = 'block';
+    e.textContent = 'JS Error: ' + msg + ' (line ' + line + ')';
+  }
+};
+
 (function() {
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
-      navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function(e) {
-        console.warn('SW register failed:', e);
-      });
+      navigator.serviceWorker.register('sw.js', { scope: './' }).catch(function() {});
     });
   }
-
-  let deferredPrompt = null;
+  var deferredPrompt = null;
   window.addEventListener('beforeinstallprompt', function(e) {
     e.preventDefault();
     deferredPrompt = e;
-    document.getElementById('install-bar').classList.add('show');
+    var bar = document.getElementById('install-bar');
+    if (bar) bar.classList.add('show');
   });
-
   window.installApp = function() {
     if (!deferredPrompt) {
-      alert('如果顶部没有安装按钮：请用 Chrome 打开，等待 5 秒后刷新一次；或点浏览器菜单 → 添加到主屏幕。');
+      alert('如果没有安装按钮：请用 Chrome 打开，等 5 秒刷新一次，或点浏览器菜单 → 添加到主屏幕。');
       return;
     }
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(function() {
       deferredPrompt = null;
-      document.getElementById('install-bar').classList.remove('show');
+      var bar = document.getElementById('install-bar');
+      if (bar) bar.classList.remove('show');
     });
   };
-
   window.addEventListener('appinstalled', function() {
-    document.getElementById('install-bar').classList.remove('show');
+    var bar = document.getElementById('install-bar');
+    if (bar) bar.classList.remove('show');
   });
 })();
 
-const CARDS_DEF = [
+var CARDS_DEF = [
   {
     name: "RHB Shell 2498",
     barClass: "bar-rhb", borderClass: "rhb-border", resetDay: 13,
@@ -279,31 +275,31 @@ const CARDS_DEF = [
   }
 ];
 
-const MAX_CYCLES = 3;
-const DATA_VERSION = 19;
+var MAX_CYCLES = 3;
+var DATA_VERSION = 20;
 
 function formatDateDMY(d) {
-  const date = new Date(d + 'T00:00:00');
+  var date = new Date(d + 'T00:00:00');
   return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear();
 }
 function getTodayStr() {
-  const n = new Date();
+  var n = new Date();
   return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
 }
 function addDays(dateStr, days) {
-  const d = new Date(dateStr + 'T00:00:00');
+  var d = new Date(dateStr + 'T00:00:00');
   d.setDate(d.getDate() + days);
   return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
 }
 function getCycleStart(day) {
-  const now = new Date();
-  let start = new Date(now.getFullYear(), now.getMonth(), day);
+  var now = new Date();
+  var start = new Date(now.getFullYear(), now.getMonth(), day);
   if (now.getDate() < day) start.setMonth(start.getMonth() - 1);
   return start.getFullYear() + '-' + String(start.getMonth()+1).padStart(2,'0') + '-' + String(start.getDate()).padStart(2,'0');
 }
 function getCycleEnd(startStr) {
-  const p = startStr.split('-').map(Number);
-  const end = new Date(p[0], p[1] - 1, p[2]);
+  var p = startStr.split('-').map(Number);
+  var end = new Date(p[0], p[1] - 1, p[2]);
   end.setMonth(end.getMonth() + 1);
   end.setDate(end.getDate() - 1);
   return end.getFullYear() + '-' + String(end.getMonth()+1).padStart(2,'0') + '-' + String(end.getDate()).padStart(2,'0');
@@ -315,7 +311,8 @@ function getRateTier(totalSpend) {
   return 0;
 }
 function showToast(msg, isError) {
-  const t = document.getElementById('toast');
+  var t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = msg;
   t.className = isError ? 'error' : '';
   t.style.display = 'block';
@@ -323,8 +320,8 @@ function showToast(msg, isError) {
 }
 
 function normalizeCard(raw, i) {
-  const def = CARDS_DEF[i];
-  const c = raw || {};
+  var def = CARDS_DEF[i];
+  var c = raw || {};
   return {
     name: def.name,
     barClass: def.barClass,
@@ -348,13 +345,16 @@ function normalizeCard(raw, i) {
 }
 
 function getDefaultState() {
-  const cards = CARDS_DEF.map(function(def, i) { return normalizeCard({}, i); });
+  var cards = [];
+  for (var i = 0; i < CARDS_DEF.length; i++) {
+    cards.push(normalizeCard({}, i));
+  }
   return { version: DATA_VERSION, cards: cards, transactions: [] };
 }
 
 function loadState() {
-  const raw = localStorage.getItem('finoryData');
-  let state = null;
+  var raw = localStorage.getItem('finoryData');
+  var state = null;
   if (raw) {
     try { state = JSON.parse(raw); } catch(e) { state = null; }
   }
@@ -363,7 +363,11 @@ function loadState() {
     saveState(state);
     return state;
   }
-  state.cards = CARDS_DEF.map(function(def, i) { return normalizeCard(state.cards[i], i); });
+  var newCards = [];
+  for (var i = 0; i < CARDS_DEF.length; i++) {
+    newCards.push(normalizeCard(state.cards[i], i));
+  }
+  state.cards = newCards;
   if (!Array.isArray(state.transactions)) state.transactions = [];
   state.version = DATA_VERSION;
   saveState(state);
@@ -377,7 +381,7 @@ function saveState(state) {
 
 function checkAndReset(state) {
   state.cards.forEach(function(c) {
-    const currentStart = getCycleStart(c.resetDay);
+    var currentStart = getCycleStart(c.resetDay);
     if (c.lastCycleStart !== currentStart) {
       c.totalSpend = 0;
       c.cashback = 0;
@@ -389,15 +393,15 @@ function checkAndReset(state) {
 }
 
 function applyAutoDebits(state) {
-  let changed = false;
+  var changed = false;
   state.cards.forEach(function(c, i) {
-    const def = CARDS_DEF[i];
+    var def = CARDS_DEF[i];
     if (def.autoDebit && c.lastCycleStart !== c.autoDebitCycle) {
-      const rate = def.rates[def.autoDebit.category];
-      const rawEarned = def.autoDebit.amount * rate;
-      const cap = def.cap || 999;
-      const remaining = cap - c.cashback;
-      const earned = Math.max(0, Math.min(rawEarned, remaining));
+      var rate = def.rates[def.autoDebit.category];
+      var rawEarned = def.autoDebit.amount * rate;
+      var cap = def.cap || 999;
+      var remaining = cap - c.cashback;
+      var earned = Math.max(0, Math.min(rawEarned, remaining));
       c.totalSpend += def.autoDebit.amount;
       c.cashback += earned;
       c.categorySpend[def.autoDebit.category] = (c.categorySpend[def.autoDebit.category] || 0) + def.autoDebit.amount;
@@ -421,7 +425,7 @@ function applyAutoDebits(state) {
 
 function getRateForCategory(cardDef, cat, tier) {
   if (cardDef.name.indexOf('RHB') !== -1) {
-    const arr = cardDef.rates[cat];
+    var arr = cardDef.rates[cat];
     return arr && arr.length > tier ? arr[tier] : 0;
   }
   return cardDef.rates && cardDef.rates[cat] ? cardDef.rates[cat] : 0;
@@ -429,77 +433,45 @@ function getRateForCategory(cardDef, cat, tier) {
 
 function computeCategoryTarget(cardDef, cardState, cat) {
   if (cardDef.name.indexOf('RHB') === -1) return null;
-  const tier = getRateTier(cardState.totalSpend);
-  const rate = getRateForCategory(cardDef, cat, tier);
+  var tier = getRateTier(cardState.totalSpend);
+  var rate = getRateForCategory(cardDef, cat, tier);
   if (rate === 0) return Infinity;
-  const cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 0;
-  const minSpend = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
-  let target = cap / rate;
+  var cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 0;
+  var minSpend = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
+  var target = cap / rate;
   if (target < minSpend) target = minSpend;
   return target;
 }
 
 function getRate(cardDef, cardState, cat, amount) {
   if (cardDef.name.indexOf('RHB') !== -1) {
-    const min = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
+    var min = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
     if ((cardState.categorySpend[cat] || 0) + amount < min) return 0;
-    const tier = getRateTier(cardState.totalSpend + amount);
-    const arr = cardDef.rates[cat];
+    var tier = getRateTier(cardState.totalSpend + amount);
+    var arr = cardDef.rates[cat];
     return arr && arr.length > tier ? arr[tier] : 0;
   }
   return cardDef.rates && cardDef.rates[cat] ? cardDef.rates[cat] : 0;
 }
 
-function recalcCard(state, cardIndex) {
-  const def = CARDS_DEF[cardIndex];
-  const cardState = state.cards[cardIndex];
-  cardState.totalSpend = 0;
-  cardState.cashback = 0;
-  cardState.categoryCashback = {};
-  cardState.categorySpend = {};
-  const txs = state.transactions
-    .filter(function(t) { return t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart; })
-    .sort(function(a, b) { return a.timestamp - b.timestamp; });
-  txs.forEach(function(tx) {
-    const rate = getRate(def, cardState, tx.category, tx.amount);
-    let earned = 0;
-    if (def.name.indexOf('RHB') !== -1) {
-      const cap = def.caps && def.caps[tx.category] ? def.caps[tx.category] : 999;
-      const cur = cardState.categoryCashback[tx.category] || 0;
-      earned = Math.min(tx.amount * rate, cap - cur);
-      if (earned < 0) earned = 0;
-      cardState.cashback += earned;
-      cardState.categoryCashback[tx.category] = cur + earned;
-    } else {
-      const cap = def.cap || 999;
-      const cur = cardState.cashback;
-      earned = Math.min(tx.amount * rate, cap - cur);
-      if (earned < 0) earned = 0;
-      cardState.cashback += earned;
-    }
-    cardState.totalSpend += tx.amount;
-    cardState.categorySpend[tx.category] = (cardState.categorySpend[tx.category] || 0) + tx.amount;
-  });
-}
-
 function addTransaction(cardIndex, amount, cat, note, txDate) {
-  const state = loadState();
+  var state = loadState();
   checkAndReset(state);
-  const cardState = state.cards[cardIndex];
-  const cardDef = CARDS_DEF[cardIndex];
-  const rate = getRate(cardDef, cardState, cat, amount);
-  let earned = 0;
+  var cardState = state.cards[cardIndex];
+  var cardDef = CARDS_DEF[cardIndex];
+  var rate = getRate(cardDef, cardState, cat, amount);
+  var earned = 0;
   if (cardDef.name.indexOf('RHB') !== -1) {
-    const cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 999;
-    const cur = cardState.categoryCashback[cat] || 0;
+    var cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 999;
+    var cur = cardState.categoryCashback[cat] || 0;
     earned = Math.min(amount * rate, cap - cur);
     if (earned < 0) earned = 0;
     cardState.cashback += earned;
     cardState.categoryCashback[cat] = cur + earned;
   } else {
-    const cap = cardDef.cap || 999;
-    const cur = cardState.cashback;
-    earned = Math.min(amount * rate, cap - cur);
+    var cap2 = cardDef.cap || 999;
+    var cur2 = cardState.cashback;
+    earned = Math.min(amount * rate, cap2 - cur2);
     if (earned < 0) earned = 0;
     cardState.cashback += earned;
   }
@@ -525,8 +497,11 @@ function addTransaction(cardIndex, amount, cat, note, txDate) {
 
 function deleteTransaction(txId) {
   if (!confirm('Delete this transaction?')) return;
-  const state = loadState();
-  const tx = state.transactions.find(function(t) { return t.id === txId; });
+  var state = loadState();
+  var tx = null;
+  for (var i = 0; i < state.transactions.length; i++) {
+    if (state.transactions[i].id === txId) { tx = state.transactions[i]; break; }
+  }
   if (!tx) return;
   state.transactions = state.transactions.filter(function(t) { return t.id !== txId; });
   recalcCard(state, tx.cardIndex);
@@ -535,15 +510,47 @@ function deleteTransaction(txId) {
   renderAll();
 }
 
+function recalcCard(state, cardIndex) {
+  var def = CARDS_DEF[cardIndex];
+  var cardState = state.cards[cardIndex];
+  cardState.totalSpend = 0;
+  cardState.cashback = 0;
+  cardState.categoryCashback = {};
+  cardState.categorySpend = {};
+  var txs = state.transactions
+    .filter(function(t) { return t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart; })
+    .sort(function(a, b) { return a.timestamp - b.timestamp; });
+  txs.forEach(function(tx) {
+    var rate = getRate(def, cardState, tx.category, tx.amount);
+    var earned = 0;
+    if (def.name.indexOf('RHB') !== -1) {
+      var cap = def.caps && def.caps[tx.category] ? def.caps[tx.category] : 999;
+      var cur = cardState.categoryCashback[tx.category] || 0;
+      earned = Math.min(tx.amount * rate, cap - cur);
+      if (earned < 0) earned = 0;
+      cardState.cashback += earned;
+      cardState.categoryCashback[tx.category] = cur + earned;
+    } else {
+      var cap2 = def.cap || 999;
+      var cur2 = cardState.cashback;
+      earned = Math.min(tx.amount * rate, cap2 - cur2);
+      if (earned < 0) earned = 0;
+      cardState.cashback += earned;
+    }
+    cardState.totalSpend += tx.amount;
+    cardState.categorySpend[tx.category] = (cardState.categorySpend[tx.category] || 0) + tx.amount;
+  });
+}
+
 function cleanupOldCycles(state) {
   state.cards.forEach(function(c, i) {
-    const cycles = [];
+    var cycles = [];
     state.transactions.forEach(function(tx) {
       if (tx.cardIndex === i && cycles.indexOf(tx.cycleStart) === -1) cycles.push(tx.cycleStart);
     });
     cycles.sort(function(a, b) { return b.localeCompare(a); });
     if (cycles.length > MAX_CYCLES) {
-      const toDelete = cycles.slice(MAX_CYCLES);
+      var toDelete = cycles.slice(MAX_CYCLES);
       state.transactions = state.transactions.filter(function(tx) {
         if (tx.cardIndex !== i) return true;
         return toDelete.indexOf(tx.cycleStart) === -1;
@@ -554,55 +561,55 @@ function cleanupOldCycles(state) {
 
 function isCatMaxed(cardState, cardDef, cat) {
   if (cardDef.name.indexOf('RHB') !== -1) {
-    const cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 999;
+    var cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 999;
     return (cardState.categoryCashback[cat] || 0) >= cap;
   }
   return cardState.cashback >= (cardDef.cap || 999);
 }
 
 function computeRecordStatus(state, i) {
-  const cardState = state.cards[i];
-  const cycleStart = cardState.lastCycleStart;
-  const cycleEnd = getCycleEnd(cycleStart);
-  const currentTxs = state.transactions.filter(function(t) {
+  var cardState = state.cards[i];
+  var cycleStart = cardState.lastCycleStart;
+  var cycleEnd = getCycleEnd(cycleStart);
+  var currentTxs = state.transactions.filter(function(t) {
     return t.cardIndex === i && t.cycleStart === cycleStart;
   });
   if (currentTxs.length === 0) {
     return { hasRecord: false, lastDate: null, nextStart: cycleStart, cycleStart: cycleStart, cycleEnd: cycleEnd };
   }
-  let lastDate = currentTxs[0].date;
+  var lastDate = currentTxs[0].date;
   currentTxs.forEach(function(tx) { if (tx.date > lastDate) lastDate = tx.date; });
   return { hasRecord: true, lastDate: lastDate, nextStart: addDays(lastDate, 1), cycleStart: cycleStart, cycleEnd: cycleEnd };
 }
 
 function renderHome() {
-  const state = loadState();
+  var state = loadState();
   checkAndReset(state);
   applyAutoDebits(state);
   saveState(state);
 
-  const grid = document.getElementById('card-grid');
+  var grid = document.getElementById('card-grid');
   if (!grid) return;
 
   try {
     grid.innerHTML = state.cards.map(function(c, i) {
-      const def = CARDS_DEF[i];
-      const status = computeRecordStatus(state, i);
-      const cashback = typeof c.cashback === 'number' ? c.cashback : 0;
-      const totalSpend = typeof c.totalSpend === 'number' ? c.totalSpend : 0;
+      var def = CARDS_DEF[i];
+      var status = computeRecordStatus(state, i);
+      var cashback = typeof c.cashback === 'number' ? c.cashback : 0;
+      var totalSpend = typeof c.totalSpend === 'number' ? c.totalSpend : 0;
 
-      const prevTxs = state.transactions
+      var prevTxs = state.transactions
         .filter(function(t) { return t.cardIndex === i && t.cycleStart !== c.lastCycleStart; })
         .sort(function(a, b) { return b.cycleStart.localeCompare(a.cycleStart); });
-      let prevHtml = '';
+      var prevHtml = '';
       if (prevTxs.length > 0) {
-        const latest = prevTxs[0].cycleStart;
-        const filtered = prevTxs.filter(function(t) { return t.cycleStart === latest; });
-        const prevTotal = filtered.reduce(function(s, t) { return s + t.amount; }, 0);
+        var latest = prevTxs[0].cycleStart;
+        var filtered = prevTxs.filter(function(t) { return t.cycleStart === latest; });
+        var prevTotal = filtered.reduce(function(s, t) { return s + t.amount; }, 0);
         prevHtml = '<div class="big-card-prev"><span>上期账单 (' + formatDateDMY(latest) + ' — ' + formatDateDMY(getCycleEnd(latest)) + ')</span><span>RM ' + prevTotal.toFixed(2) + '</span></div>';
       }
 
-      let statusHtml = '';
+      var statusHtml = '';
       if (status.hasRecord) {
         statusHtml = '<div class="record-status has-record"><div><span class="rs-label">上次记录</span><span class="rs-value">' + formatDateDMY(status.lastDate) + '</span></div><div class="rs-arrow">→</div><div class="rs-right"><span class="rs-label">下次从这天开始</span><span class="rs-value">' + formatDateDMY(status.nextStart) + '</span></div></div>';
       } else {
@@ -628,21 +635,20 @@ function renderHome() {
       '</div>';
     }).join('');
   } catch(e) {
-    console.error('Render error:', e);
-    grid.innerHTML = '<div style="color:#ef4444;padding:20px;background:#1a1a1a;border-radius:12px;">渲染出错：' + e.message + '<br>请刷新页面或清除缓存重试。</div>';
+    grid.innerHTML = '<div style="color:#ef4444;padding:20px;background:#1a1a1a;border-radius:12px;">渲染出错：' + e.message + '</div>';
   }
 
   renderHistory();
 }
 
 function renderHistory() {
-  const state = loadState();
-  const container = document.getElementById('history-container');
-  const meta = document.getElementById('history-meta');
+  var state = loadState();
+  var container = document.getElementById('history-container');
+  var meta = document.getElementById('history-meta');
   if (!container) return;
 
-  const currentStarts = state.cards.map(function(c) { return c.lastCycleStart; });
-  const past = state.transactions.filter(function(tx) { return tx.cycleStart !== currentStarts[tx.cardIndex]; });
+  var currentStarts = state.cards.map(function(c) { return c.lastCycleStart; });
+  var past = state.transactions.filter(function(tx) { return tx.cycleStart !== currentStarts[tx.cardIndex]; });
 
   if (!past.length) {
     container.innerHTML = '<div class="empty-state">No past transactions.</div>';
@@ -650,28 +656,28 @@ function renderHistory() {
     return;
   }
 
-  const groups = {};
+  var groups = {};
   past.forEach(function(tx) {
-    const key = tx.cardIndex + '|' + tx.cycleStart;
+    var key = tx.cardIndex + '|' + tx.cycleStart;
     if (!groups[key]) groups[key] = [];
     groups[key].push(tx);
   });
-  const keys = Object.keys(groups).sort(function(a, b) {
-    const pa = a.split('|');
-    const pb = b.split('|');
+  var keys = Object.keys(groups).sort(function(a, b) {
+    var pa = a.split('|');
+    var pb = b.split('|');
     if (pa[1] !== pb[1]) return pb[1].localeCompare(pa[1]);
     return parseInt(pa[0]) - parseInt(pb[0]);
   });
 
   container.innerHTML = keys.map(function(key) {
-    const parts = key.split('|');
-    const idx = parseInt(parts[0]);
-    const cs = parts[1];
-    const def = CARDS_DEF[idx];
-    const txs = groups[key].sort(function(a, b) { return b.timestamp - a.timestamp; });
-    const ce = getCycleEnd(cs);
-    const total = txs.reduce(function(s, t) { return s + t.amount; }, 0);
-    const rows = txs.map(function(tx) {
+    var parts = key.split('|');
+    var idx = parseInt(parts[0]);
+    var cs = parts[1];
+    var def = CARDS_DEF[idx];
+    var txs = groups[key].sort(function(a, b) { return b.timestamp - a.timestamp; });
+    var ce = getCycleEnd(cs);
+    var total = txs.reduce(function(s, t) { return s + t.amount; }, 0);
+    var rows = txs.map(function(tx) {
       return '<div class="tx-row">' +
         '<div class="tx-left"><div><span class="tx-date">' + formatDateDMY(tx.date) + '</span> <span class="tx-cat">' + tx.category + '</span></div></div>' +
         '<div class="tx-right"><div class="tx-amt">RM ' + tx.amount.toFixed(2) + '</div><button class="tx-del" onclick="event.stopPropagation();window.deleteTransaction(\'' + tx.id + '\')">Delete</button></div>' +
@@ -686,9 +692,9 @@ function renderHistory() {
     '</div>';
   }).join('');
 
-  const counts = [];
+  var counts = [];
   state.cards.forEach(function(c, i) {
-    const cycles = [];
+    var cycles = [];
     state.transactions.forEach(function(tx) {
       if (tx.cardIndex === i && tx.cycleStart !== c.lastCycleStart && cycles.indexOf(tx.cycleStart) === -1) cycles.push(tx.cycleStart);
     });
@@ -698,8 +704,8 @@ function renderHistory() {
 }
 
 function toggleCycle(h) {
-  const b = h.nextElementSibling;
-  const a = h.querySelector('.cycle-arrow');
+  var b = h.nextElementSibling;
+  var a = h.querySelector('.cycle-arrow');
   if (!b) return;
   if (b.classList.contains('open')) {
     b.classList.remove('open');
@@ -712,57 +718,57 @@ function toggleCycle(h) {
   }
 }
 
-const modal = { cardIndex: null, category: null, step: 'category' };
+var appModal = { cardIndex: null, category: null, step: 'category' };
 
 function openModal(i) {
-  modal.cardIndex = i;
-  modal.category = null;
-  const def = CARDS_DEF[i];
+  appModal.cardIndex = i;
+  appModal.category = null;
+  var def = CARDS_DEF[i];
   if (def.fixedCategory) {
-    modal.category = def.fixedCategory;
-    modal.step = 'amount';
+    appModal.category = def.fixedCategory;
+    appModal.step = 'amount';
   } else {
-    modal.step = 'category';
+    appModal.step = 'category';
   }
-  document.getElementById('modal').classList.remove('hidden');
+  document.getElementById('appModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
   renderModal();
 }
 
 function closeModal() {
-  document.getElementById('modal').classList.add('hidden');
+  document.getElementById('appModal').classList.add('hidden');
   document.body.style.overflow = '';
-  modal.cardIndex = null;
-  modal.category = null;
-  modal.step = 'category';
+  appModal.cardIndex = null;
+  appModal.category = null;
+  appModal.step = 'category';
 }
 
 function renderModal() {
-  const i = modal.cardIndex;
+  var i = appModal.cardIndex;
   if (i === null) return;
-  const def = CARDS_DEF[i];
-  const state = loadState();
-  const c = state.cards[i];
-  const status = computeRecordStatus(state, i);
+  var def = CARDS_DEF[i];
+  var state = loadState();
+  var c = state.cards[i];
+  var status = computeRecordStatus(state, i);
 
   document.getElementById('modal-title').textContent = def.name;
-  const body = document.getElementById('modal-body');
+  var body = document.getElementById('modal-body');
 
-  const statusBanner = status.hasRecord
+  var statusBanner = status.hasRecord
     ? '<div style="background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#86efac;font-weight:700;">上次记录 ' + formatDateDMY(status.lastDate) + ' · 本次从 ' + formatDateDMY(status.nextStart) + ' 开始汇总</div>'
     : '<div style="background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#fde047;font-weight:700;">本周期尚未记录 · 从 ' + formatDateDMY(status.cycleStart) + ' 开始汇总</div>';
 
-  if (modal.step === 'category') {
+  if (appModal.step === 'category') {
     body.innerHTML = statusBanner +
       '<div class="modal-subtitle">选择分类</div>' +
       '<div class="cat-grid">' +
         def.cats.map(function(cat) {
-          const maxed = isCatMaxed(c, def, cat) ? 'maxed' : '';
-          const spent = c.categorySpend[cat] || 0;
-          const target = computeCategoryTarget(def, c, cat);
-          const targetStr = target === Infinity ? '—' : target.toFixed(0);
-          const minSpend = def.minSpend && def.minSpend[cat] ? def.minSpend[cat] : 0;
-          const minNote = minSpend > 0 && spent < minSpend ? ' · 需达 ' + minSpend : '';
+          var maxed = isCatMaxed(c, def, cat) ? 'maxed' : '';
+          var spent = c.categorySpend[cat] || 0;
+          var target = computeCategoryTarget(def, c, cat);
+          var targetStr = target === Infinity ? '—' : target.toFixed(0);
+          var minSpend = def.minSpend && def.minSpend[cat] ? def.minSpend[cat] : 0;
+          var minNote = minSpend > 0 && spent < minSpend ? ' · 需达 ' + minSpend : '';
           return '<button class="cat-big-btn ' + maxed + '" onclick="window.selectCategory(\'' + cat + '\')">' +
             '<span class="cat-big-name">' + cat + '</span>' +
             '<span class="cat-big-info">RM ' + spent.toFixed(2) + ' / ' + targetStr + minNote + '</span>' +
@@ -771,21 +777,21 @@ function renderModal() {
       '</div>' +
       '<button class="modal-back" style="margin-top:16px;" onclick="window.closeModal()">取消</button>';
   } else {
-    const cat = modal.category;
-    const spent = c.categorySpend[cat] || 0;
-    const target = computeCategoryTarget(def, c, cat);
-    const targetStr = target === Infinity ? '—' : target.toFixed(0);
-    const defaultDate = status.hasRecord ? status.nextStart : status.cycleStart;
+    var cat2 = appModal.category;
+    var spent2 = c.categorySpend[cat2] || 0;
+    var target2 = computeCategoryTarget(def, c, cat2);
+    var targetStr2 = target2 === Infinity ? '—' : target2.toFixed(0);
+    var defaultDate = status.hasRecord ? status.nextStart : status.cycleStart;
     body.innerHTML = statusBanner +
-      '<div class="modal-subtitle">' + cat + '</div>' +
-      '<div class="modal-progress-info">已用 RM ' + spent.toFixed(2) + ' / ' + targetStr + '</div>' +
+      '<div class="modal-subtitle">' + cat2 + '</div>' +
+      '<div class="modal-progress-info">已用 RM ' + spent2.toFixed(2) + ' / ' + targetStr2 + '</div>' +
       '<div class="date-row"><span class="date-label">交易日期</span><input type="date" id="modal-date" class="date-input" value="' + defaultDate + '"></div>' +
       '<input type="number" id="modal-amount" class="modal-amount-input" placeholder="0.00" step="0.01" inputmode="decimal">' +
       '<button class="modal-confirm" onclick="window.confirmAmount()">记录</button>' +
       (!def.fixedCategory ? '<button class="modal-back" onclick="window.backToCategory()">← 返回选择分类</button>' : '<button class="modal-back" onclick="window.closeModal()">取消</button>');
 
     setTimeout(function() {
-      const inp = document.getElementById('modal-amount');
+      var inp = document.getElementById('modal-amount');
       if (inp) {
         inp.focus();
         inp.addEventListener('keydown', function(e) {
@@ -800,34 +806,34 @@ function renderModal() {
 }
 
 function selectCategory(cat) {
-  modal.category = cat;
-  modal.step = 'amount';
+  appModal.category = cat;
+  appModal.step = 'amount';
   renderModal();
 }
 
 function backToCategory() {
-  modal.step = 'category';
-  modal.category = null;
+  appModal.step = 'category';
+  appModal.category = null;
   renderModal();
 }
 
 function confirmAmount() {
-  const amtIn = document.getElementById('modal-amount');
-  const dateIn = document.getElementById('modal-date');
+  var amtIn = document.getElementById('modal-amount');
+  var dateIn = document.getElementById('modal-date');
   if (!amtIn) return;
-  const amt = parseFloat(amtIn.value);
+  var amt = parseFloat(amtIn.value);
   if (!amt || amt <= 0) {
     showToast('请输入有效金额', true);
     amtIn.focus();
     return;
   }
-  const txDate = dateIn ? dateIn.value : getTodayStr();
-  addTransaction(modal.cardIndex, amt, modal.category, '', txDate);
+  var txDate = dateIn ? dateIn.value : getTodayStr();
+  addTransaction(appModal.cardIndex, amt, appModal.category, '', txDate);
   closeModal();
 }
 
-document.getElementById('modal').addEventListener('click', function(e) {
-  if (e.target.id === 'modal') closeModal();
+document.getElementById('appModal').addEventListener('click', function(e) {
+  if (e.target.id === 'appModal') closeModal();
 });
 
 window.openModal = openModal;
