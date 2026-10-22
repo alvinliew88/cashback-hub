@@ -174,7 +174,7 @@
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<div class="version-info">Version 5.1 — 2026-10-22</div>
+<div class="version-info">Version 5.2 — 2026-10-22</div>
 
 <div id="appModal" class="hidden">
   <div class="modal-sheet">
@@ -263,20 +263,18 @@ var CARDS_DEF = [
     name: "Ikhwan Platinum 6157",
     barClass: "bar-ikhwan", borderClass: "ikhwan-border", resetDay: 1,
     cap: 50, fixedCategory: "Online (8%)", cats: ["Online (8%)"],
-    rates: { "Online (8%)": 0.08 },
-    progressTargets: { "Online (8%)": 625 }
+    rates: { "Online (8%)": 0.08 }
   },
   {
     name: "Maybank 2 Gold 8943",
     barClass: "bar-maybank", borderClass: "maybank-border", resetDay: 1,
     cap: 50, fixedCategory: "Weekend (5%)", cats: ["Weekend (5%)"],
-    rates: { "Weekend (5%)": 0.05 },
-    progressTargets: { "Weekend (5%)": 1000 }
+    rates: { "Weekend (5%)": 0.05 }
   }
 ];
 
 var MAX_CYCLES = 3;
-var DATA_VERSION = 20;
+var DATA_VERSION = 21;
 
 function formatDateDMY(d) {
   var date = new Date(d + 'T00:00:00');
@@ -333,7 +331,6 @@ function normalizeCard(raw, i) {
     rates: def.rates,
     cap: def.cap,
     fixedCategory: def.fixedCategory,
-    progressTargets: def.progressTargets,
     autoDebit: def.autoDebit,
     totalSpend: typeof c.totalSpend === 'number' ? c.totalSpend : 0,
     cashback: typeof c.cashback === 'number' ? c.cashback : 0,
@@ -743,6 +740,32 @@ function closeModal() {
   appModal.step = 'category';
 }
 
+function getCategoryDisplay(cardDef, cardState, cat) {
+  var target = computeCategoryTarget(cardDef, cardState, cat);
+  if (target === null) {
+    return {
+      spent: cardState.cashback || 0,
+      targetStr: String(cardDef.cap || 0),
+      minNote: ''
+    };
+  }
+  if (target === Infinity) {
+    return {
+      spent: cardState.categorySpend[cat] || 0,
+      targetStr: '—',
+      minNote: ''
+    };
+  }
+  var spent = cardState.categorySpend[cat] || 0;
+  var minSpend = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
+  var minNote = minSpend > 0 && spent < minSpend ? ' · 需达 ' + minSpend : '';
+  return {
+    spent: spent,
+    targetStr: target.toFixed(0),
+    minNote: minNote
+  };
+}
+
 function renderModal() {
   var i = appModal.cardIndex;
   if (i === null) return;
@@ -764,27 +787,21 @@ function renderModal() {
       '<div class="cat-grid">' +
         def.cats.map(function(cat) {
           var maxed = isCatMaxed(c, def, cat) ? 'maxed' : '';
-          var spent = c.categorySpend[cat] || 0;
-          var target = computeCategoryTarget(def, c, cat);
-          var targetStr = target === Infinity ? '—' : target.toFixed(0);
-          var minSpend = def.minSpend && def.minSpend[cat] ? def.minSpend[cat] : 0;
-          var minNote = minSpend > 0 && spent < minSpend ? ' · 需达 ' + minSpend : '';
+          var disp = getCategoryDisplay(def, c, cat);
           return '<button class="cat-big-btn ' + maxed + '" onclick="window.selectCategory(\'' + cat + '\')">' +
             '<span class="cat-big-name">' + cat + '</span>' +
-            '<span class="cat-big-info">RM ' + spent.toFixed(2) + ' / ' + targetStr + minNote + '</span>' +
+            '<span class="cat-big-info">RM ' + disp.spent.toFixed(2) + ' / ' + disp.targetStr + disp.minNote + '</span>' +
           '</button>';
         }).join('') +
       '</div>' +
       '<button class="modal-back" style="margin-top:16px;" onclick="window.closeModal()">取消</button>';
   } else {
     var cat2 = appModal.category;
-    var spent2 = c.categorySpend[cat2] || 0;
-    var target2 = computeCategoryTarget(def, c, cat2);
-    var targetStr2 = target2 === Infinity ? '—' : target2.toFixed(0);
+    var disp2 = getCategoryDisplay(def, c, cat2);
     var defaultDate = status.hasRecord ? status.nextStart : status.cycleStart;
     body.innerHTML = statusBanner +
       '<div class="modal-subtitle">' + cat2 + '</div>' +
-      '<div class="modal-progress-info">已用 RM ' + spent2.toFixed(2) + ' / ' + targetStr2 + '</div>' +
+      '<div class="modal-progress-info">已用 RM ' + disp2.spent.toFixed(2) + ' / ' + disp2.targetStr + '</div>' +
       '<div class="date-row"><span class="date-label">交易日期</span><input type="date" id="modal-date" class="date-input" value="' + defaultDate + '"></div>' +
       '<input type="number" id="modal-amount" class="modal-amount-input" placeholder="0.00" step="0.01" inputmode="decimal">' +
       '<button class="modal-confirm" onclick="window.confirmAmount()">记录</button>' +
