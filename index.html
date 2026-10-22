@@ -580,15 +580,12 @@ function confirmAmount() {
   if (!amt || amt <= 0) { showToast('请输入金额', true); inp.focus(); return; }
   var txDate = dateIn ? dateIn.value : getTodayStr();
   addTransaction(appModal.cardIndex, amt, appModal.category, '', txDate);
-  // 保持弹窗打开，清空金额，可连续记录
   inp.value = '';
   var btn = document.getElementById('amt-confirm');
   if (btn) { btn.disabled = true; btn.textContent = '输入金额'; }
-  // 刷新 hint（上次记录日期已更新）
   var state = loadState();
   var last = getLastRecordDate(state, appModal.cardIndex);
   document.getElementById('modal-hint').textContent = last ? ('上次记录 ' + formatDateDMY(last)) : '本周期尚未记录';
-  // 更新默认日期为下一天
   if (last && dateIn) dateIn.value = addDays(last, 1);
   inp.focus();
 }
