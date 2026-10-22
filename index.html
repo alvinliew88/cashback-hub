@@ -11,133 +11,177 @@
 <link rel="manifest" href="manifest.json">
 <style>
   :root {
-    --bg: #000; --surface: #0a0a0a; --surface2: #141414; --border: #1f1f1f;
-    --text: #fff; --text-secondary: #a0a0a0; --text-muted: #666; --accent: #7dd3fc;
+    --bg: #000; --surface: #0a0a0a; --surface2: #141414; --surface3: #1c1c1e;
+    --border: #1f1f1f; --border-light: #2a2a2c;
+    --text: #fff; --text-secondary: #a0a0a0; --text-muted: #666;
+    --accent: #7dd3fc; --green: #30d158; --yellow: #facc15;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html, body {
     margin: 0; padding: 0; background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif;
     font-size: 15px; line-height: 1.4; overscroll-behavior-y: none;
     -webkit-font-smoothing: antialiased;
   }
-  body { padding: calc(10px + var(--safe-top)) 10px calc(40px + var(--safe-bottom)); min-height: 100dvh; }
+  body { padding: calc(12px + var(--safe-top)) 12px calc(48px + var(--safe-bottom)); min-height: 100dvh; }
 
   #install-bar {
-    display: none; background: linear-gradient(90deg, #1e40af, #1d4ed8);
-    border-radius: 12px; padding: 14px 16px; margin-bottom: 12px;
-    color: #fff; font-weight: 700; font-size: 14px;
+    display: none; background: linear-gradient(135deg, #1e40af, #1d4ed8);
+    border-radius: 14px; padding: 14px 16px; margin-bottom: 14px;
+    color: #fff; font-weight: 600; font-size: 14px;
     align-items: center; justify-content: space-between; gap: 10px;
-    box-shadow: 0 2px 12px rgba(29,78,216,0.4);
+    box-shadow: 0 4px 16px rgba(29,78,216,0.35);
   }
   #install-bar.show { display: flex; }
   #install-bar button {
-    background: #fff; color: #1e40af; border: none; border-radius: 8px;
-    padding: 8px 16px; font-weight: 800; font-size: 14px; cursor: pointer;
+    background: rgba(255,255,255,0.95); color: #1e40af; border: none; border-radius: 10px;
+    padding: 8px 16px; font-weight: 700; font-size: 13px; cursor: pointer;
   }
 
-  .card-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
+  .card-grid { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
   .card-tile {
     background: var(--surface); border: 1px solid var(--border);
-    border-radius: 14px; padding: 14px; cursor: pointer;
-    transition: transform 0.12s, background 0.12s; user-select: none;
+    border-radius: 20px; overflow: hidden; cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.2,0.8,0.4,1), background 0.15s;
+    user-select: none;
   }
-  .card-tile:active { transform: scale(0.97); background: #111; }
-  .card-tile-bar { height: 4px; border-radius: 2px; margin-bottom: 10px; }
+  .card-tile:active { transform: scale(0.975); background: #111; }
+  .card-tile-bar { height: 5px; width: 100%; }
   .bar-rhb { background: linear-gradient(90deg, #f97316, #ef4444); }
   .bar-affin { background: linear-gradient(90deg, #3b82f6, #2563eb); }
   .bar-ikhwan { background: linear-gradient(90deg, #9ca3af, #4b5563); }
   .bar-maybank { background: linear-gradient(90deg, #fbbf24, #d97706); }
-  .tile-name { font-size: 13px; font-weight: 800; color: #fff; line-height: 1.2; }
-  .tile-number { font-family: 'SF Mono', monospace; font-size: 16px; font-weight: 900; color: var(--accent); margin-top: 2px; letter-spacing: 1px; }
-  .tile-cashback { font-family: 'SF Mono', monospace; font-size: 15px; font-weight: 800; color: #86efac; margin-top: 8px; }
-  .tile-spend { font-family: 'SF Mono', monospace; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
-  .tile-last { font-family: 'SF Mono', monospace; font-size: 10px; color: #facc15; font-weight: 700; margin-top: 8px; padding-top: 8px; border-top: 1px solid #2a2a2a; }
+  .tile-content {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 18px 20px; gap: 14px;
+  }
+  .tile-left { flex: 1; min-width: 0; }
+  .tile-right { text-align: right; flex-shrink: 0; }
+  .tile-name { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.2; letter-spacing: -0.2px; }
+  .tile-number { font-family: 'SF Mono', ui-monospace, monospace; font-size: 14px; font-weight: 600; color: var(--accent); margin-top: 3px; letter-spacing: 1.5px; }
+  .tile-last { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: var(--yellow); font-weight: 600; margin-top: 10px; opacity: 0.85; }
+  .tile-cashback { font-family: 'SF Mono', ui-monospace, monospace; font-size: 24px; font-weight: 800; color: var(--green); line-height: 1; letter-spacing: -0.5px; }
+  .tile-spend { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 6px; }
 
-  .history-section { margin-top: 24px; }
-  .history-title { font-size: 15px; font-weight: 800; margin-bottom: 10px; color: #fff; }
-  .cycle-box { background: var(--surface); border-radius: 12px; margin-bottom: 8px; overflow: hidden; border-left: 3px solid; }
+  .history-section { margin-top: 28px; }
+  .history-title { font-size: 13px; font-weight: 700; margin-bottom: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.08em; }
+  .cycle-box { background: var(--surface); border-radius: 16px; margin-bottom: 10px; overflow: hidden; border-left: 3px solid; }
   .cycle-box.rhb-border { border-left-color: #f97316; }
   .cycle-box.affin-border { border-left-color: #3b82f6; }
   .cycle-box.ikhwan-border { border-left-color: #9ca3af; }
   .cycle-box.maybank-border { border-left-color: #fbbf24; }
-  .cycle-header { padding: 12px 14px; background: #0f0f0f; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-  .cycle-name { font-weight: 800; font-size: 13px; color: #fff; }
-  .cycle-range { font-size: 10px; color: var(--text-muted); font-weight: 600; margin-top: 1px; }
-  .cycle-count { font-size: 10px; color: var(--text-muted); background: #1a1a1a; padding: 2px 7px; border-radius: 8px; font-weight: 700; }
-  .cycle-arrow { font-size: 10px; color: var(--text-muted); margin-left: 5px; transition: transform 0.2s; display: inline-block; }
+  .cycle-header { padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
+  .cycle-name { font-weight: 700; font-size: 14px; color: #fff; }
+  .cycle-range { font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 2px; }
+  .cycle-count { font-size: 11px; color: var(--text-secondary); background: var(--surface3); padding: 4px 10px; border-radius: 10px; font-weight: 600; }
+  .cycle-arrow { font-size: 10px; color: var(--text-muted); margin-left: 6px; transition: transform 0.2s; display: inline-block; }
   .cycle-arrow.open { transform: rotate(180deg); }
-  .cycle-body { display: none; padding: 10px 14px; }
+  .cycle-body { display: none; padding: 8px 16px 14px; }
   .cycle-body.open { display: block; }
-  .tx-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 9px 0; border-bottom: 1px solid #1a1a1a; gap: 10px; }
+  .tx-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 10px 0; border-bottom: 1px solid #1a1a1a; gap: 10px; }
   .tx-row:last-child { border-bottom: none; }
   .tx-left { flex: 1; min-width: 0; }
-  .tx-date { font-family: 'SF Mono', monospace; font-size: 11px; color: #7dd3fc; font-weight: 700; }
-  .tx-cat { font-size: 12px; color: var(--text-secondary); font-weight: 700; margin-left: 6px; }
-  .tx-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 2px; white-space: nowrap; }
-  .tx-amt { font-family: 'SF Mono', monospace; font-size: 12px; font-weight: 800; color: #fff; }
-  .tx-del { font-size: 10px; color: #666; background: #1a1a1a; border: 1px solid #222; border-radius: 5px; padding: 2px 8px; cursor: pointer; font-weight: 700; }
-  .history-meta { text-align: center; color: #333; font-size: 10px; margin-top: 12px; font-weight: 600; }
-  .empty-state { text-align: center; color: #333; font-size: 13px; padding: 20px; font-weight: 600; }
+  .tx-date { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: var(--accent); font-weight: 600; }
+  .tx-cat { font-size: 12px; color: var(--text-secondary); font-weight: 600; margin-left: 8px; }
+  .tx-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 3px; white-space: nowrap; }
+  .tx-amt { font-family: 'SF Mono', ui-monospace, monospace; font-size: 13px; font-weight: 700; color: #fff; }
+  .tx-del { font-size: 10px; color: var(--text-muted); background: var(--surface3); border: none; border-radius: 6px; padding: 4px 10px; cursor: pointer; font-weight: 600; }
+  .history-meta { text-align: center; color: #333; font-size: 10px; margin-top: 14px; font-weight: 500; }
+  .empty-state { text-align: center; color: var(--text-muted); font-size: 13px; padding: 24px; font-weight: 500; }
 
-  #appModal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; }
+  #appModal { position: fixed; inset: 0; background: rgba(0,0,0,0.75); z-index: 1000; display: flex; align-items: flex-end; justify-content: center; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
   #appModal.hidden { display: none; }
   .modal-sheet {
-    background: #0f0f0f; border-radius: 20px 20px 0 0; width: 100%;
-    max-height: 85vh; overflow-y: auto; padding: 12px 18px calc(20px + var(--safe-bottom));
-    animation: slideUp 0.22s ease; border-top: 1px solid #222;
+    background: rgba(20,20,22,0.96);
+    backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+    border-radius: 24px 24px 0 0; width: 100%;
+    max-height: 88vh; overflow-y: auto;
+    padding: 10px 20px calc(16px + var(--safe-bottom));
+    border-top: 1px solid rgba(255,255,255,0.08);
+    animation: slideUp 0.3s cubic-bezier(0.2,0.9,0.4,1);
   }
   @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-  .modal-handle { width: 36px; height: 3px; background: #333; border-radius: 2px; margin: 0 auto 14px; }
-  .modal-title { font-size: 17px; font-weight: 800; color: #fff; margin-bottom: 4px; }
-  .modal-subtitle { font-size: 12px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin: 14px 0 8px; }
-  .cat-grid { display: flex; flex-direction: column; gap: 8px; }
-  .cat-big-btn {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    color: #fff; border-radius: 12px; padding: 16px; font-size: 15px; font-weight: 800;
-    cursor: pointer; text-align: left; display: flex; justify-content: space-between; align-items: center;
-  }
-  .cat-big-btn:active { background: #1f1f1f; transform: scale(0.99); }
-  .cat-big-btn.maxed { background: #7f1d1d; border-color: #dc2626; }
-  .cat-big-name { font-size: 15px; font-weight: 800; }
-  .cat-big-info { font-family: 'SF Mono', monospace; font-size: 11px; color: #999; font-weight: 600; }
-  .cat-big-btn.maxed .cat-big-info { color: #fca5a5; }
+  .modal-handle { width: 40px; height: 4px; background: #3a3a3c; border-radius: 2px; margin: 0 auto 16px; }
 
-  .date-row { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .date-label { font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; }
-  .date-input { background: #1a1a1a; border: 1px solid #333; color: #fff; border-radius: 7px; padding: 7px 10px; font-size: 13px; font-weight: 600; outline: none; flex: 1; }
+  .modal-head { text-align: center; margin-bottom: 20px; }
+  .modal-title { font-size: 17px; font-weight: 700; color: #fff; letter-spacing: -0.2px; }
+  .modal-hint { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+  .modal-amount-wrap { margin-bottom: 20px; }
+  .modal-amount-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; text-align: center; font-weight: 600; margin-bottom: 6px; }
   .modal-amount-input {
-    width: 100%; background: var(--accent); border: 2px solid #38bdf8; color: #000;
-    border-radius: 12px; padding: 16px; font-size: 26px; outline: none;
-    font-family: 'SF Mono', monospace; font-weight: 900; height: 64px;
-    margin-bottom: 10px; text-align: center;
+    width: 100%; background: transparent; border: none; color: #fff;
+    padding: 4px; font-size: 44px; outline: none;
+    font-family: 'SF Mono', ui-monospace, monospace; font-weight: 700;
+    text-align: center; letter-spacing: -1.5px;
+    caret-color: var(--accent);
   }
+  .modal-amount-input::placeholder { color: #2a2a2c; font-weight: 600; }
+
+  .modal-cats { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 16px; }
+  .cat-pill {
+    padding: 13px 22px; min-height: 48px;
+    background: var(--surface3); border: 1px solid var(--border-light);
+    color: #fff; border-radius: 999px; font-size: 14px; font-weight: 600;
+    cursor: pointer; transition: all 0.15s cubic-bezier(0.2,0.8,0.4,1);
+    display: inline-flex; align-items: center; gap: 6px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .cat-pill:active { transform: scale(0.96); }
+  .cat-pill.active {
+    background: var(--accent); color: #000; border-color: transparent;
+    box-shadow: 0 0 24px rgba(125,211,252,0.35);
+  }
+  .cat-pill.maxed:not(.active) {
+    background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.4); color: #fca5a5;
+  }
+  .cat-pill-badge { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; opacity: 0.7; font-weight: 600; }
+  .cat-pill.active .cat-pill-badge { opacity: 0.8; }
+
+  .modal-fixed-cat {
+    display: flex; justify-content: center; margin-bottom: 16px;
+  }
+  .fixed-cat-badge {
+    padding: 10px 20px; background: rgba(125,211,252,0.12);
+    border: 1px solid rgba(125,211,252,0.3);
+    border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--accent);
+  }
+
+  .modal-date-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; padding: 0 4px; }
+  .date-label { font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; }
+  .date-input { background: var(--surface3); border: 1px solid var(--border-light); color: #fff; border-radius: 10px; padding: 10px 14px; font-size: 14px; font-weight: 600; outline: none; flex: 1; font-family: 'SF Mono', ui-monospace, monospace; }
+  .date-input:focus { border-color: var(--accent); }
+
   .modal-confirm {
-    width: 100%; background: #22c55e; border: none; color: #fff; border-radius: 12px;
-    padding: 16px; font-size: 16px; font-weight: 800; cursor: pointer; margin-bottom: 8px;
+    width: 100%; background: var(--green); border: none; color: #000;
+    border-radius: 16px; padding: 18px; font-size: 17px; font-weight: 700;
+    cursor: pointer; margin-bottom: 8px; letter-spacing: -0.2px;
+    transition: all 0.15s cubic-bezier(0.2,0.8,0.4,1);
   }
+  .modal-confirm:active { transform: scale(0.97); background: #28bc4f; }
+  .modal-confirm:disabled { background: #2a2a2c; color: #555; cursor: not-allowed; }
+
   .modal-back {
-    width: 100%; background: transparent; border: 1px solid #333; color: #999;
-    border-radius: 12px; padding: 12px; font-size: 13px; font-weight: 700; cursor: pointer;
+    width: 100%; background: transparent; border: none; color: var(--accent);
+    padding: 14px; font-size: 15px; font-weight: 600; cursor: pointer;
+    border-radius: 14px;
   }
+  .modal-back:active { background: rgba(255,255,255,0.05); }
 
   #toast {
-    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-    background: #1e7e34; color: #fff; padding: 9px 22px; border-radius: 18px;
-    font-size: 13px; display: none; z-index: 2000; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
-    max-width: 90%; text-align: center;
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(48,209,88,0.95); color: #000; padding: 12px 24px; border-radius: 14px;
+    font-size: 14px; display: none; z-index: 2000; font-weight: 700;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5); max-width: 88%; text-align: center;
+    opacity: 0; transition: opacity 0.2s, transform 0.2s;
   }
-  #toast.error { background: #b91c1c; }
+  #toast.show { display: block; opacity: 1; transform: translateX(-50%) translateY(0); }
+  #toast.error { background: rgba(239,68,68,0.95); color: #fff; }
 
-  .version-info { text-align: center; color: #333; font-size: 10px; margin-top: 16px; font-weight: 600; }
-  #jsErr { display: none; background: #b91c1c; color: #fff; padding: 10px; font-size: 11px; margin-bottom: 8px; border-radius: 8px; word-break: break-all; }
+  .version-info { text-align: center; color: #2a2a2c; font-size: 10px; margin-top: 20px; font-weight: 500; }
+  #jsErr { display: none; background: #b91c1c; color: #fff; padding: 10px; font-size: 11px; margin-bottom: 8px; border-radius: 10px; word-break: break-all; }
   ::-webkit-scrollbar { width: 0; height: 0; }
 </style>
 </head>
@@ -153,18 +197,21 @@
 <div id="card-grid" class="card-grid"></div>
 
 <div class="history-section">
-  <div class="history-title">History (90 Days)</div>
+  <div class="history-title">History · 90 Days</div>
   <div id="history-container"></div>
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<div class="version-info">Version 6.1 — 2026-10-22</div>
+<div class="version-info">Version 7.0 · Apple Style · 2026-10-22</div>
 
 <div id="appModal" class="hidden">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
-    <div class="modal-title" id="modal-title"></div>
-    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-head">
+      <div class="modal-title" id="modal-title"></div>
+      <div class="modal-hint" id="modal-hint"></div>
+    </div>
+    <div id="modal-body"></div>
   </div>
 </div>
 
@@ -173,10 +220,7 @@
 <script>
 window.onerror = function(msg, url, line) {
   var e = document.getElementById('jsErr');
-  if (e) {
-    e.style.display = 'block';
-    e.textContent = 'JS Error: ' + msg + ' (line ' + line + ')';
-  }
+  if (e) { e.style.display = 'block'; e.textContent = 'Error: ' + msg + ' (line ' + line + ')'; }
 };
 
 (function() {
@@ -187,190 +231,86 @@ window.onerror = function(msg, url, line) {
   }
   var deferredPrompt = null;
   window.addEventListener('beforeinstallprompt', function(e) {
-    e.preventDefault();
-    deferredPrompt = e;
-    var bar = document.getElementById('install-bar');
-    if (bar) bar.classList.add('show');
+    e.preventDefault(); deferredPrompt = e;
+    var bar = document.getElementById('install-bar'); if (bar) bar.classList.add('show');
   });
   window.installApp = function() {
-    if (!deferredPrompt) {
-      alert('如果没有安装按钮：请用 Chrome 打开，等 5 秒刷新一次，或点浏览器菜单 → 添加到主屏幕。');
-      return;
-    }
+    if (!deferredPrompt) { alert('点浏览器菜单 → 添加到主屏幕'); return; }
     deferredPrompt.prompt();
     deferredPrompt.userChoice.then(function() {
       deferredPrompt = null;
-      var bar = document.getElementById('install-bar');
-      if (bar) bar.classList.remove('show');
+      var bar = document.getElementById('install-bar'); if (bar) bar.classList.remove('show');
     });
   };
   window.addEventListener('appinstalled', function() {
-    var bar = document.getElementById('install-bar');
-    if (bar) bar.classList.remove('show');
+    var bar = document.getElementById('install-bar'); if (bar) bar.classList.remove('show');
   });
 })();
 
 var CARDS_DEF = [
-  {
-    name: "RHB Shell 2498",
-    shortName: "RHB 2498",
-    barClass: "bar-rhb", borderClass: "rhb-border", resetDay: 13,
+  { name: "RHB Shell 2498", shortName: "RHB 2498", barClass: "bar-rhb", borderClass: "rhb-border", resetDay: 13,
     cats: ["Petrol", "Utilities", "Online"],
     caps: { Petrol: 30, Utilities: 10, Online: 10 },
     minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
-    rates: {
-      Petrol: [0.01, 0.03, 0.05, 0.12],
-      Utilities: [0.002, 0.01, 0.02, 0.05],
-      Online: [0.002, 0.01, 0.02, 0.05]
-    }
+    rates: { Petrol: [0.01, 0.03, 0.05, 0.12], Utilities: [0.002, 0.01, 0.02, 0.05], Online: [0.002, 0.01, 0.02, 0.05] }
   },
-  {
-    name: "RHB Shell 8652",
-    shortName: "RHB 8652",
-    barClass: "bar-rhb", borderClass: "rhb-border", resetDay: 23,
+  { name: "RHB Shell 8652", shortName: "RHB 8652", barClass: "bar-rhb", borderClass: "rhb-border", resetDay: 23,
     cats: ["Petrol", "Utilities", "Online"],
     caps: { Petrol: 30, Utilities: 10, Online: 10 },
     minSpend: { Petrol: 0, Utilities: 250, Online: 500 },
-    rates: {
-      Petrol: [0.01, 0.03, 0.05, 0.12],
-      Utilities: [0.002, 0.01, 0.02, 0.05],
-      Online: [0.002, 0.01, 0.02, 0.05]
-    }
+    rates: { Petrol: [0.01, 0.03, 0.05, 0.12], Utilities: [0.002, 0.01, 0.02, 0.05], Online: [0.002, 0.01, 0.02, 0.05] }
   },
-  {
-    name: "Affin Duo Visa 3322",
-    shortName: "Affin 3322",
-    barClass: "bar-affin", borderClass: "affin-border", resetDay: 23,
-    cap: 30,
+  { name: "Affin Duo Visa 3322", shortName: "Affin 3322", barClass: "bar-affin", borderClass: "affin-border", resetDay: 23, cap: 30,
     cats: ["Auto-Billing", "E-Commerce", "E-Wallet"],
     rates: { "Auto-Billing": 0.03, "E-Commerce": 0.03, "E-Wallet": 0.03 },
     autoDebit: { amount: 700, category: "Auto-Billing", note: "Insurance Auto-Debit" }
   },
-  {
-    name: "Ikhwan Platinum 6157",
-    shortName: "Ikhwan 6157",
-    barClass: "bar-ikhwan", borderClass: "ikhwan-border", resetDay: 1,
-    cap: 50, fixedCategory: "Online (8%)", cats: ["Online (8%)"],
-    rates: { "Online (8%)": 0.08 }
-  },
-  {
-    name: "Maybank 2 Gold 8943",
-    shortName: "Maybank 8943",
-    barClass: "bar-maybank", borderClass: "maybank-border", resetDay: 1,
-    cap: 50, fixedCategory: "Weekend (5%)", cats: ["Weekend (5%)"],
-    rates: { "Weekend (5%)": 0.05 }
-  }
+  { name: "Ikhwan Platinum 6157", shortName: "Ikhwan 6157", barClass: "bar-ikhwan", borderClass: "ikhwan-border", resetDay: 1, cap: 50, fixedCategory: "Online (8%)", cats: ["Online (8%)"], rates: { "Online (8%)": 0.08 } },
+  { name: "Maybank 2 Gold 8943", shortName: "Maybank 8943", barClass: "bar-maybank", borderClass: "maybank-border", resetDay: 1, cap: 50, fixedCategory: "Weekend (5%)", cats: ["Weekend (5%)"], rates: { "Weekend (5%)": 0.05 } }
 ];
 
 var MAX_CYCLES = 3;
-var DATA_VERSION = 23;
+var DATA_VERSION = 25;
 
-function formatDateDMY(d) {
-  var date = new Date(d + 'T00:00:00');
-  return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear();
-}
-function getTodayStr() {
-  var n = new Date();
-  return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0');
-}
-function getCycleStart(day) {
-  var now = new Date();
-  var start = new Date(now.getFullYear(), now.getMonth(), day);
-  if (now.getDate() < day) start.setMonth(start.getMonth() - 1);
-  return start.getFullYear() + '-' + String(start.getMonth()+1).padStart(2,'0') + '-' + String(start.getDate()).padStart(2,'0');
-}
-function getCycleEnd(startStr) {
-  var p = startStr.split('-').map(Number);
-  var end = new Date(p[0], p[1] - 1, p[2]);
-  end.setMonth(end.getMonth() + 1);
-  end.setDate(end.getDate() - 1);
-  return end.getFullYear() + '-' + String(end.getMonth()+1).padStart(2,'0') + '-' + String(end.getDate()).padStart(2,'0');
-}
-function getRateTier(totalSpend) {
-  if (totalSpend >= 3000) return 3;
-  if (totalSpend >= 2000) return 2;
-  if (totalSpend >= 1000) return 1;
-  return 0;
-}
+function formatDateDMY(d) { var date = new Date(d + 'T00:00:00'); return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear(); }
+function getTodayStr() { var n = new Date(); return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0'); }
+function addDays(s, days) { var d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + days); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
+function getCycleStart(day) { var now = new Date(); var start = new Date(now.getFullYear(), now.getMonth(), day); if (now.getDate() < day) start.setMonth(start.getMonth() - 1); return start.getFullYear() + '-' + String(start.getMonth()+1).padStart(2,'0') + '-' + String(start.getDate()).padStart(2,'0'); }
+function getCycleEnd(s) { var p = s.split('-').map(Number); var end = new Date(p[0], p[1]-1, p[2]); end.setMonth(end.getMonth()+1); end.setDate(end.getDate()-1); return end.getFullYear() + '-' + String(end.getMonth()+1).padStart(2,'0') + '-' + String(end.getDate()).padStart(2,'0'); }
+function getRateTier(t) { if (t >= 3000) return 3; if (t >= 2000) return 2; if (t >= 1000) return 1; return 0; }
+
 function showToast(msg, isError) {
   var t = document.getElementById('toast');
-  if (!t) return;
   t.textContent = msg;
-  t.className = isError ? 'error' : '';
-  t.style.display = 'block';
-  setTimeout(function() { t.style.display = 'none'; }, 2200);
+  t.className = isError ? 'error show' : 'show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function() { t.className = isError ? 'error' : ''; }, 2200);
 }
 
 function normalizeCard(raw, i) {
-  var def = CARDS_DEF[i];
-  var c = raw || {};
-  return {
-    name: def.name,
-    shortName: def.shortName,
-    barClass: def.barClass,
-    borderClass: def.borderClass,
-    resetDay: def.resetDay,
-    cats: def.cats,
-    caps: def.caps,
-    minSpend: def.minSpend,
-    rates: def.rates,
-    cap: def.cap,
-    fixedCategory: def.fixedCategory,
-    autoDebit: def.autoDebit,
-    totalSpend: typeof c.totalSpend === 'number' ? c.totalSpend : 0,
-    cashback: typeof c.cashback === 'number' ? c.cashback : 0,
-    categoryCashback: c.categoryCashback || {},
-    categorySpend: c.categorySpend || {},
-    lastCycleStart: c.lastCycleStart || getCycleStart(def.resetDay),
-    autoDebitCycle: c.autoDebitCycle || null
-  };
+  var def = CARDS_DEF[i]; var c = raw || {};
+  return { name: def.name, shortName: def.shortName, barClass: def.barClass, borderClass: def.borderClass, resetDay: def.resetDay, cats: def.cats, caps: def.caps, minSpend: def.minSpend, rates: def.rates, cap: def.cap, fixedCategory: def.fixedCategory, autoDebit: def.autoDebit,
+    totalSpend: typeof c.totalSpend === 'number' ? c.totalSpend : 0, cashback: typeof c.cashback === 'number' ? c.cashback : 0,
+    categoryCashback: c.categoryCashback || {}, categorySpend: c.categorySpend || {},
+    lastCycleStart: c.lastCycleStart || getCycleStart(def.resetDay), autoDebitCycle: c.autoDebitCycle || null };
 }
 
-function getDefaultState() {
-  var cards = [];
-  for (var i = 0; i < CARDS_DEF.length; i++) {
-    cards.push(normalizeCard({}, i));
-  }
-  return { version: DATA_VERSION, cards: cards, transactions: [] };
-}
+function getDefaultState() { var cards = []; for (var i = 0; i < CARDS_DEF.length; i++) cards.push(normalizeCard({}, i)); return { version: DATA_VERSION, cards: cards, transactions: [] }; }
 
 function loadState() {
-  var raw = localStorage.getItem('finoryData');
-  var state = null;
-  if (raw) {
-    try { state = JSON.parse(raw); } catch(e) { state = null; }
-  }
-  if (!state || !Array.isArray(state.cards)) {
-    state = getDefaultState();
-    saveState(state);
-    return state;
-  }
-  var newCards = [];
-  for (var i = 0; i < CARDS_DEF.length; i++) {
-    newCards.push(normalizeCard(state.cards[i], i));
-  }
-  state.cards = newCards;
-  if (!Array.isArray(state.transactions)) state.transactions = [];
-  state.version = DATA_VERSION;
-  saveState(state);
-  return state;
+  var raw = localStorage.getItem('finoryData'); var state = null;
+  if (raw) { try { state = JSON.parse(raw); } catch(e) { state = null; } }
+  if (!state || !Array.isArray(state.cards)) { state = getDefaultState(); saveState(state); return state; }
+  var nc = []; for (var i = 0; i < CARDS_DEF.length; i++) nc.push(normalizeCard(state.cards[i], i));
+  state.cards = nc; if (!Array.isArray(state.transactions)) state.transactions = [];
+  state.version = DATA_VERSION; saveState(state); return state;
 }
-
-function saveState(state) {
-  try { localStorage.setItem('finoryData', JSON.stringify(state)); }
-  catch(e) { showToast('保存失败', true); }
-}
+function saveState(state) { try { localStorage.setItem('finoryData', JSON.stringify(state)); } catch(e) { showToast('保存失败', true); } }
 
 function checkAndReset(state) {
   state.cards.forEach(function(c) {
-    var currentStart = getCycleStart(c.resetDay);
-    if (c.lastCycleStart !== currentStart) {
-      c.totalSpend = 0;
-      c.cashback = 0;
-      c.categoryCashback = {};
-      c.categorySpend = {};
-      c.lastCycleStart = currentStart;
-    }
+    var s = getCycleStart(c.resetDay);
+    if (c.lastCycleStart !== s) { c.totalSpend = 0; c.cashback = 0; c.categoryCashback = {}; c.categorySpend = {}; c.lastCycleStart = s; }
   });
 }
 
@@ -380,213 +320,117 @@ function applyAutoDebits(state) {
     var def = CARDS_DEF[i];
     if (def.autoDebit && c.lastCycleStart !== c.autoDebitCycle) {
       var rate = def.rates[def.autoDebit.category];
-      var rawEarned = def.autoDebit.amount * rate;
-      var cap = def.cap || 999;
-      var remaining = cap - c.cashback;
-      var earned = Math.max(0, Math.min(rawEarned, remaining));
-      c.totalSpend += def.autoDebit.amount;
-      c.cashback += earned;
+      var earned = Math.max(0, Math.min(def.autoDebit.amount * rate, (def.cap || 999) - c.cashback));
+      c.totalSpend += def.autoDebit.amount; c.cashback += earned;
       c.categorySpend[def.autoDebit.category] = (c.categorySpend[def.autoDebit.category] || 0) + def.autoDebit.amount;
       c.autoDebitCycle = c.lastCycleStart;
-      state.transactions.push({
-        id: Date.now() + '-auto-' + i,
-        cardIndex: i,
-        cardName: def.name,
-        amount: def.autoDebit.amount,
-        category: def.autoDebit.category,
-        note: def.autoDebit.note,
-        date: getTodayStr(),
-        timestamp: Date.now(),
-        cycleStart: c.lastCycleStart
-      });
+      state.transactions.push({ id: Date.now() + '-auto-' + i, cardIndex: i, cardName: def.name, amount: def.autoDebit.amount, category: def.autoDebit.category, note: def.autoDebit.note, date: getTodayStr(), timestamp: Date.now(), cycleStart: c.lastCycleStart });
       changed = true;
     }
   });
   if (changed) saveState(state);
 }
 
-function getRateForCategory(cardDef, cat, tier) {
-  if (cardDef.name.indexOf('RHB') !== -1) {
-    var arr = cardDef.rates[cat];
-    return arr && arr.length > tier ? arr[tier] : 0;
-  }
-  return cardDef.rates && cardDef.rates[cat] ? cardDef.rates[cat] : 0;
+function getRateForCategory(def, cat, tier) {
+  if (def.name.indexOf('RHB') !== -1) { var a = def.rates[cat]; return a && a.length > tier ? a[tier] : 0; }
+  return def.rates && def.rates[cat] ? def.rates[cat] : 0;
 }
-
-function computeCategoryTarget(cardDef, cardState, cat) {
-  if (cardDef.name.indexOf('RHB') === -1) return null;
-  var tier = getRateTier(cardState.totalSpend);
-  var rate = getRateForCategory(cardDef, cat, tier);
+function computeCategoryTarget(def, cs, cat) {
+  if (def.name.indexOf('RHB') === -1) return null;
+  var tier = getRateTier(cs.totalSpend); var rate = getRateForCategory(def, cat, tier);
   if (rate === 0) return Infinity;
-  var cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 0;
-  var minSpend = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
-  var target = cap / rate;
-  if (target < minSpend) target = minSpend;
-  return target;
+  var cap = def.caps && def.caps[cat] ? def.caps[cat] : 0;
+  var min = def.minSpend && def.minSpend[cat] ? def.minSpend[cat] : 0;
+  var t = cap / rate; if (t < min) t = min; return t;
 }
-
-function getRate(cardDef, cardState, cat, amount) {
-  if (cardDef.name.indexOf('RHB') !== -1) {
-    var min = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
-    if ((cardState.categorySpend[cat] || 0) + amount < min) return 0;
-    var tier = getRateTier(cardState.totalSpend + amount);
-    var arr = cardDef.rates[cat];
-    return arr && arr.length > tier ? arr[tier] : 0;
+function getRate(def, cs, cat, amount) {
+  if (def.name.indexOf('RHB') !== -1) {
+    var min = def.minSpend && def.minSpend[cat] ? def.minSpend[cat] : 0;
+    if ((cs.categorySpend[cat] || 0) + amount < min) return 0;
+    var tier = getRateTier(cs.totalSpend + amount); var a = def.rates[cat];
+    return a && a.length > tier ? a[tier] : 0;
   }
-  return cardDef.rates && cardDef.rates[cat] ? cardDef.rates[cat] : 0;
+  return def.rates && def.rates[cat] ? def.rates[cat] : 0;
+}
+function isCatMaxed(cs, def, cat) {
+  if (def.name.indexOf('RHB') !== -1) { var cap = def.caps && def.caps[cat] ? def.caps[cat] : 999; return (cs.categoryCashback[cat] || 0) >= cap; }
+  return cs.cashback >= (def.cap || 999);
 }
 
 function addTransaction(cardIndex, amount, cat, note, txDate) {
-  var state = loadState();
-  checkAndReset(state);
-  var cardState = state.cards[cardIndex];
-  var cardDef = CARDS_DEF[cardIndex];
-  var rate = getRate(cardDef, cardState, cat, amount);
-  var earned = 0;
-  if (cardDef.name.indexOf('RHB') !== -1) {
-    var cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 999;
-    var cur = cardState.categoryCashback[cat] || 0;
-    earned = Math.min(amount * rate, cap - cur);
-    if (earned < 0) earned = 0;
-    cardState.cashback += earned;
-    cardState.categoryCashback[cat] = cur + earned;
-  } else {
-    var cap2 = cardDef.cap || 999;
-    var cur2 = cardState.cashback;
-    earned = Math.min(amount * rate, cap2 - cur2);
-    if (earned < 0) earned = 0;
-    cardState.cashback += earned;
-  }
-  cardState.totalSpend += amount;
-  cardState.categorySpend[cat] = (cardState.categorySpend[cat] || 0) + amount;
-
-  state.transactions.push({
-    id: Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-    cardIndex: cardIndex,
-    cardName: cardDef.name,
-    amount: amount,
-    category: cat,
-    note: note || '',
-    date: txDate || getTodayStr(),
-    timestamp: Date.now(),
-    cycleStart: cardState.lastCycleStart
-  });
-  cleanupOldCycles(state);
-  saveState(state);
-  renderAll();
+  var state = loadState(); checkAndReset(state);
+  var cs = state.cards[cardIndex]; var def = CARDS_DEF[cardIndex];
+  var rate = getRate(def, cs, cat, amount); var earned = 0;
+  if (def.name.indexOf('RHB') !== -1) { var cap = def.caps && def.caps[cat] ? def.caps[cat] : 999; var cur = cs.categoryCashback[cat] || 0; earned = Math.min(amount * rate, cap - cur); if (earned < 0) earned = 0; cs.cashback += earned; cs.categoryCashback[cat] = cur + earned; }
+  else { var cap2 = def.cap || 999; var cur2 = cs.cashback; earned = Math.min(amount * rate, cap2 - cur2); if (earned < 0) earned = 0; cs.cashback += earned; }
+  cs.totalSpend += amount; cs.categorySpend[cat] = (cs.categorySpend[cat] || 0) + amount;
+  state.transactions.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), cardIndex: cardIndex, cardName: def.name, amount: amount, category: cat, note: note || '', date: txDate || getTodayStr(), timestamp: Date.now(), cycleStart: cs.lastCycleStart });
+  cleanupOldCycles(state); saveState(state); renderAll();
   showToast('已记录 RM ' + amount.toFixed(2) + ' · ' + cat);
 }
-
 function deleteTransaction(txId) {
   if (!confirm('Delete this transaction?')) return;
-  var state = loadState();
-  var tx = null;
-  for (var i = 0; i < state.transactions.length; i++) {
-    if (state.transactions[i].id === txId) { tx = state.transactions[i]; break; }
-  }
+  var state = loadState(); var tx = null;
+  for (var i = 0; i < state.transactions.length; i++) if (state.transactions[i].id === txId) { tx = state.transactions[i]; break; }
   if (!tx) return;
   state.transactions = state.transactions.filter(function(t) { return t.id !== txId; });
-  recalcCard(state, tx.cardIndex);
-  cleanupOldCycles(state);
-  saveState(state);
-  renderAll();
+  recalcCard(state, tx.cardIndex); cleanupOldCycles(state); saveState(state); renderAll();
 }
-
-function recalcCard(state, cardIndex) {
-  var def = CARDS_DEF[cardIndex];
-  var cardState = state.cards[cardIndex];
-  cardState.totalSpend = 0;
-  cardState.cashback = 0;
-  cardState.categoryCashback = {};
-  cardState.categorySpend = {};
-  var txs = state.transactions
-    .filter(function(t) { return t.cardIndex === cardIndex && t.cycleStart === cardState.lastCycleStart; })
-    .sort(function(a, b) { return a.timestamp - b.timestamp; });
+function recalcCard(state, ci) {
+  var def = CARDS_DEF[ci]; var cs = state.cards[ci];
+  cs.totalSpend = 0; cs.cashback = 0; cs.categoryCashback = {}; cs.categorySpend = {};
+  var txs = state.transactions.filter(function(t) { return t.cardIndex === ci && t.cycleStart === cs.lastCycleStart; }).sort(function(a, b) { return a.timestamp - b.timestamp; });
   txs.forEach(function(tx) {
-    var rate = getRate(def, cardState, tx.category, tx.amount);
-    var earned = 0;
-    if (def.name.indexOf('RHB') !== -1) {
-      var cap = def.caps && def.caps[tx.category] ? def.caps[tx.category] : 999;
-      var cur = cardState.categoryCashback[tx.category] || 0;
-      earned = Math.min(tx.amount * rate, cap - cur);
-      if (earned < 0) earned = 0;
-      cardState.cashback += earned;
-      cardState.categoryCashback[tx.category] = cur + earned;
-    } else {
-      var cap2 = def.cap || 999;
-      var cur2 = cardState.cashback;
-      earned = Math.min(tx.amount * rate, cap2 - cur2);
-      if (earned < 0) earned = 0;
-      cardState.cashback += earned;
-    }
-    cardState.totalSpend += tx.amount;
-    cardState.categorySpend[tx.category] = (cardState.categorySpend[tx.category] || 0) + tx.amount;
+    var rate = getRate(def, cs, tx.category, tx.amount); var earned = 0;
+    if (def.name.indexOf('RHB') !== -1) { var cap = def.caps && def.caps[tx.category] ? def.caps[tx.category] : 999; var cur = cs.categoryCashback[tx.category] || 0; earned = Math.min(tx.amount * rate, cap - cur); if (earned < 0) earned = 0; cs.cashback += earned; cs.categoryCashback[tx.category] = cur + earned; }
+    else { var cap2 = def.cap || 999; var cur2 = cs.cashback; earned = Math.min(tx.amount * rate, cap2 - cur2); if (earned < 0) earned = 0; cs.cashback += earned; }
+    cs.totalSpend += tx.amount; cs.categorySpend[tx.category] = (cs.categorySpend[tx.category] || 0) + tx.amount;
   });
 }
-
 function cleanupOldCycles(state) {
   state.cards.forEach(function(c, i) {
     var cycles = [];
-    state.transactions.forEach(function(tx) {
-      if (tx.cardIndex === i && cycles.indexOf(tx.cycleStart) === -1) cycles.push(tx.cycleStart);
-    });
+    state.transactions.forEach(function(tx) { if (tx.cardIndex === i && cycles.indexOf(tx.cycleStart) === -1) cycles.push(tx.cycleStart); });
     cycles.sort(function(a, b) { return b.localeCompare(a); });
     if (cycles.length > MAX_CYCLES) {
-      var toDelete = cycles.slice(MAX_CYCLES);
-      state.transactions = state.transactions.filter(function(tx) {
-        if (tx.cardIndex !== i) return true;
-        return toDelete.indexOf(tx.cycleStart) === -1;
-      });
+      var del = cycles.slice(MAX_CYCLES);
+      state.transactions = state.transactions.filter(function(tx) { if (tx.cardIndex !== i) return true; return del.indexOf(tx.cycleStart) === -1; });
     }
   });
 }
-
-function isCatMaxed(cardState, cardDef, cat) {
-  if (cardDef.name.indexOf('RHB') !== -1) {
-    var cap = cardDef.caps && cardDef.caps[cat] ? cardDef.caps[cat] : 999;
-    return (cardState.categoryCashback[cat] || 0) >= cap;
-  }
-  return cardState.cashback >= (cardDef.cap || 999);
-}
-
 function getLastRecordDate(state, i) {
   var c = state.cards[i];
-  var currentTxs = state.transactions.filter(function(t) {
-    return t.cardIndex === i && t.cycleStart === c.lastCycleStart;
-  });
-  if (currentTxs.length === 0) return '';
-  var maxD = currentTxs[0].date;
-  currentTxs.forEach(function(t) { if (t.date > maxD) maxD = t.date; });
-  return formatDateDMY(maxD);
+  var txs = state.transactions.filter(function(t) { return t.cardIndex === i && t.cycleStart === c.lastCycleStart; });
+  if (txs.length === 0) return '';
+  var m = txs[0].date; txs.forEach(function(t) { if (t.date > m) m = t.date; }); return m;
 }
 
 function renderHome() {
-  var state = loadState();
-  checkAndReset(state);
-  applyAutoDebits(state);
-  saveState(state);
-
-  var grid = document.getElementById('card-grid');
-  if (!grid) return;
-
+  var state = loadState(); checkAndReset(state); applyAutoDebits(state); saveState(state);
+  var grid = document.getElementById('card-grid'); if (!grid) return;
   try {
     grid.innerHTML = state.cards.map(function(c, i) {
       var def = CARDS_DEF[i];
-      var lastDate = getLastRecordDate(state, i);
-      var lastText = lastDate ? ('上次: ' + lastDate) : '上次: 未记录';
+      var last = getLastRecordDate(state, i);
+      var lastText = last ? ('上次 ' + formatDateDMY(last)) : '尚未记录';
       return '<div class="card-tile" onclick="window.openModal(' + i + ')">' +
         '<div class="card-tile-bar ' + def.barClass + '"></div>' +
-        '<div class="tile-name">' + def.shortName + '</div>' +
-        '<div class="tile-number">•••• ' + def.shortName.slice(-4) + '</div>' +
-        '<div class="tile-cashback">RM ' + (c.cashback || 0).toFixed(2) + '</div>' +
-        '<div class="tile-spend">Spend ' + (c.totalSpend || 0).toFixed(2) + '</div>' +
-        '<div class="tile-last">' + lastText + '</div>' +
+        '<div class="tile-content">' +
+          '<div class="tile-left">' +
+            '<div class="tile-name">' + def.shortName + '</div>' +
+            '<div class="tile-number">•••• ' + def.shortName.slice(-4) + '</div>' +
+            '<div class="tile-last">' + lastText + '</div>' +
+          '</div>' +
+          '<div class="tile-right">' +
+            '<div class="tile-cashback">RM ' + (c.cashback || 0).toFixed(2) + '</div>' +
+            '<div class="tile-spend">Spend ' + (c.totalSpend || 0).toFixed(2) + '</div>' +
+          '</div>' +
+        '</div>' +
       '</div>';
     }).join('');
   } catch(e) {
-    grid.innerHTML = '<div style="color:#ef4444;padding:20px;background:#1a1a1a;border-radius:12px;">渲染出错：' + e.message + '</div>';
+    grid.innerHTML = '<div style="color:#ef4444;padding:20px;background:#1a1a1a;border-radius:14px;">渲染出错：' + e.message + '</div>';
   }
-
   renderHistory();
 }
 
@@ -595,187 +439,158 @@ function renderHistory() {
   var container = document.getElementById('history-container');
   var meta = document.getElementById('history-meta');
   if (!container) return;
-
-  var currentStarts = state.cards.map(function(c) { return c.lastCycleStart; });
-  var past = state.transactions.filter(function(tx) { return tx.cycleStart !== currentStarts[tx.cardIndex]; });
-
-  if (!past.length) {
-    container.innerHTML = '<div class="empty-state">No past transactions.</div>';
-    if (meta) meta.textContent = '';
-    return;
-  }
-
+  var current = state.cards.map(function(c) { return c.lastCycleStart; });
+  var past = state.transactions.filter(function(tx) { return tx.cycleStart !== current[tx.cardIndex]; });
+  if (!past.length) { container.innerHTML = '<div class="empty-state">No past transactions.</div>'; if (meta) meta.textContent = ''; return; }
   var groups = {};
-  past.forEach(function(tx) {
-    var key = tx.cardIndex + '|' + tx.cycleStart;
-    if (!groups[key]) groups[key] = [];
-    groups[key].push(tx);
-  });
+  past.forEach(function(tx) { var k = tx.cardIndex + '|' + tx.cycleStart; if (!groups[k]) groups[k] = []; groups[k].push(tx); });
   var keys = Object.keys(groups).sort(function(a, b) {
-    var pa = a.split('|');
-    var pb = b.split('|');
+    var pa = a.split('|'), pb = b.split('|');
     if (pa[1] !== pb[1]) return pb[1].localeCompare(pa[1]);
     return parseInt(pa[0]) - parseInt(pb[0]);
   });
-
   container.innerHTML = keys.map(function(key) {
-    var parts = key.split('|');
-    var idx = parseInt(parts[0]);
-    var cs = parts[1];
+    var parts = key.split('|'); var idx = parseInt(parts[0]); var cs = parts[1];
     var def = CARDS_DEF[idx];
     var txs = groups[key].sort(function(a, b) { return b.timestamp - a.timestamp; });
     var ce = getCycleEnd(cs);
     var total = txs.reduce(function(s, t) { return s + t.amount; }, 0);
     var rows = txs.map(function(tx) {
-      return '<div class="tx-row">' +
-        '<div class="tx-left"><span class="tx-date">' + formatDateDMY(tx.date) + '</span><span class="tx-cat">' + tx.category + '</span></div>' +
-        '<div class="tx-right"><div class="tx-amt">RM ' + tx.amount.toFixed(2) + '</div><button class="tx-del" onclick="event.stopPropagation();window.deleteTransaction(\'' + tx.id + '\')">Delete</button></div>' +
-      '</div>';
+      return '<div class="tx-row"><div class="tx-left"><span class="tx-date">' + formatDateDMY(tx.date) + '</span><span class="tx-cat">' + tx.category + '</span></div><div class="tx-right"><div class="tx-amt">RM ' + tx.amount.toFixed(2) + '</div><button class="tx-del" onclick="event.stopPropagation();window.deleteTransaction(\'' + tx.id + '\')">Delete</button></div></div>';
     }).join('');
-    return '<div class="cycle-box ' + def.borderClass + '">' +
-      '<div class="cycle-header" onclick="window.toggleCycle(this)">' +
-        '<div><div class="cycle-name">' + def.shortName + '</div><div class="cycle-range">' + formatDateDMY(cs) + ' — ' + formatDateDMY(ce) + '</div></div>' +
-        '<div style="display:flex;align-items:center;"><span class="cycle-count">' + txs.length + ' tx · RM ' + total.toFixed(2) + '</span><span class="cycle-arrow">▼</span></div>' +
-      '</div>' +
-      '<div class="cycle-body">' + rows + '</div>' +
-    '</div>';
+    return '<div class="cycle-box ' + def.borderClass + '"><div class="cycle-header" onclick="window.toggleCycle(this)"><div><div class="cycle-name">' + def.shortName + '</div><div class="cycle-range">' + formatDateDMY(cs) + ' — ' + formatDateDMY(ce) + '</div></div><div style="display:flex;align-items:center;"><span class="cycle-count">' + txs.length + ' tx · RM ' + total.toFixed(2) + '</span><span class="cycle-arrow">▼</span></div></div><div class="cycle-body">' + rows + '</div></div>';
   }).join('');
-
   var counts = [];
   state.cards.forEach(function(c, i) {
     var cycles = [];
-    state.transactions.forEach(function(tx) {
-      if (tx.cardIndex === i && tx.cycleStart !== c.lastCycleStart && cycles.indexOf(tx.cycleStart) === -1) cycles.push(tx.cycleStart);
-    });
+    state.transactions.forEach(function(tx) { if (tx.cardIndex === i && tx.cycleStart !== c.lastCycleStart && cycles.indexOf(tx.cycleStart) === -1) cycles.push(tx.cycleStart); });
     counts.push(CARDS_DEF[i].shortName.split(' ').pop() + ': ' + cycles.length + '/' + MAX_CYCLES);
   });
   if (meta) meta.textContent = 'Past cycles kept for 90 days · ' + counts.join(' · ');
 }
 
 function toggleCycle(h) {
-  var b = h.nextElementSibling;
-  var a = h.querySelector('.cycle-arrow');
+  var b = h.nextElementSibling; var a = h.querySelector('.cycle-arrow');
   if (!b) return;
-  if (b.classList.contains('open')) {
-    b.classList.remove('open');
-    if (a) a.classList.remove('open');
-    h.classList.remove('active');
-  } else {
-    b.classList.add('open');
-    if (a) a.classList.add('open');
-    h.classList.add('active');
-  }
+  if (b.classList.contains('open')) { b.classList.remove('open'); if (a) a.classList.remove('open'); h.classList.remove('active'); }
+  else { b.classList.add('open'); if (a) a.classList.add('open'); h.classList.add('active'); }
 }
 
-var appModal = { cardIndex: null, category: null, step: 'category' };
+var appModal = { cardIndex: null, category: null };
 
 function openModal(i) {
   appModal.cardIndex = i;
-  appModal.category = null;
   var def = CARDS_DEF[i];
-  if (def.fixedCategory) {
-    appModal.category = def.fixedCategory;
-    appModal.step = 'amount';
-  } else {
-    appModal.step = 'category';
-  }
+  appModal.category = def.fixedCategory || null;
   document.getElementById('appModal').classList.remove('hidden');
   document.body.style.overflow = 'hidden';
   renderModal();
+  setTimeout(function() {
+    var inp = document.getElementById('amt-input');
+    if (inp) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+  }, 320);
 }
 
 function closeModal() {
   document.getElementById('appModal').classList.add('hidden');
   document.body.style.overflow = '';
-  appModal.cardIndex = null;
-  appModal.category = null;
-  appModal.step = 'category';
+  appModal.cardIndex = null; appModal.category = null;
 }
 
-function getCategoryDisplay(cardDef, cardState, cat) {
-  var target = computeCategoryTarget(cardDef, cardState, cat);
-  if (target === null) {
-    return { spent: cardState.cashback || 0, targetStr: String(cardDef.cap || 0), minNote: '' };
-  }
-  if (target === Infinity) {
-    return { spent: cardState.categorySpend[cat] || 0, targetStr: '—', minNote: '' };
-  }
-  var spent = cardState.categorySpend[cat] || 0;
-  var minSpend = cardDef.minSpend && cardDef.minSpend[cat] ? cardDef.minSpend[cat] : 0;
-  var minNote = minSpend > 0 && spent < minSpend ? ' · 需达 ' + minSpend : '';
+function getCatDisplay(cs, def, cat) {
+  var target = computeCategoryTarget(def, cs, cat);
+  var spent = cs.categorySpend[cat] || 0;
+  if (target === null) return { spent: cs.cashback || 0, targetStr: String(def.cap || 0), minNote: '' };
+  if (target === Infinity) return { spent: spent, targetStr: '—', minNote: '' };
+  var min = def.minSpend && def.minSpend[cat] ? def.minSpend[cat] : 0;
+  var minNote = min > 0 && spent < min ? ' · 需达 ' + min : '';
   return { spent: spent, targetStr: target.toFixed(0), minNote: minNote };
 }
 
 function renderModal() {
-  var i = appModal.cardIndex;
-  if (i === null) return;
+  var i = appModal.cardIndex; if (i === null) return;
   var def = CARDS_DEF[i];
   var state = loadState();
   var c = state.cards[i];
+  var cat = appModal.category;
 
   document.getElementById('modal-title').textContent = def.shortName;
+  var last = getLastRecordDate(state, i);
+  document.getElementById('modal-hint').textContent = last ? ('上次记录 ' + formatDateDMY(last)) : '本周期尚未记录';
+
   var body = document.getElementById('modal-body');
+  var html = '';
 
-  if (appModal.step === 'category') {
-    body.innerHTML = '<div class="modal-subtitle">选择分类</div>' +
-      '<div class="cat-grid">' +
-        def.cats.map(function(cat) {
-          var maxed = isCatMaxed(c, def, cat) ? 'maxed' : '';
-          var disp = getCategoryDisplay(def, c, cat);
-          return '<button class="cat-big-btn ' + maxed + '" onclick="window.selectCategory(\'' + cat + '\')">' +
-            '<span class="cat-big-name">' + cat + '</span>' +
-            '<span class="cat-big-info">RM ' + disp.spent.toFixed(2) + ' / ' + disp.targetStr + disp.minNote + '</span>' +
-          '</button>';
-        }).join('') +
-      '</div>' +
-      '<button class="modal-back" style="margin-top:14px;" onclick="window.closeModal()">取消</button>';
+  if (def.fixedCategory) {
+    html += '<div class="modal-fixed-cat"><div class="fixed-cat-badge">' + def.fixedCategory + '</div></div>';
   } else {
-    var cat2 = appModal.category;
-    var disp2 = getCategoryDisplay(def, c, cat2);
-    body.innerHTML = '<div class="modal-subtitle">' + cat2 + '</div>' +
-      '<div style="font-family:SF Mono,monospace;font-size:12px;color:#a0a0a0;margin-bottom:12px;">已用 RM ' + disp2.spent.toFixed(2) + ' / ' + disp2.targetStr + '</div>' +
-      '<div class="date-row"><span class="date-label">日期</span><input type="date" id="modal-date" class="date-input" value="' + getTodayStr() + '"></div>' +
-      '<input type="number" id="modal-amount" class="modal-amount-input" placeholder="0.00" step="0.01" inputmode="decimal">' +
-      '<button class="modal-confirm" onclick="window.confirmAmount()">记录</button>' +
-      (!def.fixedCategory ? '<button class="modal-back" onclick="window.backToCategory()">← 返回分类</button>' : '<button class="modal-back" onclick="window.closeModal()">取消</button>');
+    html += '<div class="modal-cats">';
+    def.cats.forEach(function(ct) {
+      var active = (cat === ct) ? 'active' : '';
+      var maxed = isCatMaxed(c, def, ct) ? 'maxed' : '';
+      var disp = getCatDisplay(c, def, ct);
+      html += '<button class="cat-pill ' + active + ' ' + maxed + '" onclick="window.selectCat(\'' + ct + '\')">' +
+        '<span>' + ct + '</span>' +
+        '<span class="cat-pill-badge">' + disp.spent.toFixed(0) + '</span>' +
+      '</button>';
+    });
+    html += '</div>';
+  }
 
-    setTimeout(function() {
-      var inp = document.getElementById('modal-amount');
-      if (inp) {
-        inp.focus();
-        inp.addEventListener('keydown', function(e) {
-          if (e.key === 'Enter') { e.preventDefault(); confirmAmount(); }
-        });
-      }
-    }, 100);
+  var defaultDate = last ? addDays(last, 1) : c.lastCycleStart;
+  html += '<div class="modal-date-row"><span class="date-label">日期</span><input type="date" id="amt-date" class="date-input" value="' + defaultDate + '"></div>';
+  html += '<div class="modal-amount-wrap">' +
+    '<div class="modal-amount-label">金额</div>' +
+    '<input type="number" id="amt-input" class="modal-amount-input" placeholder="0.00" step="0.01" inputmode="decimal">' +
+  '</div>';
+  html += '<button class="modal-confirm" id="amt-confirm" onclick="window.confirmAmount()" ' + (cat ? '' : 'disabled') + '>' + (cat ? '记录' : '请先选分类') + '</button>';
+  html += '<button class="modal-back" onclick="window.closeModal()">完成</button>';
+
+  body.innerHTML = html;
+
+  var inp = document.getElementById('amt-input');
+  if (inp) {
+    inp.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); confirmAmount(); }
+    });
+    inp.addEventListener('input', function() {
+      var btn = document.getElementById('amt-confirm');
+      var amt = parseFloat(inp.value);
+      if (appModal.category && amt > 0) { btn.disabled = false; btn.textContent = '记录'; }
+      else { btn.disabled = true; btn.textContent = appModal.category ? '输入金额' : '请先选分类'; }
+    });
   }
 }
 
-function selectCategory(cat) {
-  appModal.category = cat;
-  appModal.step = 'amount';
+function selectCat(ct) {
+  appModal.category = ct;
   renderModal();
-}
-
-function backToCategory() {
-  appModal.step = 'category';
-  appModal.category = null;
-  renderModal();
+  setTimeout(function() {
+    var inp = document.getElementById('amt-input');
+    if (inp) inp.focus();
+  }, 80);
 }
 
 function confirmAmount() {
-  var amtIn = document.getElementById('modal-amount');
-  var dateIn = document.getElementById('modal-date');
-  if (!amtIn) return;
-  var amt = parseFloat(amtIn.value);
-  if (!amt || amt <= 0) {
-    showToast('请输入有效金额', true);
-    amtIn.focus();
-    return;
-  }
+  var inp = document.getElementById('amt-input');
+  var dateIn = document.getElementById('amt-date');
+  if (!inp) return;
+  var amt = parseFloat(inp.value);
+  if (!appModal.category) { showToast('请先选分类', true); return; }
+  if (!amt || amt <= 0) { showToast('请输入金额', true); inp.focus(); return; }
   var txDate = dateIn ? dateIn.value : getTodayStr();
   addTransaction(appModal.cardIndex, amt, appModal.category, '', txDate);
-  closeModal();
+  // 保持弹窗打开，清空金额，可连续记录
+  inp.value = '';
+  var btn = document.getElementById('amt-confirm');
+  if (btn) { btn.disabled = true; btn.textContent = '输入金额'; }
+  // 刷新 hint（上次记录日期已更新）
+  var state = loadState();
+  var last = getLastRecordDate(state, appModal.cardIndex);
+  document.getElementById('modal-hint').textContent = last ? ('上次记录 ' + formatDateDMY(last)) : '本周期尚未记录';
+  // 更新默认日期为下一天
+  if (last && dateIn) dateIn.value = addDays(last, 1);
+  inp.focus();
 }
 
 document.getElementById('appModal').addEventListener('click', function(e) {
@@ -784,8 +599,7 @@ document.getElementById('appModal').addEventListener('click', function(e) {
 
 window.openModal = openModal;
 window.closeModal = closeModal;
-window.selectCategory = selectCategory;
-window.backToCategory = backToCategory;
+window.selectCat = selectCat;
 window.confirmAmount = confirmAmount;
 window.toggleCycle = toggleCycle;
 window.deleteTransaction = deleteTransaction;
