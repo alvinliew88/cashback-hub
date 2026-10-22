@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finory-v3.8';
+const CACHE_NAME = 'finory-v4.1';
 const ASSETS = ['./', './index.html'];
 
 self.addEventListener('install', event => {
