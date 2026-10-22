@@ -60,7 +60,8 @@
   .tile-left { flex: 1; min-width: 0; }
   .tile-right { text-align: right; flex-shrink: 0; }
   .tile-name { font-size: 17px; font-weight: 700; color: #fff; line-height: 1.2; letter-spacing: -0.2px; }
-  .tile-number { font-family: 'SF Mono', ui-monospace, monospace; font-size: 14px; font-weight: 600; color: var(--accent); margin-top: 3px; letter-spacing: 1.5px; }
+  .tile-cycle { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 2px; }
+  .tile-number { font-family: 'SF Mono', ui-monospace, monospace; font-size: 14px; font-weight: 600; color: var(--accent); margin-top: 4px; letter-spacing: 1.5px; }
   .tile-last { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: var(--yellow); font-weight: 600; margin-top: 10px; opacity: 0.85; }
   .tile-cashback { font-family: 'SF Mono', ui-monospace, monospace; font-size: 24px; font-weight: 800; color: var(--green); line-height: 1; letter-spacing: -0.5px; }
   .tile-spend { font-family: 'SF Mono', ui-monospace, monospace; font-size: 11px; color: var(--text-muted); font-weight: 600; margin-top: 6px; }
@@ -202,7 +203,7 @@
   <div class="history-meta" id="history-meta"></div>
 </div>
 
-<div class="version-info">Version 7.4 · 2026-10-22</div>
+<div class="version-info">Version 7.5 · 2026-10-22</div>
 
 <div id="appModal" class="hidden">
   <div class="modal-sheet">
@@ -270,9 +271,10 @@ var CARDS_DEF = [
 ];
 
 var MAX_CYCLES = 3;
-var DATA_VERSION = 27;
+var DATA_VERSION = 28;
 
 function formatDateDMY(d) { var date = new Date(d + 'T00:00:00'); return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear(); }
+function formatDateShort(d) { var date = new Date(d + 'T00:00:00'); return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0'); }
 function getTodayStr() { var n = new Date(); return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0'); }
 function addDays(s, days) { var d = new Date(s + 'T00:00:00'); d.setDate(d.getDate() + days); return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0'); }
 function getCycleStart(day) { var now = new Date(); var start = new Date(now.getFullYear(), now.getMonth(), day); if (now.getDate() < day) start.setMonth(start.getMonth() - 1); return start.getFullYear() + '-' + String(start.getMonth()+1).padStart(2,'0') + '-' + String(start.getDate()).padStart(2,'0'); }
@@ -413,11 +415,16 @@ function renderHome() {
       var def = CARDS_DEF[i];
       var last = getLastRecordDate(state, i);
       var lastText = last ? ('上次 ' + formatDateDMY(last)) : '尚未记录';
+      var cycleStart = c.lastCycleStart;
+      var cycleEnd = getCycleEnd(cycleStart);
+      var cycleText = '周期 ' + formatDateShort(cycleStart) + ' — ' + formatDateShort(cycleEnd);
+      
       return '<div class="card-tile" onclick="window.openModal(' + i + ')">' +
         '<div class="card-tile-bar ' + def.barClass + '"></div>' +
         '<div class="tile-content">' +
           '<div class="tile-left">' +
             '<div class="tile-name">' + def.shortName + '</div>' +
+            '<div class="tile-cycle">' + cycleText + '</div>' +
             '<div class="tile-number">•••• ' + def.shortName.slice(-4) + '</div>' +
             '<div class="tile-last">' + lastText + '</div>' +
           '</div>' +
@@ -589,7 +596,7 @@ function confirmAmount() {
   var txDate = dateIn ? dateIn.value : getTodayStr();
   
   addTransaction(appModal.cardIndex, amt, appModal.category, '', txDate);
-  closeModal(); // 记录后立即关闭弹窗返回主页
+  closeModal();
 }
 
 document.getElementById('appModal').addEventListener('click', function(e) {
