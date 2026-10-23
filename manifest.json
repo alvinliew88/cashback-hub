@@ -1,15 +1,24 @@
 {
-  "name": "Finory Offline",
+  "name": "Finory",
   "short_name": "Finory",
+  "description": "Offline Credit Card Cashback Tracker",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#000000",
   "theme_color": "#000000",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/5501/5501375.png",
+      "src": "icon.svg",
       "sizes": "512x512",
-      "type": "image/png",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ]
