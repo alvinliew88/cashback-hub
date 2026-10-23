@@ -1,4 +1,4 @@
-const CACHE_NAME = 'finory-v7.8';
+const CACHE_NAME = 'finory-v8.0';
 const ASSETS = ['./', './index.html'];
 
 const MANIFEST = JSON.stringify({
@@ -13,7 +13,7 @@ const MANIFEST = JSON.stringify({
   ]
 });
 
-const ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="100" fill="#000000"/><rect x="88" y="88" width="336" height="336" rx="60" fill="none" stroke="#7dd3fc" stroke-width="28"/><text x="256" y="352" font-size="220" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#7dd3fc" text-anchor="middle">F</text></svg>';
+const ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><defs><radialGradient id="g" cx="30%" cy="30%" r="80%"><stop offset="0%" stop-color="#7dd3fc"/><stop offset="100%" stop-color="#1e3a8a"/></radialGradient></defs><rect width="512" height="512" rx="110" fill="url(#g)"/><rect x="0" y="0" width="512" height="512" rx="110" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="6"/><text x="256" y="360" font-size="240" font-family="Arial,Helvetica,sans-serif" font-weight="900" fill="#fff" text-anchor="middle">F</text></svg>';
 
 self.addEventListener('install', function(event) {
   event.waitUntil(
