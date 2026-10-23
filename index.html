@@ -9,6 +9,7 @@
 <meta name="theme-color" content="#000000">
 <title>Finory</title>
 <link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon.svg">
 <style>
   :root {
     --bg-base: #000000;
@@ -25,7 +26,6 @@
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
     
-    /* iOS Spring Animation */
     --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
     --ease: cubic-bezier(0.2, 0.8, 0.4, 1);
   }
@@ -39,7 +39,6 @@
   body {
     padding: calc(16px + var(--safe-top)) 16px calc(48px + var(--safe-bottom));
     min-height: 100dvh;
-    /* 增加明显的光晕作为背景，让玻璃模糊效果可见 */
     background: radial-gradient(circle at 10% 20%, rgba(59, 130, 246, 0.3) 0%, transparent 40%),
                 radial-gradient(circle at 90% 80%, rgba(239, 68, 68, 0.3) 0%, transparent 40%),
                 radial-gradient(circle at 50% 50%, rgba(48, 209, 88, 0.15) 0%, transparent 50%),
@@ -47,7 +46,6 @@
     background-attachment: fixed;
   }
 
-  /* 统一玻璃面板风格 */
   .glass-panel {
     background: var(--glass-surface);
     backdrop-filter: blur(24px) saturate(1.5); 
@@ -114,7 +112,6 @@
     text-align: right; margin-top: 8px; padding-right: 12px;
   }
 
-  /* Modal & Backdrop */
   #appModal {
     position: fixed; inset: 0; background: rgba(0,0,0,0.6);
     z-index: 1000; display: flex; align-items: flex-end; justify-content: center;
@@ -204,7 +201,6 @@
   }
   .modal-back:active { background: rgba(255,255,255,0.1); }
 
-  /* 弹窗内交易记录列表 */
   .modal-history {
     margin-top: 24px;
     border-top: 1px solid rgba(255,255,255,0.1);
@@ -271,13 +267,13 @@
 
 <div id="jsErr"></div>
 
-<button class="install-btn" onclick="window.installApp()">📲 安装到主屏幕 (点此)</button>
+<button class="install-btn" onclick="window.installApp()">📲 安装为全屏 App</button>
 
 <div id="card-grid" class="card-grid"></div>
 
-<button class="install-btn bottom" onclick="window.installApp()">📲 安装到主屏幕 (点此)</button>
+<button class="install-btn bottom" onclick="window.installApp()">📲 安装为全屏 App</button>
 
-<div class="version-info">Version 8.1 · Liquid Glass + History · 2026-10-23</div>
+<div class="version-info">Version 8.2 · True PWA · 2026-10-23</div>
 
 <div id="appModal" class="hidden">
   <div class="modal-sheet">
@@ -310,7 +306,7 @@ window.onerror = function(msg, url, line) {
   });
   window.installApp = function() {
     if (!deferredPrompt) { 
-      alert('请点击浏览器右下角菜单(三条横线) → 添加到主屏幕 / 安装应用。\n如果已经安装，可以忽略此提示。'); 
+      alert('请点击浏览器右下角菜单(三条横线) → 安装应用 / 添加到主屏幕。\n(如果没看到"安装应用"，请稍等几秒刷新再试)'); 
       return; 
     }
     deferredPrompt.prompt();
@@ -343,7 +339,7 @@ var CARDS_DEF = [
 ];
 
 var MAX_CYCLES = 3;
-var DATA_VERSION = 34;
+var DATA_VERSION = 35;
 
 function formatDateDMY(d) { var date = new Date(d + 'T00:00:00'); return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0') + '/' + date.getFullYear(); }
 function formatDateShort(d) { var date = new Date(d + 'T00:00:00'); return String(date.getDate()).padStart(2,'0') + '/' + String(date.getMonth()+1).padStart(2,'0'); }
@@ -439,7 +435,6 @@ function addTransaction(cardIndex, amount, cat, note, txDate) {
   cs.totalSpend += amount; cs.categorySpend[cat] = (cs.categorySpend[cat] || 0) + amount;
   state.transactions.push({ id: Date.now() + '-' + Math.random().toString(36).slice(2,7), cardIndex: cardIndex, cardName: def.name, amount: amount, category: cat, note: note || '', date: txDate || getTodayStr(), timestamp: Date.now(), cycleStart: cs.lastCycleStart });
   cleanupOldCycles(state); saveState(state); renderHome();
-  // 记录成功后，重新渲染弹窗以刷新下方的历史列表
   renderModal();
   showToast('已记录 RM ' + amount.toFixed(2) + ' · ' + cat);
 }
@@ -450,7 +445,6 @@ function deleteTransaction(txId) {
   if (!tx) return;
   state.transactions = state.transactions.filter(function(t) { return t.id !== txId; });
   recalcCard(state, tx.cardIndex); cleanupOldCycles(state); saveState(state); renderHome();
-  // 删除后重新渲染弹窗，保持打开状态
   renderModal();
 }
 function recalcCard(state, ci) {
@@ -534,7 +528,7 @@ function openModal(i) {
   if (def.fixedCategory) {
     appModal.category = def.fixedCategory;
   } else if (def.name.indexOf('RHB') !== -1) {
-    appModal.category = "Online"; // RHB 默认选中 Online
+    appModal.category = "Online";
   } else {
     appModal.category = def.cats[0];
   }
@@ -604,7 +598,6 @@ function renderModal() {
   '</div>';
   html += '<button class="modal-confirm" id="amt-confirm" onclick="window.confirmAmount()" ' + (cat ? '' : 'disabled') + '>' + (cat ? '记录' : '请先选分类') + '</button>';
 
-  // 渲染当前周期的历史记录
   var currentTxs = state.transactions.filter(function(t) { 
     return t.cardIndex === i && t.cycleStart === c.lastCycleStart; 
   }).sort(function(a, b) { return b.timestamp - a.timestamp; });
@@ -659,7 +652,6 @@ function confirmAmount() {
   
   addTransaction(appModal.cardIndex, amt, appModal.category, '', txDate);
   
-  // 成功后清空输入框并保持弹窗打开，以便继续录入或查看历史
   inp.value = '';
   var btn = document.getElementById('amt-confirm');
   if (btn) { btn.disabled = true; btn.textContent = '输入金额'; }
